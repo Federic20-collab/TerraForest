@@ -1,3 +1,98 @@
+Visual summaries and comparison images: [issue tracker](../issues/README.md).
+This file retains the wider backlog; the tracker initially covers three cases.
+
+## ESC closes active UI before opening pause — 2026-10-26
+
+Reproduced corpse storage remaining open: the session handler consumed ESC after
+calling the disabled backpack HUD, instead of closing corpse UI. An input-only
+priority policy now handles ESC before wheel/chord routing: close the active
+dialog/map/wheel/storage/inventory/tool interface, or resume an open session menu;
+open the pause menu only when no interactive UI is active. Repeats/releases are
+consumed without cascading, and pending holds are cancelled before their release.
+
+Packaged current-UI checks pass, including chest/corpse, focused Dev Bag search,
+map, tool dropdown/workspace, Alt controls, pending/open wheels and confirmation.
+Existing E-toggle and 29 focus-return checks also pass. No new native work or
+per-frame scans; no player saves selected. Human visual review remains open.
+Controls, images and scope: [ESC priority](../issues/escape-ui-priority/README.md).
+
+## Wooden torch — 2026-10-26
+
+New craftable item 6: authored wooden shaft, layered linen and charred crown,
+packed PBR maps, firm carry grip, idle/walk/run/jump/crouch, flame/embers/smoke
+and warm local light. Native inventory, drop/pickup and snapshot ownership work;
+old loadouts receive no free grants. Craft with one Wood + two Plant or use Dev Bag.
+26 presentation checks and 16 real-world checks pass, including terrain lighting
+in a temporary dark fixture. Pickaxe 24, bucket 63, crafting 15, drop 16 and the
+complete gameplay inventory UI 33 checks pass; package dependency and icon receipt
+checks pass. The outdated fixed recipe-count fixture was updated for the catalog.
+[Preview, evidence and limits](evidence/wooden_torch/README.md);
+[editable Blender source notes](../addons/characters/authoring/WOODEN_TORCH.md).
+The user rejected the hands as completely broken. The original fixed-grip
+checks missed a 105–107-degree wrist bend and skin intersecting the shaft.
+The repair rebuilds both wrists and every finger, keys the arm solve at 60 Hz,
+adds a continuous equip raise and attaches the torch to the final blended hand.
+Per-key/half-key skin and joint checks, comparison images and revised preview
+are tracked in [torch hand deformation](../issues/torch-hand-deformation/README.md).
+Revised hands remain unaccepted: player review of carry, free hand and equip is
+the return trigger. Reproduce any remaining bad pose by clip/time and inspect
+the deformed surface before closing the issue. Original evidence is retained.
+Fuel depletion, ignition controls, underwater extinguishing, fire spread/damage,
+melee and sound are outside this item-authoring pass and need separate gameplay
+requirements if requested. Dropped torches are unlit collectible meshes.
+
+## Backpack excludes toolbelt in container screens — 2026-10-26
+
+Chest/corpse player grids now display only the 22 backpack slots (native indices
+10–31), matching the regular inventory. The separate toolbelt is not duplicated.
+Grid selection/drag retain native indices; hidden belt cells cannot be used as
+backpack cells. Container capacity stays independent, including legacy overflow.
+No item filtering by type, inventory capacity, save format or item data is changed.
+Source checks cover same-type stacks on belt/backpack, first/last backpack slots,
+exact deposits/drags, untouched belt data and compact/legacy container views.
+Packaged backpack and actual chest/corpse input checks pass; rendered corpse UI
+shows 22 empty backpack cells while the occupied toolbelt remains separate.
+Follow-up with torch integration: the obsolete eleven-recipe assertion now uses
+the declared recipe catalog; the full gameplay inventory UI passes 33/33.
+The prior non-pass and wrong-mode invocation logs remain in the evidence;
+[latest UI qualification](evidence/wooden_torch/qualification.json).
+Evidence and latest visual status: [backpack separation](../issues/inventory-backpack-separation/README.md).
+
+## E container toggle and grass pickup eligibility — 2026-10-26
+
+E now closes open chest/corpse storage through the shared UI, consumes the event,
+restores mouse/HUD control and cannot reopen the container on that same press.
+Key echoes/releases are ignored; Esc/Tab remain supported. Grass joins bushes as
+harvest-only. A native species-mask query skips those proxies for E before doing
+intersection work, allowing stones/flowers/dropped items behind grass to be
+collected. Preview and action share the mask; solid occlusion and raw harvesting
+queries remain unchanged. No per-frame foliage scan or save-format change.
+
+Debug/release vegetation DLLs and the PCK are rebuilt. Native overlap tests cover
+exact rewards, unchanged grass, stale harvests, obstruction, invalid masks and
+developer removal. Actual temporary-world input checks cover chest/corpse E
+toggle, repeats, focused quantity input, no re-open and returned camera capture.
+The corpse UI fixture does not requalify zombie death/targeting. Actual animated
+grass harvesting is also checked; no player saves are selected. Latest player
+visual review remains open. [Workflow evidence](../issues/world-interaction-hints/README.md).
+
+## Quiet interaction hints and bush harvesting — 2026-10-26
+
+Automatic ground labels remain for stones and flowers, but not grass, ferns,
+twigs, bushes or boulders. Doors, containers, corpse storage, dropped items
+and vehicles retain useful prompts. Eligible ground targets still take interaction
+priority; harvest-only foliage is now skipped for E as described above.
+Grass and low bushes require harvesting rather than E pickup, matching woody bushes;
+existing durability, rewards, save data and developer removal remain unchanged.
+Source policy/native collection and actual-world gathering, pickup and door
+checks pass. Installed-package policy, 66 native woodland assertions and actual
+gathering pass; no player saves are selected. Visual scope/evidence:
+[interaction hints](../issues/world-interaction-hints/README.md).
+The user rejected `6264d5ce`'s retained boulder instruction. The follow-up removes
+that last automatic mining/harvesting hint and checks every large-species/mode
+combination. Latest visual approval remains open; useful interaction categories
+are preserved rather than suppressing all UI or collection.
+
 ## Saved pickaxe no-op — reproduced and fixed, 2026-10-26
 
 Calm_Meadow's F5 position reproduced three accepted digs with no density change.
@@ -152,6 +247,28 @@ are untouched; terrain-grid generation/contact remains separately unresolved.
 
 ## Black mining-face lighting repair — 2026-10-26
 
+Latest recurrence: Hidden_Hills' backup root reproduces the new black recess;
+18 of 23 nearby zero-sky vertices also see no sky with 256 diagnostic directions.
+Disabling cached sunlight does not repair it. Local diffuse-probe trials were
+visually insufficient and reverted; native code/DLLs remain unchanged. The user
+now explicitly permits faint visibility even in sealed caves, superseding the
+strict-darkness policy described in the earlier history below.
+
+The terrain shader floors its existing fill multiplier at 0.12. This adds one
+maximum operation, no new baking, rays, textures or passes; ordinary nonzero sky
+shading above the floor, real lights and distant tree shadows remain unchanged.
+It is a gameplay readability floor, not bounced GI. Zero restores the old policy.
+Source and installed-package same-save captures show texture in the recess with
+identical density hashes and untouched saves; zero-light GPU controls pass.
+Packaged contact mining passes 137 assertions; the 1,216-command rendered workload
+passes unchanged gates (frame p99 17.084 ms, maximum 24.491 ms, no >50 ms frames).
+Latest visual acceptance and broader cave/material/hardware qualification remain
+open. Return on new dark-face reports with matched no-lamp/lamp and raw-visibility
+captures, preserving performance gates. Evidence and rejected/failed trials:
+[readability follow-up](../issues/terrain-mining-dark-patches/readability/README.md).
+
+Earlier repairs and their original qualification follow:
+
 Reproduced the Wild_Ridge excavation in an isolated read-only copy. The faces and
 textures were present; cached sky visibility was falsely zero. Lighting treated
 exact-zero excavated samples as solid during probe placement and followed a fixed
@@ -187,8 +304,10 @@ This closes the reproduced false-black face, not all possible cave lighting:
 very small openings can still evade finite samples, and untouched caves retain
 the old approximation. Full bounced GI is not implemented. Revisit with a saved
 viewpoint, diagnostic sky/albedo views and unchanged performance gates if another
-false-black report appears. User visual acceptance and the separately deferred
-render/focus-stall investigation remain open.
+false-black report appears. The user reported improved appearance on 2026-10-26
+("I think it's better"), not universal cave-lighting acceptance. The separately
+deferred render/focus-stall investigation remains open. Current visual summary:
+[terrain mining dark patches](../issues/terrain-mining-dark-patches/README.md).
 
 ## Player movement, map, graphics and placement workflow — 2026-10-26
 

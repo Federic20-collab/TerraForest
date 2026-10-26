@@ -38,7 +38,7 @@ var content: VBoxContainer
 var ready_to_dock:=false
 var spawner:RefCounted
 var dev_bag:RefCounted
-const DESCRIPTIONS={1:"Pickaxe: hold left mouse to attack or dig. Most effective on stone.",2:"Hatchet: hold left mouse to attack or dig. Most effective on wood.",3:"Repair hammer: left mouse attacks; right mouse repairs damaged blocks, objects and vehicles at swing contact.",4:"Assembly tool: left mouse attacks the aimed target; right mouse places the selected object.",5:"Shovel: hold left mouse to dig terrain or attack, with a two-handed thrust and lift."}
+const DESCRIPTIONS={1:"Pickaxe: hold left mouse to attack or dig. Most effective on stone.",2:"Hatchet: hold left mouse to attack or dig. Most effective on wood.",3:"Repair hammer: left mouse attacks; right mouse repairs damaged blocks, objects and vehicles at swing contact.",4:"Assembly tool: left mouse attacks the aimed target; right mouse places the selected object.",5:"Shovel: hold left mouse to dig terrain or attack, with a two-handed thrust and lift.",6:"Wooden torch: a burning survival light. Equip to carry it; switch slots to put it away. G drops it."}
 func button(parent: Node,text: String,action: Callable) -> Button:
 	var out:=Button.new();out.text=text;out.custom_minimum_size.y=40;out.pressed.connect(action);parent.add_child(out);return out
 func label(parent: Node,text: String) -> Label:
@@ -296,6 +296,9 @@ func developer_command(key:int)->void:
 	if not developer:message.text="Enter development mode above to use world diagnostics.";return
 	run_command(key)
 func _input(event: InputEvent) -> void:
+	if event is InputEventKey and event.physical_keycode==KEY_ESCAPE:
+		if event.pressed and not event.echo and not leaving_world:preload("res://addons/player_runtime/escape_policy.gd").close_or_pause(self)
+		get_viewport().set_input_as_handled();return
 	if opened and event is InputEventKey and event.physical_keycode!=KEY_ESCAPE:
 		var focused:=get_viewport().gui_get_focus_owner()
 		if focused is LineEdit or focused is TextEdit:return
@@ -327,13 +330,6 @@ func _input(event: InputEvent) -> void:
 			if event.physical_keycode==KEY_F:
 				if not developer:toggle_developer()
 				toggle_flight()
-		get_viewport().set_input_as_handled();return
-	if event.pressed and event.physical_keycode==KEY_ESCAPE:
-		if confirmation.visible:confirmation.hide()
-		elif game.storage.opened:game.storage.close()
-		elif game.player_hud.inventory_open and not opened:game.player_hud.set_open(false)
-		elif workspace:set_open(false)
-		else:set_open(not visible_ui())
 		get_viewport().set_input_as_handled();return
 	if workspace:
 		# GUI gets typing, dropdowns and scrolling; world keys never reach tools.

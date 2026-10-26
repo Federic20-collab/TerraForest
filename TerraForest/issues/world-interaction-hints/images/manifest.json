@@ -1,0 +1,59 @@
+{
+  "archived_on": "2026-10-26",
+  "images": [
+    {
+      "file": "grass-unlabeled.png",
+      "source": "reports/ground_interaction_hint/quiet.png",
+      "source_run": "reports/checks/20261026T150730700083Z",
+      "world": "temporary check_8c0bf1b206074eaebc55e5cd394c5e15",
+      "seed": 1703,
+      "baseline_commit": "e77d680b",
+      "role": "source improvement; no matched before image",
+      "modified_pixels": false,
+      "sha256": "10f71c67d976505f478cb475ef95bfa7e42a86adeaccfc8fa4039be0cb156314"
+    },
+    {
+      "file": "boulder-rejected.png",
+      "source": "C:\\Users\\WINDOW~1\\AppData\\Local\\Temp\\codex-clipboard-2ef1bd4f-6a5f-4692-a21b-c65e764304ac.png",
+      "modified_pixels": false,
+      "sha256": "992802b9c9122e03ad952de3a4241a1fa2e7857ab5c03bcb65f2e18dd377ea4c",
+      "role": "user-rejected automatic mining instruction",
+      "world": "Hidden_Hills",
+      "seed": 1703,
+      "context": "Repair hammer held; exact saved position/build unrecorded."
+    },
+    {
+      "file": "boulder-unlabeled.png",
+      "source": "reports\\ground_interaction_hint\\boulder-unlabeled.png",
+      "modified_pixels": false,
+      "sha256": "e5490c21e8d6add8881885976ee53425a31b5847803a4983f6b429d6df850f02",
+      "role": "packaged correction; inspected, awaiting user review",
+      "world": "temporary generated test world",
+      "seed": 1703,
+      "context": "Natural boulder verified by native picker; repair hammer held; not a matching saved-world replay.",
+      "source_run": "reports/quiet_hints_boulder/boulder"
+    },
+    {
+      "file": "corpse-open.png",
+      "source": "reports\\interaction_workflow\\corpse-open.png",
+      "source_run": "reports/interaction_workflow_pack/container",
+      "world": "temporary seed-1703 world",
+      "seed": 1703,
+      "role": "packaged E-toggle verification; inspected, not user-reviewed",
+      "context": "Real storage UI and native corpse contents, test identity picker; no new zombie death/targeting qualification.",
+      "modified_pixels": false,
+      "sha256": "2492a70208e850def80b103f4a545c0106681da4033357d476c997ba1fd45179"
+    },
+    {
+      "file": "corpse-closed-with-e.png",
+      "source": "reports\\interaction_workflow\\corpse-closed-with-e.png",
+      "source_run": "reports/interaction_workflow_pack/container",
+      "world": "temporary seed-1703 world",
+      "seed": 1703,
+      "role": "packaged E-toggle verification; inspected, not user-reviewed",
+      "context": "Real storage UI and native corpse contents, test identity picker; no new zombie death/targeting qualification.",
+      "modified_pixels": false,
+      "sha256": "bc2016c3a00feb63e0a0047e7f9dd9304df5af6388085a5ebd553e7aa7aeddff"
+    }
+  ]
+}

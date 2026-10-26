@@ -1,6 +1,7 @@
 # SPDX-License-Identifier: 0BSD
 # UI coordination only; picking, hinge state and storage mutations remain native.
 extends RefCounted
+const GroundCatalog=preload("res://addons/world_ecosystem/ground_catalog.gd")
 var remaining:=0.0
 func available(game: Node) -> bool:
 	return game._model_edit_available() and not game.fly and Input.mouse_mode==Input.MOUSE_MODE_CAPTURED and not game.session_menu.visible_ui()
@@ -15,15 +16,16 @@ func describe(game: Node, target: Dictionary) -> String:
 	var loose:=loose_target(game,target)
 	if loose.get("kind")=="pickup":return "E · Pick up "+game.pickups.ITEMS[loose.item]
 	if loose.get("kind")=="ground":
-		if game.construction_inventory.gameplay and loose.hit.get("large",false):return "Left mouse · Mine stone boulder (pickaxe)"
-		if game.construction_inventory.gameplay and loose.hit.species==8:return "Left mouse · Harvest woody bush (two hits)"
-		var name: String=preload("res://addons/world_ecosystem/ground_catalog.gd").NAMES[loose.hit.species]
+		if loose.hit.get("large",false) or not GroundCatalog.WORLD_HINTS[loose.hit.species]:return ""
+		var name: String=GroundCatalog.NAMES[loose.hit.species]
 		return "E · "+("Collect " if game.construction_inventory.gameplay else "Remove ")+name
+	if game.world_vehicle.candidate(game)>0:return "E · Enter vehicle  /  Hold E · Vehicle actions"
 	return ""
 func ground_target(game: Node,target: Dictionary) -> Dictionary:
 	if not game.ground_enabled:return {"ok":false}
 	var origin: Vector3=game.camera.global_position
-	return game.ground_interaction.collection_probe(origin,origin-game.camera.global_basis.z*2.5,target)
+	var endpoint:Vector3=origin-game.camera.global_basis.z*2.5
+	return game.ground_interaction.pickup_probe(origin,endpoint,target) if game.construction_inventory.gameplay else game.ground_interaction.collection_probe(origin,endpoint,target)
 func pickup_end(game: Node,target: Dictionary) -> Vector3:
 	var origin: Vector3=game.camera.global_position
 	var endpoint: Vector3=origin-game.camera.global_basis.z*2.5
@@ -45,7 +47,6 @@ func update(game: Node, delta: float) -> void:
 	# One native scene ray at most every 100 ms, never a catch-up loop.
 	remaining=0.1
 	var hint:=describe(game,hit(game))
-	if hint.is_empty() and game.world_vehicle.candidate(game)>0:hint="E · Enter vehicle  /  Hold E · Vehicle actions"
 	game.player_hud.show_interaction_hint(hint)
 func interact(game: Node) -> bool:
 	if not available(game):return false
