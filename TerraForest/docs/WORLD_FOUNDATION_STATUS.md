@@ -1,6 +1,53 @@
 Visual summaries and comparison images: [issue tracker](../issues/README.md).
 This file retains the wider backlog; the tracker initially covers three cases.
 
+## ESC Player settings — 2026-10-26
+
+Added Player navigation and moved Third-person camera plus the complete
+Building-grid fit preference group out of Session. Defaults, setting callbacks
+and session action buttons are unchanged. Source/package checks pass 18/18;
+export/startup passes. The generator test's UI lookup was updated without rerunning
+world generation. Human/DPI review remains open; [screenshots and scope](../issues/esc-player-settings/README.md).
+
+## Vehicle sinks on exit — corrected 2026-10-26; user review pending
+
+The baseline exit path reproduced a player/chassis contact during the player's
+kinematic relocation, while its scene position was already beside the car.
+Twelve flat/slope diagnostic comparisons isolated this contact from the physics
+rate change, wheel rays and parking. A one-step car/player pair exclusion prevents
+the shove while retaining ground collision. Six real-world E-input cases reproduced
+it stopped and at 0.3/3 m/s, with matched collision-disabled controls remaining
+stable. Stale pre-impact support/motion readings could then freeze the penetrated car.
+
+After the user authorized repair, the exit now guards only the car/player pair
+until the kinematic transition has completed. Player world collision stays active.
+Parking requires current-tick suspension support and 0.25 seconds of stable motion
+in the physics loop; loading holds cannot become parked state. Guard ownership,
+rapid re-entry, removal and restore are covered. Native force application is
+unchanged and the session physics callback stops when no transition/coasting work
+remains.
+
+Thirteen flat/slope/unequal-support cases and 18 repeated actual-world exits at
+0/0.3/3 m/s across generators 1 and 4 pass; world cases have zero player/car contacts
+and under 8 mm height loss. Existing adapter/streaming/braking/persistence and actor
+occupancy/route checks pass. The actor fixture's older two-exit assumption failed
+against baseline code too; it now covers all supported candidate positions.
+Failed harness/fixture receipts and original diagnosis evidence remain visible.
+Corrected full-foliage and clear-view captures were inspected. The original saved
+depression and user visual review remain open; arbitrary excavations, fleet travel
+and extreme-speed dismounts are not qualified. Revisit if the original workflow
+still sinks a car. [Correction, evidence and remaining scope](../issues/vehicle-exit-terrain/README.md).
+
+## Fly wheel stationary selection — 2026-10-26
+
+The single-action backtick wheel no longer excludes its own centred Fly label
+with an inner dead zone. Release/click samples the current pointer; outside,
+Escape/right-click cancellation and short-tap developer switching remain intact.
+Actual source/package interaction checks pass 26/26, packaged ESC priority and
+export/startup pass. Earlier harness failures and one unassigned cursor-state
+failure remain recorded; human/DPI review is open. No player saves or vehicle
+wheel rules change. [Evidence and images](../issues/player-action-hover/README.md).
+
 ## ESC closes active UI before opening pause — 2026-10-26
 
 Reproduced corpse storage remaining open: the session handler consumed ESC after
@@ -378,9 +425,13 @@ This supersedes the old six-second forest settling failure for the tested fixtur
 not all varied-terrain/endurance coverage. Earlier animated-hit failures (6 and 11
 assertions in two packaged runs) remain retained; later traced graphical checks
 pass, but their earlier cause is not assigned. Return if those failures recur with
-the new cancellation/focus trace. Wider corpse-pile, extreme-impact, varied-pose/
-terrain and lower-end/endurance qualification remains open; close only with
-repeatable physical/contact/rendered evidence. Player acceptance is still separate.
+the new cancellation/focus trace. Wider qualification is now tracked in
+`../issues/zombie-ragdoll-stability/README.md`: the expanded campaign exposes
+real initial-impact stretch and dense-pile instability, not universal resolution.
+Small support withdrawals and cross-owner contact islands have native corrections;
+the new tests retain their failed gates. Close the remaining varied-pose/terrain,
+extreme-impact and lower-end/endurance scope only with repeatable physical/contact/
+rendered evidence. Player acceptance is still separate.
 
 ## New saved shoulder failure; universal contact is not achieved — 2026-10-25
 
