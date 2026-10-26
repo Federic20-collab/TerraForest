@@ -84,19 +84,19 @@ const MAX_SUSPENSION_FORCE: float = 12000.0
 # front-wheel angle then follows at a fixed rate. A held turn keeps the steering
 # cap it had when that turn began; slowing down cannot silently add steering.
 # This removes the CSV-proven speed-drop hook without any curvature catch-up.
-const LOW_SPEED_MAX_STEER_DEG: float = 26.0
+const LOW_SPEED_MAX_STEER_DEG: float = 30.0
 # Smooth the DRIVER COMMAND as a normalized fraction so high-speed steering does
 # not become instant merely because the allowed wheel angle is small. Full A/D
-# takes about 0.33 s to build at every speed.
-const STEER_INPUT_APPLY_RATE: float = 4.25
-const STEER_INPUT_RELEASE_RATE: float = 5.25
-const STEER_INPUT_REVERSE_RATE: float = 5.00
+# takes about 0.18 s to build at every speed.
+const STEER_INPUT_APPLY_RATE: float = 5.50
+const STEER_INPUT_RELEASE_RATE: float = 6.00
+const STEER_INPUT_REVERSE_RATE: float = 5.75
 const STEER_WHEEL_TRACK_RATE_DEG: float = 120.0
 # While a steering key is held, speed increases may reduce the safe steering cap
 # immediately, but slowing/coasting restores authority at a controlled rate.
 # This avoids both the old speed-drop hook and the newer coast-steering dead feel.
-const STEER_CAP_RECOVERY_RATE_DEG: float = 9.0
-const LATERAL_ACCEL_LIMIT: float = 13.0
+const STEER_CAP_RECOVERY_RATE_DEG: float = 12.0
+const LATERAL_ACCEL_LIMIT: float = 20.0
 const MAX_YAW_RATE_DEG: float = 85.0
 const AIRBORNE_CONFIRM_TIME: float = 0.025
 # A ray hit is not the same as a wheel carrying the car. Only count suspension
@@ -126,7 +126,7 @@ const BOOST_BLEND_OUT_RATE: float = 4.0
 # responsive, but engine acceleration is reduced when a tight turn is already
 # consuming most of the available tire acceleration. This prevents a full-lock
 # launch from feeling like the SUV is orbiting one rear wheel.
-const TOTAL_GRIP_ACCEL: float = 13.5
+const TOTAL_GRIP_ACCEL: float = 20.0
 
 # Free-physics controls used only during handbrake / impact recovery. Normal
 # driving does not use these forces to steer.
@@ -199,6 +199,7 @@ var _contact_normals: Array[Vector3] = [Vector3.UP, Vector3.UP, Vector3.UP, Vect
 var _spring_lengths: Array[float] = [SUSPENSION_REST_LENGTH, SUSPENSION_REST_LENGTH, SUSPENSION_REST_LENGTH, SUSPENSION_REST_LENGTH]
 var _normal_forces: Array[float] = [0.0, 0.0, 0.0, 0.0]
 var _wheel_spin_angles: Array[float] = [0.0, 0.0, 0.0, 0.0]
+var _burnout_visual_speed: float = 0.0
 
 # Public telemetry/API retained for the HUD, logger, camera and gameplay systems.
 var body_mesh_count: int = 0
@@ -1245,6 +1246,8 @@ func _update_wheel_visuals(delta: float) -> void:
 		var wheel_speed: float = linear_velocity.dot(wheel_forward)
 		if _contact_active[index]:
 			wheel_speed = get_velocity_at_world_point(_contact_points[index]).dot(wheel_forward)
+		if not is_zero_approx(_burnout_visual_speed):
+			wheel_speed = _burnout_visual_speed
 		_wheel_spin_angles[index] = wrapf(_wheel_spin_angles[index] + (wheel_speed / WHEEL_RADIUS) * delta, -PI, PI)
 		spin_pivot.rotation.x = _wheel_spin_angles[index]
 
@@ -1285,6 +1288,7 @@ func reset_vehicle() -> void:
 	boost_active = false
 	boost_amount = 0.0
 	handbrake_active = false
+	_burnout_visual_speed = 0.0
 	drive_force_newtons = 0.0
 	for index: int in range(WHEEL_COUNT):
 		_wheel_spin_angles[index] = 0.0

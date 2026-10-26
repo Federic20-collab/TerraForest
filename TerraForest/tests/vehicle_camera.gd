@@ -21,6 +21,20 @@ func run() -> void:
 	wall.free();await physics_frame;await physics_frame
 	for tick in 120: follow.update(body,camera,1.0/60)
 	check(camera.position.z< -7.19,"camera extends after obstruction disappears")
+	var slope:=StaticBody3D.new();slope.collision_layer=1
+	var slope_collider:=CollisionShape3D.new()
+	var slope_shape:=ConcavePolygonShape3D.new()
+	slope_shape.set_faces(PackedVector3Array([
+		Vector3(-20,0,0),Vector3(20,0,0),Vector3(20,8,-12),
+		Vector3(-20,0,0),Vector3(20,8,-12),Vector3(-20,8,-12),
+	]))
+	slope_shape.backface_collision=true
+	slope_collider.shape=slope_shape;slope.add_child(slope_collider);root.add_child(slope)
+	await physics_frame;await physics_frame
+	for tick in 120: follow.update(body,camera,1.0/60)
+	check(camera.position.y>5.0,"camera lifts above downhill terrain")
+	slope.free();await physics_frame;await physics_frame
+	for tick in 120: follow.update(body,camera,1.0/60)
 	var before: Vector3=camera.position
 	check(not follow.update(body,camera,NAN) and camera.position==before,"invalid time step cannot corrupt camera")
 	var self_shape:=CollisionShape3D.new();var self_box:=BoxShape3D.new();self_box.size=Vector3(2,2,4);self_shape.shape=self_box;body.add_child(self_shape)

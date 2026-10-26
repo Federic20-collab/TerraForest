@@ -6,7 +6,9 @@ extends Camera3D
 @export var height: float = 3.0
 @export var look_height: float = 0.65
 @export var look_ahead: float = 1.8
-@export var follow_speed: float = 7.5
+@export var follow_speed: float = 8.5
+@export var heading_response: float = 10.0
+@export var speed_fov_boost: float = 4.0
 
 var target: Node3D
 var use_speed_fov: bool = true
@@ -31,7 +33,9 @@ func follow_vehicle(vehicle: Node3D) -> void:
 	height = 3.0
 	look_height = 0.65
 	look_ahead = 1.8
-	follow_speed = 7.5
+	follow_speed = 8.5
+	heading_response = 10.0
+	speed_fov_boost = 4.0
 	base_fov = 72.0
 	use_speed_fov = true
 	_snap_to_target()
@@ -63,7 +67,7 @@ func _process(delta: float) -> void:
 	# Use one smoothed direction for both camera position and look-at. Previously
 	# the position lagged behind while the look direction snapped to the car's new
 	# heading, which exaggerated lateral swing during a turn.
-	var direction_weight: float = 1.0 - exp(-8.0 * delta)
+	var direction_weight: float = 1.0 - exp(-heading_response * delta)
 	_smoothed_forward = _smoothed_forward.lerp(forward, direction_weight)
 	if _smoothed_forward.length_squared() < 0.001:
 		_smoothed_forward = forward
@@ -79,7 +83,7 @@ func _process(delta: float) -> void:
 	var target_fov: float = base_fov
 	if use_speed_fov:
 		var speed: float = float(target.get("speed_kph"))
-		target_fov += clampf(speed / 140.0, 0.0, 1.0) * 10.0
+		target_fov += clampf(speed / 140.0, 0.0, 1.0) * speed_fov_boost
 	fov = lerpf(fov, target_fov, 1.0 - exp(-4.0 * delta))
 
 

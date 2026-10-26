@@ -1,6 +1,8 @@
 # SPDX-License-Identifier: 0BSD
 extends "res://vehicle_demo/scripts/car.gd"
 const STREAMING_ADAPTER=preload("res://addons/vehicle_runtime/vehicle_streaming.gd")
+const HANDBRAKE_PIVOT_YAW_DEG:=48.0
+const HANDBRAKE_PIVOT_SPEED:=1.5
 var driving_policy: RefCounted
 var suspension: RefCounted
 var visual_damage: RefCounted
@@ -91,9 +93,25 @@ func _apply_suspension_forces() -> void:
 	pass # Applied by the native contact pass exactly once per physics tick.
 func _apply_vehicle_motion(throttle: float,reverse_brake: float,handbrake: bool,parked: bool,delta: float) -> void:
 	handbrake_active=handbrake;drive_force_newtons=0;target_yaw_rate_degrees=0
+	_burnout_visual_speed=0.0
+	var supported:=_has_drive_support()
+	var held_speed:=linear_velocity.slide(_support_normal()).length()
+	if handbrake and supported and held_speed<HANDBRAKE_PIVOT_SPEED:
+		_burnout_visual_speed=clampf(throttle-reverse_brake,-1.0,1.0)*26.0
 	if not _normal_mode or handbrake or _physics_override_time>0:
 		normal_drive_locked=false
-		driving_policy.apply_free(self,_support_normal(),throttle,reverse_brake,handbrake,parked,_has_drive_support())
+		var free_throttle:=0.0 if handbrake else throttle
+		var free_reverse:=0.0 if handbrake else reverse_brake
+		driving_policy.apply_free(self,_support_normal(),free_throttle,free_reverse,handbrake,parked,_has_drive_support())
+		# A locked, supported vehicle can pivot in place with A/D. Translation
+		# stays zero; only yaw is written, and the wheels keep their burnout spin.
+		var pivot_steer:=_steer_fraction
+		var pivot_drive:=throttle-reverse_brake
+		if handbrake and supported and held_speed<HANDBRAKE_PIVOT_SPEED and absf(pivot_drive)>0.05 and absf(pivot_steer)>0.05:
+			var up:=_support_normal()
+			linear_velocity=up*linear_velocity.dot(up)
+			angular_velocity=up*deg_to_rad(HANDBRAKE_PIVOT_YAW_DEG)*clampf(pivot_steer,-1.0,1.0)
+			target_yaw_rate_degrees=rad_to_deg(angular_velocity.dot(up))
 		return
 	_update_drive_speed_state(throttle,reverse_brake,parked,delta)
 	target_yaw_rate_degrees=rad_to_deg(driving_policy.apply_grounded(self,_support_normal(),_drive_speed))
@@ -133,3 +151,11 @@ func _update_steering(input_amount: float,delta: float) -> void:
 func _update_drive_speed_state(throttle: float,reverse_brake: float,parked: bool,delta: float) -> void:
 	var result: Vector2=driving_policy.speed(_drive_speed,throttle,reverse_brake,parked,boost_amount,delta)
 	_drive_speed=result.x;drive_force_newtons=result.y*mass
+	if not parked and absf(throttle)<0.05 and absf(reverse_brake)<0.05:
+		var up:=_support_normal()
+		var body_forward:=global_transform.basis.z.slide(up)
+		if body_forward.length_squared()>0.0001:
+			body_forward=body_forward.normalized()
+			var gravity:=Vector3.DOWN*float(ProjectSettings.get_setting("physics/3d/default_gravity",9.8))*gravity_scale
+			var downhill:=gravity-up*gravity.dot(up)
+			_drive_speed=clampf(_drive_speed+downhill.dot(body_forward)*delta,-MAX_REVERSE_SPEED,MAX_FORWARD_SPEED)

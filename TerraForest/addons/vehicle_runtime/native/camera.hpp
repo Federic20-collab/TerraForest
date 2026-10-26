@@ -5,11 +5,14 @@
 #include <godot_cpp/classes/rigid_body3d.hpp>
 #include <godot_cpp/classes/sphere_shape3d.hpp>
 #include <godot_cpp/classes/physics_shape_query_parameters3d.hpp>
+#include <godot_cpp/variant/vector3.hpp>
 namespace terraforest {
 class NativeVehicleCamera : public godot::RefCounted {
     GDCLASS(NativeVehicleCamera,godot::RefCounted)
     godot::Ref<godot::SphereShape3D> shape;
     godot::Ref<godot::PhysicsShapeQueryParameters3D> query;
+    godot::Vector3 smoothed_forward=godot::Vector3(0,0,1);
+    bool initialized=false;
 protected:
     static void _bind_methods();
 public:
