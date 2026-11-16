@@ -73,13 +73,39 @@ func run() -> void:
 	game.yaw = 0
 	game.pitch = -0.8
 	game._clear_motion()
-	game.world_vehicle.request_scene(KIND)
-	var deadline := Time.get_ticks_msec() + 30000
-	while is_instance_valid(game) and Time.get_ticks_msec() < deadline and not game.world_vehicle.scene_ready(KIND):
-		await process_frame
-	check(game.world_vehicle.scene_ready(KIND), "boat scene is ready through the vehicle pack")
-	var message: String = game.world_vehicle.spawn_requested(game, KIND)
-	check(game.world_vehicle.last_spawn_identity != 0, message)
+	# The Dev Spawner promises no aiming: stand on dry ground beside the lake,
+	# face away from the water, and place from the nearest ready shore point.
+	var provider: RefCounted = game.world_vehicle.packs.adapter(KIND)
+	game.player.global_position = center + Vector3(10, 1, 0)
+	game.player.rotation.y = -PI / 2
+	game.yaw = -PI / 2
+	game._clear_motion()
+	await physics_frame
+	var off_aim: Dictionary = provider.requested_pose(game)
+	check(off_aim.get("ok", false), "boat placement finds nearby water without aiming: " + str(off_aim.get("reason", "")))
+	if off_aim.get("ok", false):
+		var pose: Transform3D = off_aim.pose
+		check(Vector2(pose.origin.x - center.x, pose.origin.z - center.z).length() < 45.0, "off-aim placement lands on the nearby lake")
+	game.player.global_position = center + Vector3(0, 1.0, 6.0)
+	game.player.rotation.y = 0
+	game.yaw = 0
+	game.pitch = -0.8
+	game._clear_motion()
+	var spawner: RefCounted = game.session_menu.spawner
+	check(spawner != null, "Dev Spawner page is available")
+	var boat_index := -1
+	if spawner != null:
+		for index in spawner.vehicle_kind.item_count:
+			if spawner.vehicle_kind.get_item_metadata(index) == KIND:
+				boat_index = index
+	check(boat_index >= 0, "Dev Spawner lists the Boat provider")
+	if boat_index >= 0:
+		spawner.vehicle_kind.select(boat_index)
+		spawner.spawn_vehicle()
+		var deadline := Time.get_ticks_msec() + 30000
+		while is_instance_valid(game) and Time.get_ticks_msec() < deadline and (spawner.vehicle_busy or game.world_vehicle.last_spawn_identity == 0):
+			await process_frame
+	check(game.world_vehicle.last_spawn_identity != 0, "Dev Spawner spawns the Boat: " + spawner.menu.message.text)
 	if game.world_vehicle.last_spawn_identity == 0:
 		await finish()
 		return

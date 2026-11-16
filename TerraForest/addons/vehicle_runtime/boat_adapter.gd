@@ -74,39 +74,60 @@ func status_text(body: RigidBody3D) -> String:
 func requested_pose(world: Node) -> Dictionary:
 	if not "lakes" in world or world.lakes == null or world.lakes.water == null:
 		return {"ok": false, "reason": "Water runtime is unavailable"}
-	var space: PhysicsDirectSpaceState3D = world.get_world_3d().direct_space_state
 	var heading := Basis(Vector3.UP, world.player.global_rotation.y + PI)
 	var forward: Vector3 = heading.z
 	var side: Vector3 = heading.x
-	var reason := "Aim at open water near a shore"
+	var reason := "No open water within 40 m · move to a lake or the coast"
 	for distance: float in [6.0, 9.0, 12.0]:
 		for offset: float in [0.0, 3.0, -3.0]:
 			var point: Vector3 = world.player.global_position + forward * distance + side * offset
-			var surface: Vector3 = world.lakes.water.surface_near(Vector3(point.x, point.y + 1.0, point.z), 3.0)
-			if not surface.is_finite() or absf(surface.y - point.y) > 8.0:
-				continue
-			if Vector2(surface.x - point.x, surface.z - point.z).length() > 6.0:
-				continue
-			if world.lakes.depth_at(surface - Vector3.UP * 0.6) < 0.2:
-				reason = "Water is too shallow for the boat"
-				continue
-			var pose := Transform3D(heading, surface + Vector3.UP * 0.28)
-			var bounds := AABB(pose.origin - Vector3(3.0, 1.0, 3.0), Vector3(6.0, 3.0, 6.0))
-			if not world.world_vehicle.ready_bounds(world, bounds):
-				reason = "Water area is still loading"
-				continue
-			if AABB(pose.origin - Vector3(3.25, 1.0, 3.25), Vector3(6.5, 3.0, 6.5)).has_point(world.player.global_position):
-				reason = "Place the boat farther from the player"
-				continue
-			var box := BoxShape3D.new()
-			box.size = Vector3(2.2, 1.4, 4.6)
-			var query := PhysicsShapeQueryParameters3D.new()
-			query.shape = box
-			query.collision_mask = 15
-			query.transform = Transform3D(pose.basis, pose.origin + Vector3.UP * 0.7)
-			query.exclude = [world.player.get_rid()]
-			if not space.intersect_shape(query, 1).is_empty():
-				reason = "Boat space is obstructed"
-				continue
-			return {"ok": true, "pose": pose, "reason": ""}
+			var placement := _pose_on_water(world, heading, point)
+			if placement.ok:
+				return placement
+			reason = placement.reason if placement.reason != "" else reason
+	# The Dev Spawner promises no aiming, so also look for nearby water around
+	# the player and report clearly when the area is dry.
+	for radius: float in [8.0, 12.0, 16.0, 24.0, 32.0, 40.0]:
+		for step in 8:
+			var angle := TAU * step / 8.0
+			var point: Vector3 = world.player.global_position + Vector3(sin(angle), 0.0, cos(angle)) * radius
+			var placement := _pose_on_water(world, heading, point)
+			if placement.ok:
+				return placement
+			if placement.reason != "":
+				reason = placement.reason
 	return {"ok": false, "reason": reason}
+
+
+func _pose_on_water(world: Node, heading: Basis, point: Vector3) -> Dictionary:
+	var surface := _surface_below(world, point)
+	if not surface.is_finite():
+		return {"ok": false, "reason": ""}
+	if world.lakes.depth_at(surface - Vector3.UP * 0.6) < 0.2:
+		return {"ok": false, "reason": "Water is too shallow for the boat"}
+	var pose := Transform3D(heading, surface + Vector3.UP * 0.28)
+	var bounds := AABB(pose.origin - Vector3(3.0, 1.0, 3.0), Vector3(6.0, 3.0, 6.0))
+	if not world.world_vehicle.ready_bounds(world, bounds):
+		return {"ok": false, "reason": "Water area is still loading"}
+	if AABB(pose.origin - Vector3(3.25, 1.0, 3.25), Vector3(6.5, 3.0, 6.5)).has_point(world.player.global_position):
+		return {"ok": false, "reason": "Place the boat farther from the player"}
+	var box := BoxShape3D.new()
+	box.size = Vector3(2.2, 1.4, 4.6)
+	var query := PhysicsShapeQueryParameters3D.new()
+	query.shape = box
+	query.collision_mask = 15
+	query.transform = Transform3D(pose.basis, pose.origin + Vector3.UP * 0.7)
+	query.exclude = [world.player.get_rid()]
+	if not world.get_world_3d().direct_space_state.intersect_shape(query, 1).is_empty():
+		return {"ok": false, "reason": "Boat space is obstructed"}
+	return {"ok": true, "pose": pose, "reason": ""}
+
+
+func _surface_below(world: Node, point: Vector3) -> Vector3:
+	# surface_near accepts a radius of at most three metres, so probe downward
+	# through the range where a shore, lake or coast can be relative to the player.
+	for step in range(-15, 2, 2):
+		var surface: Vector3 = world.lakes.water.surface_near(point + Vector3.UP * float(step), 3.0)
+		if surface.is_finite():
+			return surface
+	return Vector3.INF
