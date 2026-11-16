@@ -1,7 +1,7 @@
 {
   "outputs": {
     "res://addons/player_runtime/art/drops/1.res": "d97fb9de82ea3441dc554d09b9c290e3064a406e1b602f82d4f89860a756a5ca",
-    "res://addons/player_runtime/art/drops/2.res": "c4d78f55d1fd35ab1b4f12552c8f9f2f73cf817aafd3fb021c14296023d48237",
+    "res://addons/player_runtime/art/drops/2.res": "04e5c1af037d286a2ec2992ecace1f978ba24b393f947e54a01797abaa3317bf",
     "res://addons/player_runtime/art/drops/3.res": "d82f90f005018bdf873a0a7016f7d32fc666af0b121891d2e3903c4c06b0a8c5",
     "res://addons/player_runtime/art/drops/4.res": "185d5c075ab8589578d27de4f83e58bc0473fee00dbaadc9ce20be696a9919df",
     "res://addons/player_runtime/art/drops/5.res": "7bd5c679cf91cfe943e540701ae06172d107f0550a2c6daadd7aac6aca30b6d6",
@@ -11,20 +11,22 @@
   "sources": {
     "res://addons/characters/runtime/assets/Hammer.glb": "4f38b696f22e495a77df2119ca97d7ec3c829fe5374d333674779710b77c1d54",
     "res://addons/characters/runtime/assets/Hammer.glb.import": "1c2063fe42b26e43ed3c6983e10a9bc9e490cd13060b578e39d42d196beeef3c",
+    "res://addons/characters/runtime/assets/Hatchet_StraightHandle.glb": "a125796d9b9690a9d46f0eb6d1843287cd685e45e81e2f30c0c7da90db9481f4",
+    "res://addons/characters/runtime/assets/Hatchet_StraightHandle.glb.import": "69bbeee0892978bd5f46ce473f96357d0eb82555a6e904bb9eda7295f7a805f5",
     "res://addons/characters/runtime/assets/Human.r11.glb": "0dc8fdbcfac451f61b6eee5c914b1e79f5ec450f5e98e4c896e8b46370bf35c8",
     "res://addons/characters/runtime/assets/Human.r11.glb.import": "25bb9993391ba7a4afb8225ea88a425c0f2b4d21cc01bb3c40df5193a5975439",
     "res://addons/characters/runtime/assets/Shovel.glb": "4b0c07aaa9a466d75c133b4a6cd64e75a2b85bf596ea1ccc8efbec05dfccc9d7",
     "res://addons/characters/runtime/assets/Shovel.glb.import": "66921214f3c5694ec1e2766365ed494adb40e3dd94199ba39287912be2a2b75f",
     "res://addons/characters/runtime/assets/Torch.glb": "b1346e6731614c7b727dd41f54bdc455f3c8c4f0e152535fe10b08e4aadf2ff6",
     "res://addons/characters/runtime/assets/Torch.glb.import": "eb942c7e6d02667b523ed66e1c215b08596bed4e1ce6bba5671cc28a75c1e106",
-    "res://addons/characters/runtime/human_view.gd": "f8d3554aa2e8cd7a22c38231db567a3309d9528c35d87e20282e0c44331f7544",
+    "res://addons/characters/runtime/human_view.gd": "3f7d896e12404536a81d69572037611ccf360bf7fa3197b0bd95b07cb73513f0",
     "res://addons/player_runtime/art/drops/current_tool.gdshader": "0a0f4928e2803f493944c2acdbe3db1eb4da351270ee67034d886eaf2b556dad",
     "res://addons/player_runtime/tool_view.gd": "d52d1fb5c4361545faef6787148eb219eb73098c5ce81facf5e39dffbdb84074",
     "res://tools/bake_tool_drops.gd": "abd05f1ecfd8e076e2115f91f962fa1f2d298fe1d6202b6c9c7b89114b643a4a",
-    "res://tools/tool_drop_bake.gd": "874df2a6df2617c053aeb74134b124ff31eb1c5245b09915d4027c30b3e11ae9"
+    "res://tools/tool_drop_bake.gd": "52090dc15d7c5bc4d60d8d28ac682062ad52655850de6cf31b38942d6d9afe88"
   },
   "triangles": {
     "1": 376,
-    "2": 380
+    "2": 3168
   }
 }

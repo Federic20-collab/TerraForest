@@ -8,7 +8,7 @@ const RECEIPT="res://addons/player_runtime/art/drops/current_tools.bake.json"
 const SHADER=preload("res://addons/player_runtime/art/drops/current_tool.gdshader")
 static func snapshot()->Dictionary:
 	var result:Dictionary={}
-	for path:String in [Human.MODEL.resource_path,Human.MODEL.resource_path+".import","res://addons/characters/runtime/human_view.gd","res://addons/player_runtime/tool_view.gd","res://tools/tool_drop_bake.gd","res://tools/bake_tool_drops.gd",SHADER.resource_path]:
+	for path:String in [Human.MODEL.resource_path,Human.MODEL.resource_path+".import",Human.HATCHET.resource_path,Human.HATCHET.resource_path+".import","res://addons/characters/runtime/human_view.gd","res://addons/player_runtime/tool_view.gd","res://tools/tool_drop_bake.gd","res://tools/bake_tool_drops.gd",SHADER.resource_path]:
 		result[path]=FileAccess.get_sha256(path)
 	for scene:PackedScene in Human.EQUIPMENT.values():
 		result[scene.resource_path]=FileAccess.get_sha256(scene.resource_path)
@@ -68,8 +68,11 @@ static func build(view:Node,item:int)->ArrayMesh:
 			var wood:bool=source.albedo_texture!=null
 			if wood:
 				# Bundle current embedded textures into the drop asset, not cache paths.
-				material.set_shader_parameter("wood_albedo",ImageTexture.create_from_image(source.albedo_texture.get_image()))
-				if source.normal_texture!=null:material.set_shader_parameter("wood_normal",ImageTexture.create_from_image(source.normal_texture.get_image()))
+				# The 35 cm pickup does not need the 4K held-tool maps; cap the
+				# supplied hatchet maps to keep the replacement drop light.
+				var limit:=1024 if item==2 else 0
+				material.set_shader_parameter("wood_albedo",ImageTexture.create_from_image(drop_image(source.albedo_texture,limit)))
+				if source.normal_texture!=null:material.set_shader_parameter("wood_normal",ImageTexture.create_from_image(drop_image(source.normal_texture,limit)))
 				material.set_shader_parameter("wood_normal_strength",source.normal_scale)
 			var arrays:=mesh.mesh.surface_get_arrays(index)
 			var vertices:PackedVector3Array=arrays[Mesh.ARRAY_VERTEX]
@@ -87,8 +90,17 @@ static func build(view:Node,item:int)->ArrayMesh:
 				surface.set_normal((normal_basis*normals[vertex]).normalized());surface.add_vertex(pose*vertices[vertex])
 	surface.generate_tangents();surface.set_material(material)
 	var output:=surface.commit()
-	output.set_meta("source_model",Human.MODEL.resource_path)
-	output.set_meta("source_model_sha256",FileAccess.get_sha256(Human.MODEL.resource_path))
+	var source_path:String=Human.HATCHET.resource_path if item==2 else Human.MODEL.resource_path
+	output.set_meta("source_model",source_path)
+	output.set_meta("source_model_sha256",FileAccess.get_sha256(source_path))
 	output.set_meta("source_item",item);output.set_meta("source_triangles",triangle_count)
 	output.set_meta("authored_scale",1.0/factor);output.set_meta("authored_size",bounds.size)
 	return output
+static func drop_image(texture:Texture2D,limit:int)->Image:
+	var image:=texture.get_image()
+	if limit<=0:return image
+	var largest:=maxi(image.get_width(),image.get_height())
+	if largest<=limit:return image
+	var scale:=float(limit)/largest
+	image.resize(maxi(1,roundi(image.get_width()*scale)),maxi(1,roundi(image.get_height()*scale)),Image.INTERPOLATE_LANCZOS)
+	return image

@@ -1,5 +1,5 @@
 {
-  "atlas_sha256": "b9599538d0c7660eee67dba25abcb20004fb9eebb2a20f595d5eebccb6a5af5f",
+  "atlas_sha256": "08022442626a389aaf4afb7ab4fe9a284b5e3057c530c7fd2599f6028245660b",
   "schema": 1,
   "sources": {
     "clothing": {
@@ -41,6 +41,8 @@
       "files": {
         "res://addons/characters/runtime/assets/Hammer.glb": "4f38b696f22e495a77df2119ca97d7ec3c829fe5374d333674779710b77c1d54",
         "res://addons/characters/runtime/assets/Hammer.glb.import": "1c2063fe42b26e43ed3c6983e10a9bc9e490cd13060b578e39d42d196beeef3c",
+        "res://addons/characters/runtime/assets/Hatchet_StraightHandle.glb": "a125796d9b9690a9d46f0eb6d1843287cd685e45e81e2f30c0c7da90db9481f4",
+        "res://addons/characters/runtime/assets/Hatchet_StraightHandle.glb.import": "69bbeee0892978bd5f46ce473f96357d0eb82555a6e904bb9eda7295f7a805f5",
         "res://addons/characters/runtime/assets/Human.bucket.res": "72f620852d55f88d9da64c37e74308ded71f30d4581b4ceeea2d500cf9a2111f",
         "res://addons/characters/runtime/assets/Human.crouch.res": "d1c8d3ef2ffb4ddbe97c809a84901593e6d82f4407b9f2264594b3add846b304",
         "res://addons/characters/runtime/assets/Human.hammer.res": "a0efd00e897b9698914a112adfa3bec8f48f78385fdc67725986472ec55b67b6",
@@ -86,7 +88,7 @@
         "res://addons/characters/runtime/assets/Torch_Torch_8.png.import": "5659d5b0a65bdac175deb5763dfde3a17b2d885bb5ac4f6364f517aae157e9f0",
         "res://addons/characters/runtime/held_item.gd": "e2fce6b1937cf1a7e75ae8d674ed39c287e9cff48eb4479aa36ab2a35dbdbc3d",
         "res://addons/characters/runtime/hidden_surface.gdshader": "0c9a2deeaa1ee872d18bc78a086d74e1fe6cb511c6ad6e149aa3e4f57b4dc61a",
-        "res://addons/characters/runtime/human_view.gd": "f8d3554aa2e8cd7a22c38231db567a3309d9528c35d87e20282e0c44331f7544",
+        "res://addons/characters/runtime/human_view.gd": "3f7d896e12404536a81d69572037611ccf360bf7fa3197b0bd95b07cb73513f0",
         "res://addons/characters/runtime/muzzle_flash.gd": "e213337eafe9e6738b0371e553207c7f7d3f08bbf64f2302b9b9c111d719eb77",
         "res://addons/characters/runtime/muzzle_flash.gdshader": "846d35ad380d80aeeca8945748ab2656459c0ea0fe9f92ec09d5b31ca4757b69",
         "res://addons/characters/runtime/muzzle_smoke.gdshader": "3314d4aee40a0def47350d93400968742f70ba5f70875ed9dbd03ef6655bfbb4",

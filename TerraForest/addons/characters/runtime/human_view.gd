@@ -37,6 +37,7 @@ const HeldItem = preload("res://addons/characters/runtime/held_item.gd")
 const BUCKET = preload("res://addons/characters/runtime/assets/Human.bucket.res")
 const BUCKET_MODEL = preload("res://addons/volumetric_water/bucket_model.gd")
 const EQUIPMENT = {6:preload("res://addons/characters/runtime/assets/Torch.glb"),3:preload("res://addons/characters/runtime/assets/Hammer.glb"),5:preload("res://addons/characters/runtime/assets/Shovel.glb")}
+const HATCHET = preload("res://addons/characters/runtime/assets/Hatchet_StraightHandle.glb")
 const AUTHORED_TOOLS = [0,1,2,3,5,6,401]
 const HIDDEN_SURFACE = preload("res://addons/characters/runtime/hidden_surface.gdshader")
 var model: Node3D
@@ -65,6 +66,7 @@ var bucket_display_fill:=0.0
 var torch_effects:Node3D
 var bucket_water:MeshInstance3D
 var held_item:MeshInstance3D
+var hatchet:Node3D
 var item_use_identity:=0
 var face_surfaces:Array=[]
 var face_meshes:Dictionary={}
@@ -107,6 +109,22 @@ func _ready() -> void:
 		else:equipment.transform=skeleton.get_bone_global_rest(skeleton.find_bone(attachment.bone_name)).affine_inverse()*equipment.transform
 		if item==6:
 			torch_effects=preload("res://addons/characters/runtime/torch_effects.gd").new();equipment.add_child(torch_effects)
+	# The supplied hatchet is a static mesh. Ride the existing Weapon_Axe bone so
+	# every FP_Axe idle, walk and swing clip drives it without a second rig.
+	var hatchet_attachment:=BoneAttachment3D.new();hatchet_attachment.bone_name="Weapon_Axe";skeleton.add_child(hatchet_attachment)
+	hatchet=Node3D.new();hatchet.name="Equipment_Hatchet";hatchet.set_meta("first_person_equipment",true)
+	hatchet_attachment.add_child(hatchet)
+	var hatchet_rest:=skeleton.get_bone_global_rest(skeleton.find_bone("Weapon_Axe"))
+	# Match the authored axe's grip and length in Human model space: its shaft
+	# runs -0.159..0.529 m and the asset is a 1 m vertical hatchet.
+	hatchet.transform=hatchet_rest.affine_inverse()*Transform3D(Basis.IDENTITY.scaled(Vector3.ONE*.69),Vector3(0,.185,0))
+	var hatchet_model:Node3D=HATCHET.instantiate()
+	hatchet_model.set_meta("first_person_equipment",true)
+	hatchet.add_child(hatchet_model)
+	for hatchet_mesh:MeshInstance3D in hatchet.find_children("*","MeshInstance3D",true,false):
+		hatchet_mesh.name="Equipment_Hatchet"
+		hatchet_mesh.cast_shadow=GeometryInstance3D.SHADOW_CASTING_SETTING_OFF
+		meshes.append(hatchet_mesh)
 	var bail_attachment:=BoneAttachment3D.new();bail_attachment.bone_name="Weapon_Axe";skeleton.add_child(bail_attachment)
 	var bail:=MeshInstance3D.new();bail.name="Equipment_Bucket_Bail";bail.mesh=BUCKET_MODEL.BAIL;bail_attachment.add_child(bail)
 	bail.transform=skeleton.get_bone_global_rest(skeleton.find_bone("Weapon_Axe")).affine_inverse()
@@ -288,7 +306,7 @@ func _sync_equipment() -> void:
 	for mesh in meshes:
 		var label := String(mesh.name).to_lower().replace("_", ".")
 		if label.begins_with("equipment."):
-			mesh.visible = not placement_active and ((current==7 and label.contains("carbine")) or (current==8 and label.contains("ranger")) or (current == 1 and label.contains("pickaxe")) or (current == 2 and label.contains("axe") and not label.contains("pickaxe")) or (current==3 and label.contains("hammer")) or (current==5 and label.contains("shovel")) or (current==6 and label.contains("torch")) or (current==401 and label.contains("bucket")))
+			mesh.visible = not placement_active and ((current==7 and label.contains("carbine")) or (current==8 and label.contains("ranger")) or (current == 1 and label.contains("pickaxe")) or (current == 2 and label.contains("hatchet")) or (current==3 and label.contains("hammer")) or (current==5 and label.contains("shovel")) or (current==6 and label.contains("torch")) or (current==401 and label.contains("bucket")))
 		elif label.begins_with("hair.") or label.begins_with("brows.") or label.begins_with("eye") or label.begins_with("upper_lashes"):
 			mesh.visible=third_person and face_meshes.get(mesh.get_instance_id(),false)
 	_sync_bucket_water()
