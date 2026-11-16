@@ -104,7 +104,9 @@ func _update_controls(delta: float) -> void:
 			throttle_target = -0.6
 		if Input.is_key_pressed(KEY_SPACE):
 			throttle_target = 0.0
-		steer_target = float(int(right) - int(left))
+		# Godot's positive Y yaw turns +Z toward +X, which is screen-left from the
+		# chase camera. D must therefore produce a negative steering value.
+		steer_target = float(int(left) - int(right))
 	throttle = move_toward(throttle, throttle_target, throttle_slew_rate * delta)
 	steering = move_toward(steering, steer_target, steer_rate * delta)
 

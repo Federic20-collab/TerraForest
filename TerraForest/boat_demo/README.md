@@ -17,7 +17,7 @@ cache, then opens the scene fullscreen at 1920x1080, 60 FPS and the demo's
 ## Controls
 
 - `W` / `Up`: throttle. `S` / `Down`: reverse.
-- `A` / `Left`, `D` / `Right`: rudder and steering.
+- `A` / `Left`, `D` / `Right`: rudder; `D` steers right and `A` steers left.
 - `Space`: idle (throttle to zero).
 - `R`: reset to the dock.
 
@@ -25,7 +25,8 @@ cache, then opens the scene fullscreen at 1920x1080, 60 FPS and the demo's
 
 The GLB is imported unchanged at 6x scene scale (about 6.0 m long, 2.5 m beam),
 rotated so the bow is the vehicle's +Z forward direction. Its seven authored
-materials and 82 mesh parts are used as imported. See `PROVENANCE.md`.
+materials and 82 mesh parts are used as imported, plus an original cockpit-floor
+plate at the waterline so the open interior reads dry. See `PROVENANCE.md`.
 
 ## Water and buoyancy
 
@@ -46,9 +47,9 @@ controller: buoyancy samples the streamed world's volumetric lake surface instea
 of the demo wave field, placement picks the lake surface and rejects shallow or
 obstructed water, `E` enters and exits, and exiting over water puts the player in
 the water to swim. The world host owns persistence and disables the demo `R`
-reset. The 82 source parts are baked once into `assets/Boat.world.res` (seven
-surfaces) so the native parked prototype stays inside its 64-part limit; the
-source GLB is unchanged.
+reset. The 82 model parts and the cockpit floor are baked once into
+`assets/Boat.world.res` (eight surfaces) so the native parked prototype stays
+inside its 64-part limit; the source GLB is unchanged.
 
 ## Check
 

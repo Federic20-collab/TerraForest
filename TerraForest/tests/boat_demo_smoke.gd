@@ -71,7 +71,7 @@ func run() -> void:
 		await physics_frame
 	_press(KEY_D, false)
 	var heading_change := wrapf(_heading(boat) - heading_before, -PI, PI)
-	var turning := heading_change > 0.12 and boat.global_basis.y.dot(Vector3.UP) > 0.9 \
+	var turning := heading_change < -0.12 and boat.global_basis.y.dot(Vector3.UP) > 0.9 \
 		and boat.wet_probes >= 4
 	var record := {
 		"settled": settled, "driving": driving, "turning": turning,

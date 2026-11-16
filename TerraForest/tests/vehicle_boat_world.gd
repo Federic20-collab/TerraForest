@@ -148,7 +148,10 @@ func run() -> void:
 	_press(KEY_D, false)
 	_press(KEY_W, false)
 	var heading_change := wrapf(atan2(boat.global_basis.z.x, boat.global_basis.z.z) - heading_before, -PI, PI)
-	check(heading_change > 0.08, "right rudder turns the boat right")
+	var chase_camera := game.get_viewport().get_camera_3d()
+	var screen_right := boat.global_basis.z.dot(chase_camera.global_basis.x)
+	check(heading_change < -0.08, "right rudder turns the boat right")
+	check(screen_right > 0.0, "right rudder turns screen-right")
 	if DisplayServer.get_name() != "headless":
 		await RenderingServer.frame_post_draw
 		root.get_texture().get_image().save_png("res://reports/vehicle_boat_world.png")
