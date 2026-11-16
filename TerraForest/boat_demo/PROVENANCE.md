@@ -21,10 +21,9 @@ The source GLB remains at the repository root as supplied; the copy under
 `assets/` is the version referenced by the Godot scene and covered by this record.
 
 The main-world pack uses `assets/Boat.world.res`, a consolidated copy baked from
-that unchanged source by `tools/bake_boat_world_mesh.gd`: eight surfaces, 6,000
+that unchanged source by `tools/bake_boat_world_mesh.gd`: seven surfaces, 5,976
 vertices, SHA-256
-`aace90d277b8e818cd5332b157f02ad2e5b16600fc01c7e093dd3fd7bbcc904d`. The eighth
-surface is a small original cockpit-floor plate added in `scenes/boat.tscn` so
-the model's open interior stays visually dry above the waterline; the source
-GLB's seven materials are unchanged. The bake record is
+`121efe32417be48a4c09047a974125cd8cc64c1e328b327c3577f5aa03b85644`. No extra
+geometry is added to the boat; the visual is positioned so the model's own
+interior sits above the waterline. The bake record is
 `assets/Boat.world.bake.json`.

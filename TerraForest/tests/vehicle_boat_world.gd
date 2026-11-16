@@ -152,6 +152,8 @@ func run() -> void:
 	var screen_right := boat.global_basis.z.dot(chase_camera.global_basis.x)
 	check(heading_change < -0.08, "right rudder turns the boat right")
 	check(screen_right > 0.0, "right rudder turns screen-right")
+	check(game.player.global_position.y > boat.water_height + 0.05, "driver stays above the lake surface")
+	check(chase_camera.global_position.y > boat.water_height + 0.3, "boat camera stays above the lake")
 	if DisplayServer.get_name() != "headless":
 		await RenderingServer.frame_post_draw
 		root.get_texture().get_image().save_png("res://reports/vehicle_boat_world.png")
