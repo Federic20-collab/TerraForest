@@ -1,0 +1,11 @@
+{
+  "engine": "4.7.2-stable (steam)",
+  "output": "res://boat_demo/assets/Boat.world.res",
+  "output_bytes": 224803,
+  "output_sha256": "ee1002144a3fdc7a8596f0146156e076825f481752caa2c77ae4ec318d03c5c6",
+  "output_surfaces": 7,
+  "output_vertices": 5976,
+  "source": "res://boat_demo/scenes/boat.tscn",
+  "source_parts": 82,
+  "source_sha256": "2245e43a1889eea7430dd45d59951afac737e1e43198b5c876a530b0f810b919"
+}

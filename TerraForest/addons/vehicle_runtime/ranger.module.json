@@ -8,6 +8,13 @@
       "name": "Ranger",
       "scene": "res://vehicle_demo/scenes/car.tscn",
       "adapter": "res://addons/vehicle_runtime/ranger_adapter.gd"
+    },
+    {
+      "capability": "vehicle",
+      "id": "terraforest.boat.v1",
+      "name": "Boat",
+      "scene": "res://boat_demo/scenes/boat_world.tscn",
+      "adapter": "res://addons/vehicle_runtime/boat_adapter.gd"
     }
   ]
 }

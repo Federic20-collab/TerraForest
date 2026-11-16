@@ -145,7 +145,14 @@ func spawn_requested(world:Node,kind: String = Packs.DEFAULT)->String:
 	last_spawn_identity=0
 	request_scene(kind)
 	if not scene_ready(kind):return "Vehicle model is loading or its pack is unavailable"
-	var pose:Transform3D=preload("res://addons/vehicle_runtime/vehicle_placement.gd").requested_pose(world)
+	var driver:RefCounted=packs.adapter(kind)
+	var pose:Transform3D
+	if driver!=null and driver.has_method("requested_pose"):
+		var placement:Dictionary=driver.requested_pose(world)
+		if not placement.get("ok",false):return placement.get("reason","Vehicle placement failed")
+		pose=placement.pose
+	else:
+		pose=preload("res://addons/vehicle_runtime/vehicle_placement.gd").requested_pose(world)
 	if fleet_enabled:
 		var message:String=activation.place_requested(world,pose,kind)
 		if last_spawn_identity==0:return message
@@ -271,7 +278,20 @@ func safe_exit_for(world:Node,body:RigidBody3D,occupant:RID)->Vector3:
 		var desired: Vector3=body.position+body.global_basis*offset
 		var ray:=PhysicsRayQueryParameters3D.create(desired+Vector3.UP*2,desired-Vector3.UP*3,3,[body.get_rid(),occupant])
 		var hit: Dictionary=world.get_world_3d().direct_space_state.intersect_ray(ray)
-		if hit.is_empty() or hit.normal.dot(Vector3.UP)<0.7: continue
+		if hit.is_empty() or hit.normal.dot(Vector3.UP)<0.7:
+			# A boat is normally surrounded by water rather than walkable ground.
+			# Let the occupant step out and swim instead of refusing every exit.
+			if "lakes" in world and world.lakes!=null and world.lakes.water!=null:
+				var surface:Vector3=world.lakes.water.surface_near(desired+Vector3.UP*0.2,3.0)
+				if surface.is_finite() and world.lakes.depth_at(surface-Vector3.UP*0.4)>0.2:
+					var wet_feet:Vector3=surface+Vector3.UP*0.15
+					if ready_bounds(world,AABB(wet_feet-Vector3(.4,.1,.4),Vector3(.8,2,.8))):
+						var wet_capsule:=CapsuleShape3D.new();wet_capsule.height=1.8;wet_capsule.radius=.34
+						var wet_query:=PhysicsShapeQueryParameters3D.new();wet_query.shape=wet_capsule
+						wet_query.transform=Transform3D(Basis.IDENTITY,wet_feet+Vector3.UP*.9);wet_query.collision_mask=15
+						wet_query.exclude=[occupant]
+						if world.get_world_3d().direct_space_state.intersect_shape(wet_query,1).is_empty():return wet_feet
+			continue
 		var feet: Vector3=hit.position+Vector3.UP*0.06
 		if not ready_bounds(world,AABB(feet-Vector3(.4,.1,.4),Vector3(.8,2,.8))): continue
 		var capsule:=CapsuleShape3D.new();capsule.height=1.8;capsule.radius=.34

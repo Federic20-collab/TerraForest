@@ -19,3 +19,9 @@ original 0BSD work. No third-party textures or other material are included.
 
 The source GLB remains at the repository root as supplied; the copy under
 `assets/` is the version referenced by the Godot scene and covered by this record.
+
+The main-world pack uses `assets/Boat.world.res`, a consolidated copy baked from
+that unchanged source by `tools/bake_boat_world_mesh.gd`: seven surfaces, 5,976
+vertices, SHA-256
+`ee1002144a3fdc7a8596f0146156e076825f481752caa2c77ae4ec318d03c5c6`. The bake
+record is `assets/Boat.world.bake.json`.

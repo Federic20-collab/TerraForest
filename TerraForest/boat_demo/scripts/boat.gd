@@ -35,6 +35,7 @@ const PROBES := [
 @export var righting_strength := 9000.0
 @export var roll_damping := 3200.0
 @export var gravity := 20.0
+@export var allow_reset := true
 
 var water: BoatWaterSurface
 var controls_enabled := true
@@ -54,8 +55,6 @@ var _reset_was_down := false
 func _ready() -> void:
 	gravity = float(ProjectSettings.get_setting("physics/3d/default_gravity", 20.0))
 	water = get_node_or_null(water_path) as BoatWaterSurface
-	if water == null:
-		push_error("Boat water_path does not point to a BoatWaterSurface")
 	_spawn_transform = global_transform
 	can_sleep = false
 	sleeping = false
@@ -63,14 +62,23 @@ func _ready() -> void:
 
 func _physics_process(delta: float) -> void:
 	var reset_down := Input.is_key_pressed(KEY_R)
-	if reset_down and not _reset_was_down:
+	if allow_reset and reset_down and not _reset_was_down:
 		reset_boat()
 	_reset_was_down = reset_down
-	if global_position.y < -20.0:
+	if allow_reset and global_position.y < -20.0:
 		reset_boat()
 	_update_controls(delta)
 	_apply_water_forces()
 	_update_telemetry()
+
+
+func set_controls_enabled(enabled: bool) -> void:
+	controls_enabled = enabled
+
+
+## Override in host-driven variants to sample the world's real water runtime.
+func _water_height_at(point: Vector3) -> float:
+	return water.height_at(point) if water != null else NAN
 
 
 func _update_controls(delta: float) -> void:
@@ -93,9 +101,14 @@ func _update_controls(delta: float) -> void:
 
 
 func _apply_water_forces() -> void:
-	if water == null:
+	var height := _water_height_at(global_position)
+	if not is_finite(height):
+		water_height = 0.0
+		wet_probes = 0
+		speed_kph = Vector3(linear_velocity.x, 0.0, linear_velocity.z).length() * 3.6
+		speed_knots = speed_kph / 1.852
 		return
-	water_height = water.height_at(global_position)
+	water_height = height
 	var basis := global_transform.basis
 	var submerged := 0
 	for local in PROBES:
@@ -143,8 +156,8 @@ func _update_telemetry() -> void:
 	var horizontal := Vector3(linear_velocity.x, 0.0, linear_velocity.z)
 	speed_kph = horizontal.length() * 3.6
 	speed_knots = speed_kph / 1.852
-	if water != null:
-		draft = maxf(0.0, water.height_at(global_position) - (global_position.y + HULL_BOTTOM))
+	var height := _water_height_at(global_position)
+	draft = maxf(0.0, height - (global_position.y + HULL_BOTTOM)) if is_finite(height) else 0.0
 
 
 func probe_total() -> int:

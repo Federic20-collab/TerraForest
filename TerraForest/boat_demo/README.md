@@ -36,20 +36,36 @@ outboard motor position, rudder yaw is speed-scaled, and water drag/righting kee
 the boat planing without capsizing. The demo water is a visual height field, not
 the streamed world's volumetric lake runtime.
 
+## Main world vehicle pack
+
+The boat is also the second built-in vehicle provider, `terraforest.boat.v1`, in
+`addons/vehicle_runtime/ranger.module.json`. Spawn it from the Developer vehicle
+pack while aiming along open water. `scenes/boat_world.tscn` extends the demo
+controller: buoyancy samples the streamed world's volumetric lake surface instead
+of the demo wave field, placement picks the lake surface and rejects shallow or
+obstructed water, `E` enters and exits, and exiting over water puts the player in
+the water to swim. The world host owns persistence and disables the demo `R`
+reset. The 82 source parts are baked once into `assets/Boat.world.res` (seven
+surfaces) so the native parked prototype stays inside its 64-part limit; the
+source GLB is unchanged.
+
 ## Check
 
 ```
 python tools/run_godot_check.py boat_demo_smoke --headless --timeout 60 --require BOAT_SMOKE
+python tools/run_godot_check.py vehicle_boat_pack --headless --timeout 90 --require VEHICLE_BOAT_PACK
+python tools/run_godot_check.py vehicle_boat_world --headless --timeout 240 --require VEHICLE_BOAT_WORLD -- --vehicle-fleet
 ```
 
-The check asserts the boat settles with all eight probes wet and upright, the bow
-faces +Z, throttle covers more than 10 m above 20 km/h, and rudder changes heading
-while the hull stays upright. The most recent passing run is
-`reports/checks/20261116T180058848632Z`.
+The demo check asserts the boat settles with all eight probes wet and upright, the
+bow faces +Z, throttle covers more than 10 m above 20 km/h, and rudder changes
+heading while the hull stays upright. The pack check covers registration, adapter
+acceptance, placement, controls, camera and parking. The world check authors a
+real lake, spawns and enters the boat, drives it on the actual lake surface,
+exits into the water and captures a versioned fleet snapshot.
 
 ## Remaining limits
 
-This is a single-scene boat, not a vehicle-pack provider: main-world placement,
-entry/exit, persistence, fleet activation, multiplayer authority, collision with
-the streamed terrain/water runtime and sustained populated-world performance are
-not implemented or qualified here.
+Multiplayer authority and sustained populated-world performance are not qualified
+here. The world check uses a temporary authored lake; natural ocean/lake
+navigation across a full saved world still relies on the same lake runtime.
