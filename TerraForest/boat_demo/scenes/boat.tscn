@@ -1,0 +1,33 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://boat_demo/scripts/boat.gd" id="1_boat"]
+[ext_resource type="PackedScene" path="res://boat_demo/assets/Boat_6K_Geometry_Review.glb" id="2_model"]
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_hull"]
+friction = 0.4
+bounce = 0.05
+
+[sub_resource type="BoxShape3D" id="BoxShape_hull"]
+size = Vector3(1.7, 0.75, 4.0)
+
+[node name="Boat" type="RigidBody3D"]
+mass = 380.0
+physics_material_override = SubResource("PhysicsMaterial_hull")
+continuous_cd = true
+can_sleep = false
+linear_damp = 0.05
+angular_damp = 0.8
+center_of_mass_mode = 1
+center_of_mass = Vector3(0, -0.18, 0)
+script = ExtResource("1_boat")
+water_path = NodePath("../Water")
+
+[node name="HullCollision" type="CollisionShape3D" parent="."]
+position = Vector3(0, -0.175, 0)
+shape = SubResource("BoxShape_hull")
+
+[node name="Visual" type="Node3D" parent="."]
+rotation = Vector3(0, 1.570796327, 0)
+scale = Vector3(4, 4, 4)
+
+[node name="Model" parent="Visual" instance=ExtResource("2_model")]

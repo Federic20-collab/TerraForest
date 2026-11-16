@@ -1,0 +1,334 @@
+[gd_scene load_steps=35 format=3]
+
+[ext_resource type="Script" path="res://boat_demo/scripts/session.gd" id="1_session"]
+[ext_resource type="Script" path="res://boat_demo/scripts/water_surface.gd" id="2_water"]
+[ext_resource type="Shader" path="res://boat_demo/scripts/water.gdshader" id="3_shader"]
+[ext_resource type="PackedScene" path="res://boat_demo/scenes/boat.tscn" id="4_boat"]
+[ext_resource type="Script" path="res://vehicle_demo/scripts/chase_camera.gd" id="5_camera"]
+[ext_resource type="Script" path="res://boat_demo/scripts/boat_hud.gd" id="6_hud"]
+
+[sub_resource type="ProceduralSkyMaterial" id="SkyMaterial_main"]
+sky_top_color = Color(0.16, 0.34, 0.58, 1)
+sky_horizon_color = Color(0.64, 0.75, 0.84, 1)
+ground_bottom_color = Color(0.06, 0.09, 0.11, 1)
+ground_horizon_color = Color(0.56, 0.66, 0.74, 1)
+
+[sub_resource type="Sky" id="Sky_main"]
+sky_material = SubResource("SkyMaterial_main")
+
+[sub_resource type="Environment" id="Environment_main"]
+background_mode = 2
+sky = SubResource("Sky_main")
+ambient_light_source = 3
+ambient_light_energy = 0.75
+tonemap_mode = 2
+fog_enabled = true
+fog_light_color = Color(0.58, 0.67, 0.75, 1)
+fog_density = 0.0022
+fog_sky_affect = 0.35
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_water"]
+shader = ExtResource("3_shader")
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_water"]
+size = Vector2(180, 180)
+subdivide_width = 96
+subdivide_depth = 96
+
+[sub_resource type="StandardMaterial3D" id="Material_seabed"]
+albedo_color = Color(0.19, 0.2, 0.17, 1)
+roughness = 1.0
+
+[sub_resource type="StandardMaterial3D" id="Material_shore"]
+albedo_color = Color(0.55, 0.51, 0.4, 1)
+roughness = 0.95
+
+[sub_resource type="StandardMaterial3D" id="Material_shore_rock"]
+albedo_color = Color(0.35, 0.35, 0.34, 1)
+roughness = 0.95
+
+[sub_resource type="StandardMaterial3D" id="Material_dock"]
+albedo_color = Color(0.29, 0.2, 0.12, 1)
+roughness = 0.9
+
+[sub_resource type="StandardMaterial3D" id="Material_post"]
+albedo_color = Color(0.16, 0.11, 0.07, 1)
+roughness = 0.95
+
+[sub_resource type="StandardMaterial3D" id="Material_buoy_red"]
+albedo_color = Color(0.62, 0.09, 0.07, 1)
+roughness = 0.55
+
+[sub_resource type="StandardMaterial3D" id="Material_buoy_green"]
+albedo_color = Color(0.08, 0.45, 0.16, 1)
+roughness = 0.55
+
+[sub_resource type="BoxShape3D" id="Shape_seabed"]
+size = Vector3(200, 1, 200)
+
+[sub_resource type="BoxMesh" id="Mesh_seabed"]
+size = Vector3(200, 1, 200)
+
+[sub_resource type="BoxShape3D" id="Shape_shore_ns"]
+size = Vector3(200, 4.2, 30)
+
+[sub_resource type="BoxMesh" id="Mesh_shore_ns"]
+size = Vector3(200, 4.2, 30)
+
+[sub_resource type="BoxShape3D" id="Shape_shore_ew"]
+size = Vector3(30, 4.2, 200)
+
+[sub_resource type="BoxMesh" id="Mesh_shore_ew"]
+size = Vector3(30, 4.2, 200)
+
+[sub_resource type="BoxShape3D" id="Shape_dock"]
+size = Vector3(2.8, 0.22, 9)
+
+[sub_resource type="BoxMesh" id="Mesh_dock"]
+size = Vector3(2.8, 0.22, 9)
+
+[sub_resource type="BoxMesh" id="Mesh_post"]
+size = Vector3(0.28, 3.2, 0.28)
+
+[sub_resource type="CylinderMesh" id="Mesh_buoy"]
+top_radius = 0.26
+bottom_radius = 0.34
+height = 0.9
+radial_segments = 16
+
+[sub_resource type="StandardMaterial3D" id="Material_island_sand"]
+albedo_color = Color(0.62, 0.57, 0.43, 1)
+roughness = 0.95
+
+[sub_resource type="StandardMaterial3D" id="Material_island_rock"]
+albedo_color = Color(0.32, 0.32, 0.3, 1)
+roughness = 0.95
+
+[sub_resource type="CylinderShape3D" id="Shape_island"]
+radius = 7.0
+height = 2.2
+
+[sub_resource type="CylinderMesh" id="Mesh_island"]
+top_radius = 7.4
+bottom_radius = 8.4
+height = 2.2
+radial_segments = 32
+
+[sub_resource type="SphereMesh" id="Mesh_rock"]
+radius = 1.0
+height = 2.0
+radial_segments = 12
+rings = 6
+
+[node name="BoatDemo" type="Node3D"]
+script = ExtResource("1_session")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_main")
+
+[node name="Sun" type="DirectionalLight3D" parent="."]
+rotation = Vector3(-0.907571, -0.698132, 0)
+light_energy = 1.25
+shadow_enabled = true
+directional_shadow_max_distance = 140.0
+
+[node name="Water" type="MeshInstance3D" parent="."]
+mesh = SubResource("PlaneMesh_water")
+material_override = SubResource("ShaderMaterial_water")
+script = ExtResource("2_water")
+
+[node name="Seabed" type="StaticBody3D" parent="."]
+position = Vector3(0, -3.2, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Seabed"]
+shape = SubResource("Shape_seabed")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Seabed"]
+mesh = SubResource("Mesh_seabed")
+material_override = SubResource("Material_seabed")
+
+[node name="ShoreNorth" type="StaticBody3D" parent="."]
+position = Vector3(0, -1.1, -95)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="ShoreNorth"]
+shape = SubResource("Shape_shore_ns")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="ShoreNorth"]
+mesh = SubResource("Mesh_shore_ns")
+material_override = SubResource("Material_shore")
+
+[node name="ShoreSouth" type="StaticBody3D" parent="."]
+position = Vector3(0, -1.1, 95)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="ShoreSouth"]
+shape = SubResource("Shape_shore_ns")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="ShoreSouth"]
+mesh = SubResource("Mesh_shore_ns")
+material_override = SubResource("Material_shore")
+
+[node name="ShoreWest" type="StaticBody3D" parent="."]
+position = Vector3(-95, -1.1, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="ShoreWest"]
+shape = SubResource("Shape_shore_ew")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="ShoreWest"]
+mesh = SubResource("Mesh_shore_ew")
+material_override = SubResource("Material_shore_rock")
+
+[node name="ShoreEast" type="StaticBody3D" parent="."]
+position = Vector3(95, -1.1, 0)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="ShoreEast"]
+shape = SubResource("Shape_shore_ew")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="ShoreEast"]
+mesh = SubResource("Mesh_shore_ew")
+material_override = SubResource("Material_shore_rock")
+
+[node name="Dock" type="StaticBody3D" parent="."]
+position = Vector3(7, 0.45, -20)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Dock"]
+shape = SubResource("Shape_dock")
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="Dock"]
+mesh = SubResource("Mesh_dock")
+material_override = SubResource("Material_dock")
+
+[node name="Post1" type="MeshInstance3D" parent="Dock"]
+position = Vector3(-1.1, -1.5, -4)
+mesh = SubResource("Mesh_post")
+material_override = SubResource("Material_post")
+
+[node name="Post2" type="MeshInstance3D" parent="Dock"]
+position = Vector3(1.1, -1.5, -4)
+mesh = SubResource("Mesh_post")
+material_override = SubResource("Material_post")
+
+[node name="Post3" type="MeshInstance3D" parent="Dock"]
+position = Vector3(-1.1, -1.5, 4)
+mesh = SubResource("Mesh_post")
+material_override = SubResource("Material_post")
+
+[node name="Post4" type="MeshInstance3D" parent="Dock"]
+position = Vector3(1.1, -1.5, 4)
+mesh = SubResource("Mesh_post")
+material_override = SubResource("Material_post")
+
+[node name="Buoys" type="Node3D" parent="."]
+
+[node name="BuoyRedNorth" type="MeshInstance3D" parent="Buoys"]
+position = Vector3(-8, 0.1, -8)
+mesh = SubResource("Mesh_buoy")
+material_override = SubResource("Material_buoy_red")
+
+[node name="BuoyGreenNorth" type="MeshInstance3D" parent="Buoys"]
+position = Vector3(8, 0.1, -8)
+mesh = SubResource("Mesh_buoy")
+material_override = SubResource("Material_buoy_green")
+
+[node name="BuoyRedSouth" type="MeshInstance3D" parent="Buoys"]
+position = Vector3(-8, 0.1, 38)
+mesh = SubResource("Mesh_buoy")
+material_override = SubResource("Material_buoy_red")
+
+[node name="BuoyGreenSouth" type="MeshInstance3D" parent="Buoys"]
+position = Vector3(8, 0.1, 38)
+mesh = SubResource("Mesh_buoy")
+material_override = SubResource("Material_buoy_green")
+
+[node name="Island" type="StaticBody3D" parent="."]
+position = Vector3(34, -0.5, 44)
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="Island"]
+shape = SubResource("Shape_island")
+
+[node name="Sand" type="MeshInstance3D" parent="Island"]
+mesh = SubResource("Mesh_island")
+material_override = SubResource("Material_island_sand")
+
+[node name="Rock1" type="MeshInstance3D" parent="Island"]
+position = Vector3(-2.4, 1.7, 1.2)
+scale = Vector3(1.6, 1.1, 1.4)
+mesh = SubResource("Mesh_rock")
+material_override = SubResource("Material_island_rock")
+
+[node name="Rock2" type="MeshInstance3D" parent="Island"]
+position = Vector3(2.0, 1.4, -1.8)
+scale = Vector3(1.1, 0.8, 1.0)
+mesh = SubResource("Mesh_rock")
+material_override = SubResource("Material_island_rock")
+
+[node name="Boat" parent="." instance=ExtResource("4_boat")]
+position = Vector3(3, 0.9, -24)
+
+[node name="ChaseCamera" type="Camera3D" parent="."]
+position = Vector3(3, 4.5, -14)
+rotation = Vector3(-0.20944, 3.141593, 0)
+current = true
+fov = 72.0
+near = 0.08
+script = ExtResource("5_camera")
+target_path = NodePath("../Boat")
+distance = 10.0
+height = 3.6
+look_height = 0.8
+look_ahead = 2.4
+
+[node name="HUD" type="CanvasLayer" parent="."]
+script = ExtResource("6_hud")
+boat_path = NodePath("../Boat")
+
+[node name="Panel" type="ColorRect" parent="HUD"]
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 760.0
+offset_bottom = 132.0
+mouse_filter = 2
+color = Color(0.02, 0.025, 0.03, 0.72)
+
+[node name="SpeedLabel" type="Label" parent="HUD"]
+offset_left = 30.0
+offset_top = 24.0
+offset_right = 430.0
+offset_bottom = 64.0
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 5
+theme_override_font_sizes/font_size = 30
+text = "0 km/h  ·  0.0 kn"
+
+[node name="StateLabel" type="Label" parent="HUD"]
+offset_left = 31.0
+offset_top = 68.0
+offset_right = 750.0
+offset_bottom = 94.0
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 14
+text = "Throttle:+0%  Rudder:+0%  Draft:0.00 m  Wet probes:0/8  Water:+0.00 m"
+
+[node name="ControlsLabel" type="Label" parent="HUD"]
+offset_left = 31.0
+offset_top = 98.0
+offset_right = 750.0
+offset_bottom = 122.0
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 14
+text = "W/S: throttle & reverse   A/D: steer   Space: idle   R: reset to dock"
+
+[node name="Hint" type="Label" parent="HUD"]
+anchors_preset = 2
+anchor_top = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = -42.0
+offset_right = 900.0
+offset_bottom = -16.0
+grow_vertical = 0
+theme_override_colors/font_outline_color = Color(0, 0, 0, 1)
+theme_override_constants/outline_size = 4
+theme_override_font_sizes/font_size = 14
+text = "Boat review · Boat_6K_Geometry_Review.glb · imported at 4× scale · water is a demo height field"
