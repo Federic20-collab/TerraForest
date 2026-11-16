@@ -132,14 +132,26 @@ func run() -> void:
 	check(boat.global_basis.y.dot(Vector3.UP) > 0.95, "boat remains upright on the actual lake")
 	var start := boat.global_position
 	_press(KEY_W, true)
-	for frame in 240:
+	for frame in 150:
 		# Headless hosts cannot capture the mouse, so keep the host control gate open.
 		boat.set_controls_enabled(true)
 		await physics_frame
-	_press(KEY_W, false)
 	var moved := Vector2(boat.global_position.x - start.x, boat.global_position.z - start.z).length()
 	check(moved > 6.0 and boat.speed_kph > 15.0, "boat drives across the actual lake under throttle")
 	check(boat.global_basis.y.dot(Vector3.UP) > 0.9, "driving boat stays upright")
+	check(boat.effects_active(), "moving boat leaves a visible wake on the lake")
+	var heading_before := atan2(boat.global_basis.z.x, boat.global_basis.z.z)
+	_press(KEY_D, true)
+	for frame in 90:
+		boat.set_controls_enabled(true)
+		await physics_frame
+	_press(KEY_D, false)
+	_press(KEY_W, false)
+	var heading_change := wrapf(atan2(boat.global_basis.z.x, boat.global_basis.z.z) - heading_before, -PI, PI)
+	check(heading_change > 0.08, "right rudder turns the boat right")
+	if DisplayServer.get_name() != "headless":
+		await RenderingServer.frame_post_draw
+		root.get_texture().get_image().save_png("res://reports/vehicle_boat_world.png")
 	var exit_message: String = game.world_vehicle.exit_vehicle(game)
 	check(not game.world_vehicle.driving and game.player.global_position.is_finite(), "boat exit places the player in the water: " + exit_message)
 	check(is_instance_valid(boat) and not boat.freeze, "boat keeps simulating after the player exits")
@@ -149,9 +161,6 @@ func run() -> void:
 	check(game.world_vehicle.fleet.first_of_kind(KIND) > 0, "saved fleet retains the boat kind")
 	var record: Dictionary = game.world_vehicle.fleet.get_record(game.world_vehicle.fleet.first_of_kind(KIND))
 	check(record.get("present", false) and record.kind == KIND, "boat record keeps its provider identity")
-	if DisplayServer.get_name() != "headless":
-		await RenderingServer.frame_post_draw
-		root.get_texture().get_image().save_png("res://reports/vehicle_boat_world.png")
 	await finish()
 
 

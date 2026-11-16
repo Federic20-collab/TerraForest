@@ -55,30 +55,31 @@ func run() -> void:
 	var driven_position := boat.global_position
 	var driven_distance := Vector2(driven_position.x - rest_position.x, driven_position.z - rest_position.z).length()
 	var driven_speed := boat.speed_kph
+	var wake := boat.effects_active()
 	var driving := driven_distance > 10.0 and driven_speed > 20.0 and driven_position.y > -1.0 \
-		and boat.global_basis.y.dot(Vector3.UP) > 0.9
-	_press(KEY_W, false)
-	_press(KEY_A, true)
-	var heading_before := _heading(boat)
-	for tick in 240:
-		await physics_frame
-	_press(KEY_A, false)
-	var heading_change := wrapf(_heading(boat) - heading_before, -PI, PI)
-	var turning := absf(heading_change) > 0.12 and boat.global_basis.y.dot(Vector3.UP) > 0.9 \
-		and boat.wet_probes >= 4
-	var record := {
-		"settled": settled, "driving": driving, "turning": turning,
-		"rest": settled_record,
-		"driven_distance": driven_distance, "driven_kph": driven_speed,
-		"heading_change": heading_change, "wet_after_turn": boat.wet_probes,
-	}
-	print("BOAT_SMOKE ", JSON.stringify(record))
+		and boat.global_basis.y.dot(Vector3.UP) > 0.9 and wake
 	if DisplayServer.get_name() != "headless":
 		await process_frame
 		await RenderingServer.frame_post_draw
 		var screenshot := root.get_texture().get_image()
 		screenshot.save_png("res://reports/boat_demo.png")
 		print("BOAT_SCREENSHOT res://reports/boat_demo.png")
+	_press(KEY_W, false)
+	_press(KEY_D, true)
+	var heading_before := _heading(boat)
+	for tick in 240:
+		await physics_frame
+	_press(KEY_D, false)
+	var heading_change := wrapf(_heading(boat) - heading_before, -PI, PI)
+	var turning := heading_change > 0.12 and boat.global_basis.y.dot(Vector3.UP) > 0.9 \
+		and boat.wet_probes >= 4
+	var record := {
+		"settled": settled, "driving": driving, "turning": turning,
+		"rest": settled_record,
+		"driven_distance": driven_distance, "driven_kph": driven_speed,
+		"heading_change": heading_change, "wet_after_turn": boat.wet_probes, "wake": wake,
+	}
+	print("BOAT_SMOKE ", JSON.stringify(record))
 	scene.queue_free()
 	await process_frame
 	quit(0 if settled and driving and turning else 1)

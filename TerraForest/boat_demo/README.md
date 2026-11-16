@@ -23,7 +23,7 @@ cache, then opens the scene fullscreen at 1920x1080, 60 FPS and the demo's
 
 ## Model and materials
 
-The GLB is imported unchanged at 4x scene scale (about 4.0 m long, 1.7 m beam),
+The GLB is imported unchanged at 6x scene scale (about 6.0 m long, 2.5 m beam),
 rotated so the bow is the vehicle's +Z forward direction. Its seven authored
 materials and 82 mesh parts are used as imported. See `PROVENANCE.md`.
 
@@ -33,7 +33,8 @@ materials and 82 mesh parts are used as imported. See `PROVENANCE.md`.
 height field. Eight hull-bottom probes sample it each physics tick and apply
 spring/damper forces with the project gravity (20 m/s²). Thrust acts at the
 outboard motor position, rudder yaw is speed-scaled, and water drag/righting keep
-the boat planing without capsizing. The demo water is a visual height field, not
+the boat planing without capsizing. The hull also emits a speed-scaled foam wake,
+bow spray and stern spray at the sampled waterline. The demo water is a visual height field, not
 the streamed world's volumetric lake runtime.
 
 ## Main world vehicle pack
@@ -58,8 +59,8 @@ python tools/run_godot_check.py vehicle_boat_world --headless --timeout 240 --re
 ```
 
 The demo check asserts the boat settles with all eight probes wet and upright, the
-bow faces +Z, throttle covers more than 10 m above 20 km/h, and rudder changes
-heading while the hull stays upright. The pack check covers registration, adapter
+bow faces +Z, throttle covers more than 10 m above 20 km/h, the wake is emitting,
+and right rudder turns the bow right while the hull stays upright. The pack check covers registration, adapter
 acceptance, placement, controls, camera and parking. The world check authors a
 real lake, spawns and enters the boat, drives it on the actual lake surface,
 exits into the water and captures a versioned fleet snapshot.

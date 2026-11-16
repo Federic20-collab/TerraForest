@@ -43,7 +43,7 @@ func can_park(body: RigidBody3D, _frame: int) -> bool:
 
 
 func bounds(body: RigidBody3D) -> AABB:
-	return AABB(body.global_position - Vector3(2.8, 1.2, 2.8), Vector3(5.6, 2.8, 5.6))
+	return AABB(body.global_position - Vector3(3.4, 1.6, 3.4), Vector3(6.8, 3.2, 6.8))
 
 
 func collision(body: RigidBody3D) -> CollisionShape3D:
@@ -106,13 +106,13 @@ func _pose_on_water(world: Node, heading: Basis, point: Vector3) -> Dictionary:
 	if world.lakes.depth_at(surface - Vector3.UP * 0.6) < 0.2:
 		return {"ok": false, "reason": "Water is too shallow for the boat"}
 	var pose := Transform3D(heading, surface + Vector3.UP * 0.28)
-	var bounds := AABB(pose.origin - Vector3(3.0, 1.0, 3.0), Vector3(6.0, 3.0, 6.0))
+	var bounds := AABB(pose.origin - Vector3(3.5, 1.0, 3.5), Vector3(7.0, 3.0, 7.0))
 	if not world.world_vehicle.ready_bounds(world, bounds):
 		return {"ok": false, "reason": "Water area is still loading"}
-	if AABB(pose.origin - Vector3(3.25, 1.0, 3.25), Vector3(6.5, 3.0, 6.5)).has_point(world.player.global_position):
+	if AABB(pose.origin - Vector3(4.0, 1.0, 4.0), Vector3(8.0, 3.0, 8.0)).has_point(world.player.global_position):
 		return {"ok": false, "reason": "Place the boat farther from the player"}
 	var box := BoxShape3D.new()
-	box.size = Vector3(2.2, 1.4, 4.6)
+	box.size = Vector3(3.0, 1.8, 6.4)
 	var query := PhysicsShapeQueryParameters3D.new()
 	query.shape = box
 	query.collision_mask = 15

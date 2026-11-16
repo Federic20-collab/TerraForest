@@ -11,7 +11,7 @@ The project owner supplied `Boat_6K_Geometry_Review.glb` at the repository root 
   `Boat - 6K Source-Matched Retopology`, 82 meshes, seven authored materials,
   no images and no animations.
 - Geometry in the file: about 1.0 x 0.295 x 0.423 m (X = boat length, bow at -X),
-  imported at 4x in `scenes/boat.tscn`.
+  imported at 6x in `scenes/boat.tscn` (about 6.0 x 1.8 x 2.5 m).
 
 Terms: the asset is recorded as a new original asset under the repository's
 CC0-1.0 default. New code in this folder (scripts, shader, scenes, test) is

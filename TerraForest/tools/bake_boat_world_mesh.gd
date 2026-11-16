@@ -26,16 +26,16 @@ func run() -> void:
 	var boat := packed.instantiate()
 	root.add_child(boat)
 	await process_frame
-	var visual: Node3D = boat.get_node("Visual")
-	var inverse := visual.global_transform.affine_inverse()
 	var groups: Dictionary = {}
 	var order: Array[int] = []
 	var parts := 0
 	for mesh_instance: MeshInstance3D in boat.find_children("*", "MeshInstance3D", true, false):
-		if mesh_instance.mesh == null:
+		if mesh_instance.mesh == null or mesh_instance.mesh.get_surface_count() == 0:
 			continue
 		parts += 1
-		var transform := inverse * mesh_instance.global_transform
+		# Bake the authored visual transform (scale and heading) into the one-part
+		# mesh so the world scene can use it at identity scale.
+		var transform := mesh_instance.global_transform
 		for surface in mesh_instance.mesh.get_surface_count():
 			var material: Material = mesh_instance.material_override
 			if material == null:

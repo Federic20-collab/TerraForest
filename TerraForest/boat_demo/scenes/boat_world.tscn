@@ -11,7 +11,7 @@ bounce = 0.05
 size = Vector3(1.7, 0.75, 4.0)
 
 [node name="Boat" type="RigidBody3D"]
-mass = 380.0
+mass = 420.0
 physics_material_override = SubResource("PhysicsMaterial_hull")
 continuous_cd = true
 can_sleep = false
@@ -23,7 +23,8 @@ script = ExtResource("1_boat")
 water_path = NodePath("NoDemoWater")
 
 [node name="HullCollision" type="CollisionShape3D" parent="."]
-position = Vector3(0, -0.175, 0)
+position = Vector3(0, -0.2625, 0)
+scale = Vector3(1.5, 1.5, 1.5)
 shape = SubResource("BoxShape_hull")
 
 [node name="Visual" type="MeshInstance3D" parent="."]
