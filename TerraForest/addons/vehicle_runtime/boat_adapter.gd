@@ -103,8 +103,10 @@ func _pose_on_water(world: Node, heading: Basis, point: Vector3) -> Dictionary:
 	var surface := _surface_below(world, point)
 	if not surface.is_finite():
 		return {"ok": false, "reason": ""}
-	if world.lakes.depth_at(surface - Vector3.UP * 0.6) < 0.2:
-		return {"ok": false, "reason": "Water is too shallow for the boat"}
+	# The 6 m hull draws about 0.9 m; a 0.2 m puddle would ground it and leave the
+	# boat sitting under the surface. Require clearance below the whole hull.
+	if world.lakes.depth_at(surface - Vector3.UP * 0.9) < 0.6:
+		return {"ok": false, "reason": "Water is too shallow for the boat's hull"}
 	var pose := Transform3D(heading, surface + Vector3.UP * 0.28)
 	var bounds := AABB(pose.origin - Vector3(3.5, 1.0, 3.5), Vector3(7.0, 3.0, 7.0))
 	if not world.world_vehicle.ready_bounds(world, bounds):

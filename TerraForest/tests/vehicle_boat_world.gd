@@ -129,6 +129,8 @@ func run() -> void:
 		await physics_frame
 	check(boat.wet_probes == boat.probe_total() and boat.global_position.y > center.y - 3.0 and boat.global_position.y < center.y + 2.0,
 		"boat floats on the actual lake surface")
+	check(game.lakes.depth_at(boat.global_position - Vector3.UP * 0.9) > 0.6,
+		"spawn water is deep enough for the boat's hull")
 	check(boat.global_basis.y.dot(Vector3.UP) > 0.95, "boat remains upright on the actual lake")
 	var start := boat.global_position
 	_press(KEY_W, true)
