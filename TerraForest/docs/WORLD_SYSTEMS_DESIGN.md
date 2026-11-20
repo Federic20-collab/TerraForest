@@ -6,6 +6,75 @@ Current delivery order, coverage gates and deferred-work triggers are maintained
 
 Implemented paths include the pinned native toolchain, bounded native entity storage/kinematics, fullscreen measurement policy, static volumetric water, seeded cave/mountain/geology generation, terrain road editing, block/prefab construction, a single integrated vehicle, and compound terrain/addon snapshots. Water bakes connected occupancy from terrain density and invalidates after edits. Definitions and stable IDs survive reload; derived occupancy rebakes. See the addon READMEs for API limits, WORLD_STORAGE.md for snapshot limits, and DELIVERY_STATUS.md for evidence. The contract below remains broader than the implementation: it is not a claim of complete settlement generation, fleets, multiplayer or sustained populated-world performance.
 
+## Current priority: one world for dedicated hosting and continuous zoom
+
+Dedicated-server readiness and client frame headroom are current design goals.
+The transport rollout can follow in stages. Qualify the same authority and
+save data from local play and a separate server process. The installed client
+still creates a player, HUD and presentation services in demo/world.gd.
+The compound archive includes Windows-specific locking and publication. Both
+are concrete dependencies to address when bringing up a portable host.
+
+1. **Extract one complete authority path.** Start with a terrain edit touching
+   water at a region boundary. A simulation-only host owns the world descriptor,
+   storage lease, edit validation, terrain density and water quantities. Run the
+   same command handler from ordinary local play. Keep mesh uploads, camera,
+   shaders, audio and menus owned by the client. Dedicated mode needs an explicit
+   entry point: a headless launch of the client scene still constructs client
+   services. Verify a clean start, acknowledged edit, disconnect, save, process
+   restart and reload on a disposable world. Compare affected densities and
+   water quantities with the local-game result. Verify archive locking and crash
+   recovery separately on each supported server OS.
+2. **Give plugins the same commands and queries as gameplay.** Define an operation
+   ID, schema version, bounded payload, actor identity from the session, request
+   ID and expected revision for mutations. Return accepted, rejected or deferred
+   promptly, with an explicit reason or request handle. Publish the committed
+   revision and affected regions only after authoritative state changes. Make
+   retries idempotent and order conflicting edits. Keep command processing
+   independent of rendering, with per-session and world-wide work budgets.
+   Provide read-only queries and post-commit subscriptions. Keep stable IDs and
+   versioned data at the plugin boundary, with native memory layout private.
+   Admit server plugins explicitly and validate content dependencies at join.
+   Test duplicate requests, stale revisions, unknown versions and subscriber
+   teardown. Start with concrete consumers before standardizing more APIs.
+3. **Separate what a camera sees from what a player simulates.** A strategy camera
+   subscribes to coarse region summaries and a bounded set of visible detail.
+   First-person proximity requests precise terrain, collision, nearby actors and
+   water. Keep canonical state independent of camera distance. Share interest
+   across overlapping players: simulate a shared region once per tick and fan
+   out its committed changes to interested clients. Budget snapshot bytes per
+   peer, coalesce superseded visual state and resync a slow peer from a region
+   baseline plus later deltas. Preserve ordered gameplay transactions. On the
+   client, retain the previous visual until its replacement
+   is ready and discard superseded jobs by revision. Gameplay edits invalidate
+   just the affected regions and necessary neighbours. Keep immediate local
+   feedback separate from an authoritative commit. Compare saved viewpoints and
+   continuous zoom captures both ways for holes, silhouette jumps, seams and
+   stale collision at edited sea and lake shores.
+4. **Qualify replication and headroom before claiming scale.** First exercise a
+   dedicated host and two clients over the actual transport, including late join,
+   loss, reconnect and simultaneous conflicting edits. Then replay representative
+   movement and edits with 32, 100 and 200 concurrent simulated clients, clustered
+   and dispersed, with real rendering clients in the busiest region. Measure
+   server tick percentiles and worst tick, command-to-commit latency, queue age,
+   per-client traffic, snapshot bytes, memory plateau and client frame intervals.
+   Pin hardware, resolution, visual settings and server tick rate in each report.
+   For the 60 FPS client, count every interval above 16.67 ms and consecutive
+   misses, and measure presentation as well as CPU/GPU work. A proposed headroom
+   target is p99 CPU and GPU work under 13.3 ms on the reference client, leaving
+   about 20 percent of the frame for bursts. Validate idle, sustained traversal,
+   zoom and simultaneous edits separately. Select native or packed batch work
+   where profiles show repeated CPU, allocation or transfer cost.
+
+The first implemented API is a scene-independent read on NativeGeneratedRegion.
+`get_place_position(id)` reads the committed place index and returns Vector3.INF
+for an absent ID. `plan_changed(revision)` fires synchronously after successful
+publication or snapshot restore, including an empty restore. Validation failures
+leave the committed index and revision intact. Subscribe then read current state
+when attaching mid-session. The shopkeeper consumes this API. It is a local
+post-commit notification on the mutating thread. A network service should
+marshal mutations to the authority thread and queue outbound deltas there.
+
 ## Representation and authority
 
 A server-owned world descriptor identifies generator version, seed, material registry, region coordinates, and content hashes. Untouched regions regenerate from that descriptor. Persistent storage records edits, placed prefab instances, water basin changes and entity state; derived meshes, collision, light data and instance buffers remain disposable caches. Windows native terrain cancellation is now instance-owned and tested during concurrent mesh jobs. Multiple authoritative scene worlds still require cache/save ownership changes; the scene facade retains its single-world guard.
@@ -42,3 +111,56 @@ Cache keys include generator/material/schema versions, canonical region revision
 Replication should send region baselines followed by ordered versioned deltas, with per-client interest sets and byte budgets. Players/entities require server ticks, input sequencing, interpolation/reconciliation and bounded queues. Mutable vegetation and buildings use stable IDs; visual grass and small stones regenerate locally from versioned seeds where gameplay allows it. Reliability and scalability require at least server-plus-two-client tests, late join, packet loss/reorder, edits across region boundaries and independent server memory/bandwidth measurements. No player-count claim is justified before those tests.
 
 Graphical measurements are fixed at 1920×1080 fullscreen, 100% 3D scale. Headless correctness and server simulations are reported separately. CPU-only entity integration throughput must not be presented as fully simulated/rendered vehicle or multiplayer throughput.
+## Finite shoreline edits following the November 20 packaged trials
+
+The first-visible crater is the relevant acceptance point. Adding nearby
+receivers closed the straight cut. Funding them directly from more donor
+cells made many distant mesh owners urgent. Even the reduced window took
+434 ms and missed a bank probe. [Measurements and rejected variants](../issues/explosive-combat/water-plan.md)
+
+The proposed next implementation is to cache connected basin capacity by
+water elevation. A cached region records connected cavities, the elevations
+at which they connect across faces, and how much water fits below a given
+elevation. The authority owns one finite quantity per connected basin.
+A dig or deposition updates the affected regional capacities and connections.
+For a basin whose connections remain intact, obtain the new water level from
+its aggregate capacity and conserved quantity. The edited mesh can use that
+committed level immediately. Every consumer, including buckets and immersion
+queries, must read the same revision. A distant mesh refresh must never
+credit or debit water a second time.
+
+Start with an inland excavation against a basin with a known unchanged outlet.
+Compare volume, depth, bank contact and shore publication time with the current
+solver in the actual game. Then exercise overhangs, breached sills, basin
+splits, bucket vacancies, displaced water, ocean exchange and interrupted
+save/reload before adopting a new save representation. Store the revision of
+the connectivity data with the quantities so a worker cannot commit a result
+computed against obsolete terrain. This proposal has no performance result
+yet.
+
+The current finite-cell implementation admits missing regions within a
+bounded shoreline excavation up to the highest wet region layer in that
+edit. It samples terrain before solving. When an edit creates receivers, the
+local snapshot includes resident donor candidates within three horizontal
+regions of its seeds. Extra candidates supply water only through the solver's
+connected faces. A disconnected pool in the window keeps its previous
+quantities. This decision uses simulation state so local play and a headless
+authority can make the same selection. Donor cell redistribution still
+requires mesh publication across multiple regions; the basin-capacity design
+above remains necessary to qualify immediate editing at scale.
+
+The coastal authoring case has a different source of cost. At Cedar Vale's
+saved spawn, the 64 m wide box needs a 20 by 20 footprint in the current
+four-layer coastal admission band, or 1,600 region keys. The gate accepts at
+most 512. Sampling every layer across that rectangle before accepting the
+terrain command also delays a single small edit beyond the two-frame target.
+
+For an open sea, the next design to test is a spatial index of cavities
+connected to the reservoir at sea level, with explicit stored exceptions for
+bucket withdrawals and enclosed water. A terrain transaction should be able to
+publish its revision and update affected connectivity and exception records
+without materializing every pristine region in the rectangle. Test a wide
+coastal cut, a sealed tunnel below sea level, a breached tunnel, deposition
+that closes the breach, and a bucket withdrawal spanning save/reload. Check
+the resulting volumes and queryable surfaces at several depths. Passing an
+unrestricted flat-plane rendering check cannot establish these behaviours.

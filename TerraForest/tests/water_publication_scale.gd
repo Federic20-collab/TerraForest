@@ -5,6 +5,10 @@ const PublicationBudget=preload("res://addons/volumetric_water/publication_budge
 # these requests, a headless flow test measures a missing worker, not settling.
 class SolidTerrain extends RefCounted:
  func execute(command:PackedByteArray)->PackedByteArray:
+  if command.decode_u32(0)==32:
+   var boundary:=PackedByteArray();boundary.resize(28)
+   boundary.encode_u32(0,0x32505254);boundary.encode_u32(12,command.decode_u32(4));boundary.encode_u32(16,command.decode_u32(8))
+   return boundary
   var count:=command.decode_u32(8);var reply:=PackedByteArray();reply.resize(20+count*4);reply.fill(0)
   reply.encode_u32(0,0x32505254);reply.encode_u32(12,command.decode_u32(4));reply.encode_u32(16,count)
   for i in count:reply.encode_float(20+i*4,-1.0)
@@ -99,6 +103,7 @@ func scene_publication()->void:
   var count:=0
   while not lake.statistics().render_ready and count<1024:
    lake._publish_meshes();count+=1
+   await process_frame
   check(lake.statistics().render_ready and lake.water.capture_snapshot(catalog)==before,"Scene publication preserves restored water in loading mode %s"%loading)
   nodes.append(lake);frames.append(count)
  var matching:bool=nodes[0]._mesh_faces.size()==nodes[1]._mesh_faces.size()
@@ -109,14 +114,31 @@ func scene_publication()->void:
  check(nodes[0].water.raycast_surface(start,finish)==nodes[1].water.raycast_surface(start,finish),"Loading and gameplay budgets publish identical water queries")
  # The same node returns to the gameplay path after the loading cover ends.
  nodes[1].loading_active=func()->bool:return false
+ var distant:=Vector3i(10,10,13)
+ var unchanged:MeshInstance3D=nodes[1]._meshes[distant]
  var removed:int=nodes[1].water.brush(Vector3(41.75,41.75,41.75),0.0,-1000)
- for frame in 16:nodes[1]._publish_meshes()
+ for frame in 120:
+  nodes[1]._publish_meshes()
+  if nodes[1].statistics().render_ready:break
+  await process_frame
+ check(nodes[1]._meshes[distant]==unchanged,"Local publication retains the distant mesh instance")
  check(removed==1000 and nodes[1].statistics().render_ready and nodes[1].water.statistics().water_ml==64000000*4-1000,"Edited water remains publishable after loading mode ends")
+ var drained:=0
+ for z in 8:
+  for x in 8:
+   drained+=nodes[1].water.brush(Vector3(40.25+.5*x,41.75,40.25+.5*z),0.0,-62500)
+ for frame in 120:
+  nodes[1]._publish_meshes()
+  if nodes[1].statistics().render_ready:break
+  await process_frame
+ var owner:=Vector3i(10,10,10)
+ check(drained==3999000 and nodes[1].statistics().render_ready and not nodes[1]._meshes.has(owner) and not nodes[1]._mesh_faces.has(owner) and not nodes[1].water.raycast_surface(start,finish).hit,"Draining the complete region retires its mesh, face counts and pick surface together")
+ check(nodes[1]._meshes[distant]==unchanged and unchanged.visible,"Draining a region retains the neighbouring pool")
  print("WATER_LOADING_PUBLICATION calls_gameplay=",frames[0]," calls_loading=",frames[1])
  for lake:Node in nodes:lake.free()
 func _initialize():
  GDExtensionManager.load_extension("res://addons/volumetric_water/volumetric_water.gdextension")
- scene_publication()
+ await scene_publication()
  for count in [1,16,64,256]:
   var water=fixture(count)
   if water==null:quit(2);return
@@ -126,11 +148,22 @@ func _initialize():
   var local:=publish(water,100)
   water.advance(1)
   var stats:Dictionary=water.statistics()
+  var query_start:=Time.get_ticks_usec()
+  var sampled_ml:int=0
+  for read in 1024:sampled_ml+=water.total_water_ml()
+  var quantity_read_us:=Time.get_ticks_usec()-query_start
+  check(sampled_ml==1024*int(stats.water_ml),"Scalar quantity matches the residency audit (%d regions)"%count)
   check(initial.complete and local.complete and edited==1000 and stats.water_ml==count*4000000+1000,"Publication and local edit conserve water (%d regions)"%count)
   check(initial.packets<=count*4 and initial.empty_packets==0,"Restore schedules surface owners without empty halo packets (%d regions)"%count)
-  check(initial.batches==count and initial.largest_batch_packets==3,"Independent pools publish separately with bounded batch size (%d regions)"%count)
+  check(initial.batches==count and initial.largest_batch_packets==1 and initial.packets==count,"Each isolated pool publishes its one nonempty surface owner (%d regions)"%count)
   check(local.packets==1,"Local interior edit rebuilds only one owner (%d regions)"%count)
-  rows.append({"regions":count,"initial":initial,"local_edit":local,"query_cache_bytes":stats.query_cache_bytes,"resident_cell_bytes":stats.resident_cell_bytes})
+  rows.append({"regions":count,"initial":initial,"local_edit":local,"quantity_1024_reads_us":quantity_read_us,"query_cache_bytes":stats.query_cache_bytes,"resident_cell_bytes":stats.resident_cell_bytes})
+ var edge_pool=fixture(1)
+ publish(edge_pool,100)
+ var edge_removed:int=edge_pool.brush(Vector3(43.75,41.75,43.75),0,-100)
+ check(edge_removed==100 and edge_pool.statistics().dirty_meshes==1,"An inland corner edit queues its resident surface owner")
+ var edge_update:=publish(edge_pool,100)
+ check(edge_update.complete and edge_update.packets==1 and edge_pool.statistics().water_ml==3999900,"The corner edit publishes and conserves the remaining water")
  var scoped=fixture(256)
  var scoped_first:Dictionary=scoped.next_mesh_batch()
  var distant_added:=0

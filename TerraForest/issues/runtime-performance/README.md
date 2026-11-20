@@ -1,5 +1,109 @@
 # Runtime performance
 
+## Exploring Cedar Vale at 60 FPS
+
+The extended grounded route uses two 30-second laps with ordinary player
+movement and turning. Each lap covers approximately 160 m. Run
+`tools/run_godot_check.py water_player_world --pack --isolated-render --timeout 240 --require failures=0 -- --water-source-slot=Cedar_Vale --grounded-pacing --exploration-profile --water-load-only`
+with and without `--exploration-trader`. The read-only run records intervals
+at the game process-frame signal, including the count above 16.67 ms,
+p99, maximum and consecutive frames over 20 ms. These intervals include cap
+pacing and do not measure display presentation. A successful traversal and
+unchanged save hash establish functional completion only.
+
+The native boulder renderer skips distance checks on groups whose nearest
+detail transition cannot have been crossed since inspection. On 120 camera
+moves with 2,048 rocks it checked 10,016 rows against 245,760 in the exhaustive
+reference and matched both detail counts every step (093018316273Z).
+The ordinary packaged route before this change (092349479136Z) recorded
+p99 of 17.80 and 17.66 ms. With it installed (093409576848Z), p99 was
+25.33 and 17.51 ms. This establishes a reduction in rock-selection work,
+while whole-game walking performance varies and remains above budget.
+A trial sharing a time budget between terrain dispatch and staging recorded
+a 36 ms frame (092609600100Z) and was reverted.
+
+In the trader district (093229249929Z), four frames exceeded 50 ms across
+two laps. The worst took 236.43 ms, including 215.54 ms in process callbacks.
+Two hitches near x=1843 exceeded 200 ms on separate laps. Neither cap changes
+nor rendering quality reductions were used.
+
+A repeat with timings between scene subtrees (093749948921Z) attributed
+187 to 233 ms to the trader on three slow frames. Leaving and returning to
+the shop destroyed and rebuilt its dressed human model. During world loading
+the shop now prepares one visual, then keeps it hidden with processing disabled
+while the trader is away. The character body is still created only with a valid
+floor and collision readiness. Save restoration and ordinary departure use the
+same retirement path. This trades one retained character visual and its initial
+loading cost for predictable re-entry. In the source replay (094108616917Z),
+worst frames were 37.12 and 36.12 ms with no frames above 50 ms.
+
+Packaged Cedar Vale verification (094838318372Z) crossed the residency boundary
+in both directions, reactivated a visible, animated and dressed merchant, and
+verified the input save hash. Per lap the maximum trader-subtree cost was 6.04
+and 5.93 ms. Whole-frame maxima were 34.20 and 31.54 ms, p99 was 22.50 and
+22.22 ms, and 53/1786 and 29/1796 intervals exceeded 20 ms. No frame exceeded
+50 ms. The worst interval included 24.95 ms between pre-draw and post-draw.
+The latest available viewport GPU timer at that sample was 6.53 ms and the
+viewport CPU timer was 6.19 ms. These asynchronous counters cannot attribute
+the entire draw interval to either the GPU or the driver. Record presentation
+intervals and correlate render-thread work on a repeated walk before changing
+world detail or adding a global streaming scheduler.
+
+The final ordinary-terrain package replay (095033983749Z) recorded p99 of
+19.98 and 17.83 ms, maxima of 32.04 and 24.05 ms, and 18 and 5 intervals above
+20 ms. The ordinary route also remains above the 16.67 ms target.
+
+The installed November 20 package (`091617996922Z`) reduces first PX9 equip
+from 134.332 to 31.763 ms on the same saved-world sea encounter. The old and
+new packages use the same no-capture driver with `--grounded-pacing`,
+`--blast-only-timing`, `--water-edit-response` and `--water-no-captures`.
+On the new package the first and second grounded laps contain 4/602 and 3/602
+frames over 20 ms. Each late frame occurs alone, and neither lap has a frame
+over 33 ms. Both versions traverse 26.7 m each way with a turning view. Walking
+precedes equip, so the between-run variation does not establish a causal walking
+improvement. Sea / lake / pickaxe water response takes 155.545 / 214.212 /
+172.746 ms from terrain publication. Lake-blast p99 is 17.840 ms in this run.
+All 74 PX9 behavior checks pass (`091351428429Z`). The avatar retains its own
+corrected mesh during play, and the load/duplicate cost moves into world setup.
+
+`091739281463Z` records a separate instrumented package run. A read-only Windows
+process-thread observer sampled the owned process's earliest-created thread
+2,286 times (10 ms requested interval) into `main_thread_samples.csv`. Matching
+the wall clock to the four longest lake frames, all 15 samples inside them show
+Running. Each frame includes 30.8–37.2 ms of conservation snapshot work, with
+31.25 ms of main-thread CPU accumulation at the OS counter resolution. These
+samples cannot reconstruct every scheduling transition. Buckets publish in
+38.3–48.7 ms, but this run **fails** one of 22 lake contact probes after bucket
+interruption, at (688.191, 44.14063, 770.5733). Keep that geometry result open
+independently of equip timing. The explosion-only run and full source run passed
+their probes. No contact tolerances or water runtime code changed in this fix.
+
+An unobserved full repeat (`091856930220Z`) confirms the same missing contact
+at the same coordinate. First handgun equip takes 29.191 ms, buckets 34.597–
+49.897 ms and sea/lake/mining response 145.119 / 227.484 / 145.525 ms. On the
+two grounded laps, 3/602 and 2/602 frames exceed 20 ms, with zero over 33 ms.
+The repeated contact failure keeps overall water acceptance open.
+
+The November 20 frame-pacing investigation uses Cedar_Vale, an isolated render
+desktop and a read-only game session. On the original package (`090919214690Z`),
+the 60 FPS grounded turn-and-walk route crosses x=1856 and returns to within a
+metre of its starting point. The first and second ten-second laps respectively
+have 44 and 7 frames over 20 ms, none over 33 ms, and longest runs of 5 and 2
+consecutive frames over 20 ms. First handgun equip takes 134.332 ms. The old
+package also misses the 250 ms lake response target in this run (291.527 ms).
+
+The candidate prepares the player-specific corrected hand skin during world
+loading, retaining the ordinary material, animation, attachment and restoration
+paths. In the instrumented source comparison the first equip drops from 171.872
+to 33.317 ms. The timed preparation/adapter portion drops from 124.696 to 2.335 ms.
+In that same candidate run the four slowest lake frames include 28–33 ms each
+of test-only save serialization for conservation assertions. The separate
+`--blast-only-timing` measurement excludes the four intervening bucket actions
+and their assertions. Full correctness runs retain them. Windows denied the
+kernel scheduling trace (`CPU.Light`, `0xc5585011`), so wait versus runnable
+time in the remaining hitches is still unassigned. Evidence is under
+`reports/checks/20261120T090454969528Z`, `090725457603Z`, and `090919214690Z`.
+
 [Combat CPU work after the human playtest](combat-cpu-2026-11-13.md) records native
 skin baking from exact offline packets, removal of redundant animated hit areas,
 and debris-free corpse restoration. Median controlled arm severing falls from

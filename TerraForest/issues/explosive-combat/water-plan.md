@@ -1,5 +1,119 @@
 # Continuous volumetric water replacement
 
+**November 20 crater mesh dispatch.** The first lake publication now sends
+the affected owners through one native job when their shared occupancy
+fits the existing reservation. The 70-owner regression commits one job
+and matches the serial arrays exactly. The prior limit split the same
+gameplay crater into two jobs, with a frame handoff between them.
+Run `20261120T143633262102Z` took 340 ms from terrain publication to the
+lake draw with captures disabled (previous build 385 ms). Visual run
+`20261120T143735944389Z` took 342 ms and retained bank contact at both
+shores, including the lake after bucket interruption. Both camera angles
+were reviewed. The 66 live lake probes and the 43-owner geometry digest
+matched the committed replay. Lake latency still fails the 250 ms check.
+Mining took 185 ms in the timing run and 284 ms in the visual run.
+
+**November 20 local mesh invalidation.** Terrain resampling and water
+redistribution now queue the union of the changed cells' two-cell halos.
+Diagonal changes in one region queue seven owners in the sparse regression
+(`20261120T141919850599Z`). The packaged Cedar Vale lake blast queued
+132 urgent owners at first commit, down from 140. Both camera angles at
+each shore and the 81 crater probes per shore in `20261120T142005564440Z`
+show the crater filled at first publication. Sea/lake contact probes
+passed again after settlement and bucket interruption. This change leaves
+the visible response slow. Lake publication took 401 ms, mining took
+299 ms and one scoop took 104 ms. Keep all three timing failures open.
+
+**Rejected local lake handoff, November 20.** Runs `20261120T132949094958Z`
+and `20261120T133050159749Z` deferred presentation of 25 donor regions
+after committing the finite-water exchange. The first crater needed 78
+urgent mesh owners instead of 140. Depth, shore contact and region-edge
+continuity passed, but both lake cameras revealed a dark angular ridge on
+the far side of the crater. At eight metres along +Z the first surface
+was 65 mm above the same point on the fully published local revision.
+The partial donor handoff has been removed. Preserve both captures and
+require a first-frame surface comparison against the committed local
+field when changing publication order.
+
+**November 20 submerged block contact.** Installed run
+`20261120T131316874925Z` reproduced a 123 mm dip around all four walls
+of a one-metre cube crossing a lake. Reconstruction sampled the top of
+the water under the cube as though it were an exposed surface. The mesher
+now excludes a water-to-solid ceiling contact from free-surface interpolation.
+Run `20261120T131750662534Z` measured a level of 48.2511 m one centimetre
+outside each wall, matching the open-water reference. The solid interior
+was dry and removing the block restored the water boundary. The report
+contains `object_contact_above.png` and `object_contact_underwater.png`.
+This fixture covers a construction cube. Moving hull contact remains a
+separate qualification case.
+
+**November 20 installed receiver update.** Cedar Vale run
+`20261120T123819287867Z` passed all 81 first-publication crater-depth probes
+at each shore and all 23 sea and 26 lake bank probes. The lake's straight
+cut was gone in both `player_lake_after.png` and
+`player_lake_after_reverse.png`. The executable loaded the debug extension
+from `dist/addons/volumetric_water/bin` (SHA-256
+`569605243d5223bffe5c718c7189181ec230350a755e85d86a063c6c183450e1`).
+The strict route still failed the lake deadline. The local lake response
+took 498.773 ms and changed 51 regions. The timeline shows 48 pending terrain
+occupancy samples (region requests), then 150 urgent mesh owners. Three mesh
+worker groups ran before local publication. Retain the verified receiver and
+finite-volume behavior as the reference while reducing those costs. The
+reference route does not qualify immediate response, frame pacing, arbitrary
+underwater object contact, or larger authoring edits.
+
+Installed brush-admission build `2edffbb6`, run `20261120T120625031936Z`,
+reproduced the four first-publication failures. The sea centre ray missed.
+At the lake, immediate depth, bank contact and the 250 ms deadline failed.
+Sea/lake/mining times from terrain publication were 201.207/318.864/195.116 ms.
+The coastal click-retention fix does not close the barrel or contact gates.
+
+**First-publication regression, November 20.** The Cedar Vale packaged route
+`20261120T104316302094Z` captures each blast from both sides before broader
+relaxation. In `player_lake_after_reverse.png` a straight edge crosses the
+open crater. The settled check passed every depth and contact probe. Repeat
+`20261120T104953892882Z` checks those same points at first publication too:
+52 of 81 excavated lake points failed depth and 23 of 25 bank contacts failed.
+At sea all 81 immediate depth probes passed but the centre surface ray missed.
+The settled sea and lake passed. Keep these first-publication checks in the
+qualification route and use `--water-immediate-contact --water-edit-response`
+on the same packaged driver for a focused reproduction. Run details and the
+image pairs are in `reports/checks/<run-id>/`.
+
+**Rejected changes to the local solve.** Admitting newly opened dry regions
+alone removed the straight cut but left too little local donor water. Run
+`20261120T105417373110Z` measured the local surface at 43.259 m and failed
+all 81 depth probes. Including three resident donor regions in each horizontal
+direction passed 81/81 depth and 26/26 contact probes in
+`20261120T105757172555Z`. Lake publication took 477.895 ms and mining
+587.012 ms. A two-region window limited to newly admitted receivers took
+434.171 ms at the lake and 530.778 ms for mining. It passed 81/81 crater
+probes, missed one of 27 bank contacts and missed the bucket scoop deadline.
+See both `player_lake_after` images and `receiver-window.patch` in
+`20261120T110055611848Z`. The packaged defaults were restored. The remaining
+design requirement is a way to account for connected finite volume without
+placing every donating region in the urgent mesh replacement. Recheck sea
+surface targeting separately from lake volume conservation.
+
+Installed native build, `20261120T111738366582Z`: both fixed camera angles
+again show the straight cutoff through the inland crater. Both sea angles
+show water in the cut, while its first-publication centre ray still misses.
+The matched before and after sea cameras use the placed barrel's position.
+Sea/lake/mining measured 163.989/278.726/197.234 ms. The read-only source
+hash matched at exit. The trial widening the donor window is absent from this
+build. The four pictures named `player_{shore,lake}_after{,_reverse}.png`
+in that run are the current visual reference.
+
+**November 20 contact regression observation.** During frame-pacing verification,
+`20261120T091739281463Z` misses one of 22 two-centimetre lake shoreline probes
+after the four bucket actions, including background-mesh interruption. The probe
+at (688.191, 44.14063, 770.5733) has no published surface hit. The crater depth,
+sea contact and exact bucket quantity tests pass. The timing repair changes
+handgun presentation only. Reproduce with Cedar_Vale and the full bucket sequence
+and compare the clipped shore, queried triangles and actual terrain at this
+point. The prior scoped passes below do not close this intermittent failure.
+`20261120T091856930220Z` reproduces the same miss with the thread sampler off.
+
 ## Immediate editing architecture correction — November 14
 
 **Implemented and installed; scoped gameplay verification passed.**

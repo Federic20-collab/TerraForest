@@ -25,11 +25,56 @@ class FramePhases extends Node:
  func _exit_tree()->void:
   if RenderingServer.frame_pre_draw.is_connected(pre_draw):RenderingServer.frame_pre_draw.disconnect(pre_draw)
   if RenderingServer.frame_post_draw.is_connected(post_draw):RenderingServer.frame_post_draw.disconnect(post_draw)
+# Sample between sibling subtrees in scene processing order to locate work
+# outside the game controller's explicit timers. Enabled only by the route driver.
+class RouteProcessMarker extends Node:
+ var observe:Callable
+ func _process(_delta:float)->void:observe.call()
+var route_markers:Array[Node]=[]
+var route_section_us:Dictionary={}
+var route_trader_section:=""
+var route_marker_time:=0
+func mark_route_section(label:String)->void:
+ var now:=Time.get_ticks_usec()
+ route_section_us[label]=now-route_marker_time
+ route_marker_time=now
+func install_route_markers()->void:
+ for child:Node in game.get_children():
+  var marker:=RouteProcessMarker.new()
+  var script:Script=child.get_script()
+  var label:=str(child.name)+" "+(script.resource_path if script else child.get_class())
+  if child==game.trader:route_trader_section=label
+  marker.observe=mark_route_section.bind(label)
+  route_markers.append(marker)
+  game.add_child(marker)
+  game.move_child(marker,child.get_index()+1)
+var exploration_terrain_stages:Dictionary={}
+func record_exploration_stage(label:String,ms:float)->void:
+ exploration_terrain_stages[label]=float(exploration_terrain_stages.get(label,0.0))+ms
 var frame_phases:FramePhases
 var game:Node3D
 var failures:=0
 var evidence:=""
 var slot:="Amber_Pines"
+func check_lake_region_seams(center:Vector3,level:float,label:String)->void:
+ var sampled:=0
+ var largest_step:=0.0
+ for axis:int in [0,2]:
+  for region_offset in range(-4,5):
+   for lane:int in [-3,0,3]:
+    var at:=Vector3(center.x,level+2,center.z)
+    at[axis]=(floorf(center[axis]/4)+region_offset)*4
+    at[2-axis]+=lane
+    var offset:=Vector3.ZERO
+    offset[axis]=.00025
+    var left:Dictionary=game.lakes.water.raycast_surface(at-offset,at-offset-Vector3.UP*4)
+    var right:Dictionary=game.lakes.water.raycast_surface(at+offset,at+offset-Vector3.UP*4)
+    if not left.get("hit",false) or not right.get("hit",false):continue
+    if left.normal.y<.8 or right.normal.y<.8:continue
+    sampled+=1
+    largest_step=maxf(largest_step,absf(left.point.y-right.point.y))
+ print("LAKE_REGION_SEAMS ",label," wet_pairs=",sampled," max_step_m=",largest_step)
+ check(sampled>=10 and largest_step<=.0015,label+" adjacent lake regions meet across the open water surface")
 func check_crater_coverage(center:Vector3,level:float,label:String)->void:
  var sampled:=0;var missing:Array=[]
  for x in range(-5,6):
@@ -39,10 +84,27 @@ func check_crater_coverage(center:Vector3,level:float,label:String)->void:
    var hit:Dictionary=game.get_world_3d().direct_space_state.intersect_ray(PhysicsRayQueryParameters3D.create(p+Vector3.UP*8,p-Vector3.UP*8,1))
    if hit.is_empty() or hit.position.y>p.y-.1:continue
    sampled+=1
-   if game.lakes.depth_at(p)<.2:missing.append({"point":str(p),"floor":hit.position.y})
+   if game.lakes.depth_at(p)<.2:
+    var live:Dictionary=game.lakes.water.cell_geometry(p)
+    missing.append({"point":str(p),"floor":hit.position.y,"region":str(Vector3i((p/4).floor())),"resident":not live.is_empty(),"capacity_ml":live.get("capacity_ml",0),"head":live.get("head",0)})
  print("CRATER_COVERAGE ",label," sampled=",sampled," missing=",JSON.stringify(missing))
  check(sampled>10 and missing.is_empty(),label+" water covers every sampled excavated air point below its level")
  var surface:Dictionary=game.lakes.water.raycast_surface(Vector3(center.x,level+1,center.z),Vector3(center.x,level-1,center.z))
+ if label.begins_with("sea"):
+  var column:=Vector2i(floori(center.x/4),floori(center.z/4))
+  var mask:PackedByteArray=game.lakes._surrounding_ocean.last_coverage
+  var detailed:=mask.size()==250000 and mask[column.x+500*column.y]!=0
+  var rendered_hits:Array[float]=[]
+  for layer in range(floori((level-1)/4),floori((level+1)/4)+1):
+   var instance:MeshInstance3D=game.lakes._meshes.get(Vector3i(column.x,layer,column.y))
+   if instance==null or not instance.is_visible_in_tree():continue
+   var faces:=instance.mesh.get_faces()
+   var origin:=instance.to_local(Vector3(center.x,level+1,center.z))
+   var end:=instance.to_local(Vector3(center.x,level-1,center.z))
+   for i in range(0,faces.size(),3):
+    var hit=Geometry3D.segment_intersects_triangle(origin,end,faces[i],faces[i+1],faces[i+2])
+    if hit!=null:rendered_hits.append(instance.to_global(hit).y)
+  print("SEA_PUBLICATION ",label," center=",center," detail=",detailed," mesh_hits=",rendered_hits," query=",surface)
  if not surface.get("hit",false):check(false,label+" shoreline reference surface exists");return
  var water_level:float=surface.point.y
  var contacts:=0;var gaps:Array=[]
@@ -54,7 +116,9 @@ func check_crater_coverage(center:Vector3,level:float,label:String)->void:
   contacts+=1
   var probe:Vector3=bank.position-direction*.02
   var top:Dictionary=game.lakes.water.raycast_surface(Vector3(probe.x,water_level+.3,probe.z),Vector3(probe.x,water_level-.3,probe.z))
-  if not top.get("hit",false) or absf(top.point.y-water_level)>.025:gaps.append({"point":str(probe),"water_hit":top.get("hit",false),"height":top.get("point",Vector3.INF).y})
+  if not top.get("hit",false) or absf(top.point.y-water_level)>.025:
+   var floor_hit:Dictionary=game.get_world_3d().direct_space_state.intersect_ray(PhysicsRayQueryParameters3D.create(probe+Vector3.UP*2,probe-Vector3.UP*2,1))
+   gaps.append({"point":str(probe),"water_hit":top.get("hit",false),"height":top.get("point",Vector3.INF).y,"reference_y":water_level,"floor_y":floor_hit.get("position",Vector3.INF).y,"depth_at_probe":game.lakes.depth_at(probe),"angle_index":angle})
  print("SHORE_CONTACT ",label," sampled=",contacts," gaps=",JSON.stringify(gaps))
  check(contacts>=10 and gaps.is_empty(),label+" water reaches within 2 cm of the actual terrain waterline")
 var blast_metrics:Dictionary={}
@@ -66,6 +130,12 @@ func terrain_published(_bounds:AABB,_revision:int)->void:
  if not timing_phase.is_empty():terrain_published_us=Time.get_ticks_usec()
 var timing_phase:=""
 var timing_local_ms:=-1.0
+var action_started_us:=0
+var local_draw_us:=0
+func measure_local_draw()->void:
+ if timing_phase.is_empty() or not action_started_us or local_draw_us or not terrain_published_us:return
+ if game.lakes._local_response_started_us>=action_started_us and not game.lakes._local_response_pending and not game.lakes._local_publication_pending:
+  local_draw_us=Time.get_ticks_usec()
 var timing_previous:=0
 var timing_frames:Array[float]=[]
 var timing_water:Array[float]=[]
@@ -81,10 +151,13 @@ func timing_stage(label:String,ms:float)->void:
   timing_totals[label]=float(timing_totals.get(label,0))+ms
 func start_timing(label:String)->void:
  if frame_phases==null:frame_phases=FramePhases.new();root.add_child(frame_phases)
- game.max_fps=0;game.background_fps=0;Engine.max_fps=0
- if DisplayServer.get_name()!="headless":DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
+ if "--qualification-route" not in OS.get_cmdline_user_args() and "--water-immediate-contact" not in OS.get_cmdline_user_args():
+  game.max_fps=0;game.background_fps=0;Engine.max_fps=0
+  if DisplayServer.get_name()!="headless":DisplayServer.window_set_vsync_mode(DisplayServer.VSYNC_DISABLED)
  game.structures.blocks.set_process_profiling_enabled(true)
- terrain_published_us=0;blast_started=Time.get_ticks_usec();blast_timeline.clear();blast_last_state=""
+ terrain_published_us=0;action_started_us=0;local_draw_us=0;blast_started=Time.get_ticks_usec();blast_timeline.clear();blast_last_state=""
+ if DisplayServer.get_name()!="headless" and not RenderingServer.frame_post_draw.is_connected(measure_local_draw):
+  RenderingServer.frame_post_draw.connect(measure_local_draw)
  if not game.terrain.region_changed.is_connected(terrain_published):game.terrain.region_changed.connect(terrain_published)
  timing_phase=label;timing_local_ms=-1;timing_frames.clear();timing_water.clear();timing_previous=Time.get_ticks_usec()
  timing_stages.clear();timing_worst.clear();timing_totals.clear();timing_water_worst.clear()
@@ -100,6 +173,7 @@ func sample_timing()->void:
  var specializations:=Performance.get_monitor(Performance.PIPELINE_COMPILATIONS_SPECIALIZATION)
  timing_worst.append({"frame_ms":(now-timing_previous)/1000.0,"stages":timing_stages.duplicate(),"water_main_us":game.lakes.last_process_us,"pipeline_draw_delta":pipelines-timing_pipeline_draw,"pipeline_specialization_delta":specializations-timing_pipeline_specialization,"render_setup_ms":RenderingServer.get_frame_setup_time_cpu(),"render_cpu_ms":RenderingServer.viewport_get_measured_render_time_cpu(root.get_viewport_rid()),"gpu_ms":RenderingServer.viewport_get_measured_render_time_gpu(root.get_viewport_rid()),"process_ms":Performance.get_monitor(Performance.TIME_PROCESS)*1000,"physics_ms":Performance.get_monitor(Performance.TIME_PHYSICS_PROCESS)*1000})
  timing_pipeline_draw=pipelines;timing_pipeline_specialization=specializations
+ timing_worst.back().sample_end_unix_ms=Time.get_unix_time_from_system()*1000
  timing_worst.back().frame_phases=frame_phases.sample.duplicate()
  timing_worst.back().other_main_us={"handgun":game.tool_view.human.last_handgun_process_us,"forest":game.vegetation.last_process_us,"ecosystem":game.ecosystem.last_process_us,"ground_cover":game.ground_cover.last_process_us,"model_paging":game.model_paging.last_process_us if game.model_paging!=null else 0}
  timing_worst.back().native_blocks=game.structures.blocks.process_frame_profile()
@@ -129,6 +203,7 @@ func finish_timing()->void:
  blast_metrics[timing_phase].water_after_terrain_ms=(Time.get_ticks_usec()-terrain_published_us)/1000.0 if terrain_published_us else -1
  blast_metrics[timing_phase].timeline=blast_timeline.duplicate(true)
  blast_metrics[timing_phase].local_response_ms=timing_local_ms
+ blast_metrics[timing_phase].action_to_local_draw_ms=(local_draw_us-action_started_us)/1000.0 if local_draw_us else -1
  blast_metrics[timing_phase].worst_frames=timing_worst.duplicate(true)
  blast_metrics[timing_phase].stage_totals=timing_totals.duplicate()
  blast_metrics[timing_phase].water_worst=timing_water_worst.duplicate(true)
@@ -143,17 +218,21 @@ func local_response(point:Vector3,label:String)->void:
    print("LOCAL_WATER_RESPONSE ",label," ms=",latency," wider_pending=",game.lakes.water.runtime_state().settling_regions)
    print("LOCAL_WATER_SOLVE ",label," ",JSON.stringify(game.lakes.statistics().get("equilibrium_result",{})))
    if label=="lake":
+    var packet:=PackedByteArray()
+    var first_surface:Array=[]
     if "--water-local-snapshot" in OS.get_cmdline_user_args():
-     var packet:PackedByteArray=game.lakes.water.capture_local_snapshot(AABB(point-Vector3(12,8,12),Vector3(24,12,24)))
+     packet=game.lakes.water.capture_local_snapshot(AABB(point-Vector3(12,8,12),Vector3(24,12,24)))
      check(not packet.is_empty() and packet.size()<8*1024*1024,"Local replay fits its declared eight MiB evidence allowance")
-     if not packet.is_empty() and packet.size()<8*1024*1024:FileAccess.open(evidence.path_join("local_response.water_regions"),FileAccess.WRITE).store_var({"point":point,"snapshot":packet})
     for axis:Vector3 in [Vector3.RIGHT,Vector3.BACK]:
      var heads:Array=[]
      for offset in range(-16,17):
       var sample:=point+axis*offset*.5+Vector3.UP*2
       var hit:Dictionary=game.lakes.water.raycast_surface(sample,sample-Vector3.UP*5)
+      if not packet.is_empty():first_surface.append({"from":sample,"height":hit.point.y if hit.get("hit",false) else null})
       heads.append([offset*.5,str(hit)])
      print("LOCAL_WATER_HEADS origin=",point," axis=",axis," ",JSON.stringify(heads))
+    if not packet.is_empty() and packet.size()<8*1024*1024:
+     FileAccess.open(evidence.path_join("local_response.water_regions"),FileAccess.WRITE).store_var({"point":point,"snapshot":packet,"first_surface":first_surface})
    var probe:=point-Vector3.UP
    if label=="mining":
     var floor_hit:Dictionary=game.get_world_3d().direct_space_state.intersect_ray(PhysicsRayQueryParameters3D.create(point+Vector3.UP*3,point-Vector3.UP*5,1))
@@ -206,6 +285,7 @@ func mining_response_case(lake:Dictionary)->void:
  var target:Dictionary={"kind":"terrain","key":"terrain:%d:%d:%d"%[cell.x,cell.y,cell.z],"health":game.world_attack.Durability.WORLD.terrain,"material":"stone","name":"Terrain","position":ground.position,"normal":ground.normal}
  game.terrain.set_interaction_target(ground.position)
  start_timing("lake_mining")
+ action_started_us=Time.get_ticks_usec()
  check(game.world_attack.apply_target(target) and game.terrain.pending_edit,"Ordinary pickaxe damage and contact-mining stroke are admitted in the saved game")
  await local_response(ground.position+Vector3.UP*.25,"mining")
  check(await ready("mining"),"Mining completes wider relaxation")
@@ -213,6 +293,7 @@ func mining_response_case(lake:Dictionary)->void:
  check(owned_amount()==before,"Mining conserves every owned millilitre")
 func capture(label:String,center:Vector3,level:float,underwater:bool=false)->void:
  if DisplayServer.get_name()=="headless" or "--water-no-captures" in OS.get_cmdline_user_args():return
+ capture_phase="capture "+label
  var processing:=game.is_processing();var physics:=game.is_physics_processing()
  var water_processing:bool=game.lakes.is_processing()
  game.lakes.set_process(false)
@@ -231,7 +312,9 @@ func capture(label:String,center:Vector3,level:float,underwater:bool=false)->voi
  await RenderingServer.frame_post_draw
  captures.append([root.get_texture().get_image(),evidence.path_join(label+".png")])
  if not underwater:
-  game.camera.global_position=Vector3(center.x+5,level+(3.5 if "lake" in label else 1.5),center.z-4)
+  # Keep the second lake view on the water side of Cedar Vale's bank trees.
+  var reverse_offset:=Vector3(5,5,4) if "lake" in label else Vector3(5,1.5,-4)
+  game.camera.global_position=Vector3(center.x,level,center.z)+reverse_offset
   game.camera.look_at(Vector3(center.x,level-.6,center.z),Vector3.UP)
   game.water_camera.update()
   for frame in 4:await process_frame
@@ -244,13 +327,25 @@ func capture(label:String,center:Vector3,level:float,underwater:bool=false)->voi
  # Encode only after both angles have been captured. PNG compression must not
  # become a fake low-FPS sample between the two views of the frozen state.
  for entry:Array in captures:entry[0].save_png(entry[1])
+ if route_started:
+  # The interval containing PNG encoding ends on the next frame.
+  await process_frame
+ capture_phase=""
 func _initialize()->void:run.call_deferred()
 func owned_amount()->int:
  # Pristine ocean residency can retire after travel; it is not owned lake mass.
  # Use the production save snapshot's non-regenerable quantity, outside timing.
+ var measure:bool=not timing_phase.is_empty() and frame_phases.usage!=null
+ var before_cpu:PackedInt64Array=frame_phases.usage.thread_work() if measure else PackedInt64Array()
+ var started:=Time.get_ticks_usec()
  var catalog:PackedByteArray=ClassDB.instantiate("NativeLakeCatalog").encode([])
  var frozen:Variant=game.lakes.water.capture_storage_snapshot(catalog)
  var bytes:PackedByteArray=frozen if frozen is PackedByteArray else frozen.serialize_snapshot()
+ if measure:
+  timing_stage("test-only quantity snapshot",(Time.get_ticks_usec()-started)/1000.0)
+  var after_cpu:PackedInt64Array=frame_phases.usage.thread_work()
+  if before_cpu.size()==2 and after_cpu.size()==2 and before_cpu[1]>=0:
+   timing_stage("snapshot main-thread CPU",(after_cpu[1]-before_cpu[1])/1000.0)
  check(bytes.size()>=32 and bytes.decode_u32(0)==0x31575256,"Owned-quantity snapshot is complete")
  return bytes.decode_u64(16) if bytes.size()>=32 else -1
 func gameplay_barrel(point:Vector3)->int:
@@ -281,6 +376,7 @@ func shoot_barrel(id:int)->void:
  var equip_started:=Time.get_ticks_usec()
  check(game.player_hud.equip_item(9),"Handgun equipped for barrel ignition")
  timing_stage("handgun equip",(Time.get_ticks_usec()-equip_started)/1000.0)
+ print("EQUIP_STAGES ",game.tool_view.human.get("last_equip_stages"))
  game.camera.look_at(game.combat.barrel_position(id)+Vector3.UP*.5)
  var deadline:=Time.get_ticks_msec()+10000
  var shots_before:int=game.combat.shots
@@ -288,6 +384,7 @@ func shoot_barrel(id:int)->void:
   game.app_focused=true
   game.camera.look_at(game.combat.barrel_position(id)+Vector3.UP*.5)
   var fire_started:=Time.get_ticks_usec()
+  if not action_started_us:action_started_us=fire_started
   game.combat.fire()
   timing_stage("ordinary handgun fire",(Time.get_ticks_usec()-fire_started)/1000.0)
   await physics_frame
@@ -345,7 +442,76 @@ func measure_game(lake:Dictionary)->void:
 func check(ok:bool,label:String)->void:
  if not ok:failures+=1
  print("PASS " if ok else "FAIL ",label)
+# Binary rows avoid allocating a dictionary or encoding JSON on every frame.
+# The phase index and column order are written alongside the samples.
+const ROUTE_COLUMNS:=["elapsed_us","interval_us","phase","viewport_cpu_ms","viewport_gpu_ms","queued","x","y","z","yaw"]
+const ROUTE_MAX_FRAMES:=36000
+var route_samples:=PackedFloat64Array()
+var route_phase_names:Array[String]=[]
+var route_phase:="load"
+var capture_phase:=""
+var route_scene_start:=0
+var route_started:=0
+var route_prior:=0
+var route_count:=0
+var route_overflow:=false
+func record_route_frame()->void:
+ var now:=Time.get_ticks_usec()
+ if route_count>=ROUTE_MAX_FRAMES:route_overflow=true;return
+ var label:=timing_phase if not timing_phase.is_empty() else route_phase
+ if not capture_phase.is_empty():label=capture_phase
+ var phase:=route_phase_names.find(label)
+ if phase<0:phase=route_phase_names.size();route_phase_names.append(label)
+ var index:=route_count*ROUTE_COLUMNS.size()
+ var viewport:=root.get_viewport_rid()
+ var p:Vector3=game.player.position
+ route_samples[index]=now-route_started
+ route_samples[index+1]=now-route_prior
+ route_samples[index+2]=phase
+ route_samples[index+3]=RenderingServer.viewport_get_measured_render_time_cpu(viewport)
+ route_samples[index+4]=RenderingServer.viewport_get_measured_render_time_gpu(viewport)
+ route_samples[index+5]=game.terrain.backend.queued()
+ route_samples[index+6]=p.x;route_samples[index+7]=p.y;route_samples[index+8]=p.z;route_samples[index+9]=game.yaw
+ route_prior=now;route_count+=1
+func begin_route_capture()->void:
+ route_samples.resize(ROUTE_MAX_FRAMES*ROUTE_COLUMNS.size())
+ route_started=Time.get_ticks_usec();route_prior=route_started
+ RenderingServer.viewport_set_measure_render_time(root.get_viewport_rid(),true)
+ process_frame.connect(record_route_frame)
+func finish_route_capture(source_sha:String)->void:
+ process_frame.disconnect(record_route_frame)
+ route_samples.resize(route_count*ROUTE_COLUMNS.size())
+ var f:=FileAccess.open(evidence.path_join("qualification_frames.bin"),FileAccess.WRITE)
+ f.store_buffer(route_samples.to_byte_array());f.close()
+ var description:={"scene_setup_us":route_started-route_scene_start,"columns":ROUTE_COLUMNS,"encoding":"little-endian float64","phases":route_phase_names,"frames":route_count,"overflow":route_overflow,"source_sha256":source_sha,"gpu":RenderingServer.get_video_adapter_name(),"viewport":str(root.size),"cap":Engine.max_fps,"monitor_hz":DisplayServer.screen_get_refresh_rate(),"scope":"Game intervals and asynchronous viewport measurements. Actual display presentation requires an external trace."}
+ description.settings={"renderer":RenderingServer.get_current_rendering_method(),"vsync":DisplayServer.window_get_vsync_mode(),"msaa_3d":root.msaa_3d,"scale_3d":root.scaling_3d_scale,"shadows":game.sun.shadow_enabled}
+ description.processor=OS.get_processor_name()
+ description.video_driver=Array(OS.get_video_adapter_driver_info())
+ description.physical_memory_bytes=OS.get_memory_info().get("physical",-1)
+ description.os_version=OS.get_version()
+ FileAccess.open(evidence.path_join("qualification_frames.json"),FileAccess.WRITE).store_string(JSON.stringify(description,"  "))
+ check(not route_overflow and route_count>0,"Complete bounded qualification frame record")
+func qualification_travel()->void:
+ route_phase="forest walk";await measure_grounded_route("forest_walk.json")
+ if not game.trader.anchor.is_finite():check(false,"World contains trader");return
+ game.teleport(game.trader.anchor+Vector3(0,0,16))
+ if not await ready("trader travel"):check(false,"Trader destination loads");return
+ route_phase="trader walk";await measure_grounded_route("trader_walk.json")
+ var mines:Array=game.quests.store.get_locations().filter(func(row):return row.layout=="coal_mine")
+ if mines.size()!=1:check(false,"World contains a coal mine");return
+ var site:Dictionary=mines[0]
+ var layouts=preload("res://addons/exploration/cave_layouts.gd")
+ var station:Vector3=Vector3(site.origin)+layouts.turn(Vector3(.5,.2,43),site.rotation)
+ game.teleport(station,station.y)
+ if not await ready("underground travel"):check(false,"Underground station loads");return
+ check(game.player.global_position.distance_to(station)<5,"Player arrived at underground station")
+ route_phase="underground turn"
+ var original:float=game.yaw
+ for frame in 240:
+  game.app_focused=true;game.yaw=original+TAU*frame/240.0;game.player.rotation.y=game.yaw
+  await process_frame
 func ready(label:String)->bool:
+ route_phase=label
  var deadline:=Time.get_ticks_msec()+120000
  var next_progress:=Time.get_ticks_msec()+10000
  while Time.get_ticks_msec()<deadline:
@@ -362,19 +528,213 @@ func ready(label:String)->bool:
     print("PLAYER_WATER_STATE ",label," ",JSON.stringify(game.lakes.statistics()));return true
   await process_frame
  print("PLAYER_WATER_FAILURE ",label," ",game.terrain.latest_error," ",JSON.stringify(game.lakes.statistics() if game.lakes.water!=null else {}));return false
+# Walk the same ground out and back using the production player motor.
+func measure_grounded_route(filename:String="grounded_pacing.json")->void:
+ game.player_view.entry.finish()
+ game.fly=false
+ var prior_access:bool=game.session_menu.developer_hud.mouse_access
+ game.session_menu.developer_hud.mouse_access=true
+ game.yaw=0
+ game.player.rotation.y=0
+ var rows:Array=[]
+ var exploration:= "--exploration-profile" in OS.get_cmdline_user_args() or "--qualification-route" in OS.get_cmdline_user_args()
+ var prior_zombie_profiling:bool=game.zombies.profiling_enabled
+ var trader_route:bool="--exploration-trader" in OS.get_cmdline_user_args() or filename=="trader_walk.json"
+ var last_trader_id:=0
+ var trader_arrivals:=0
+ var trader_retirements:=0
+ var trader_outfit_ok:=true
+ var leg_ms:=15000 if exploration else 5000
+ if exploration and frame_phases==null:
+  frame_phases=FramePhases.new()
+  root.add_child(frame_phases)
+ if exploration:
+  RenderingServer.viewport_set_measure_render_time(root.get_viewport_rid(),true)
+  install_route_markers()
+  game.zombies.profiling_enabled=true
+  game.terrain.stage_measured.connect(record_exploration_stage)
+ for lap in 2:
+  var previous:=Time.get_ticks_usec()
+  var frames:Array[float]=[]
+  var longest:=0
+  var streak:=0
+  var counts:=[0,0,0]
+  var over_budget:=0
+  var slowest:Array=[]
+  var worst_frame:=0.0
+  var worst_trader_us:=0
+  var start:Vector3=game.player.position
+  var outward:=Vector3.ZERO
+  for leg in 2:
+   var keycode:=KEY_D if leg==0 else KEY_A
+   game.controls.set_key(keycode,true,Time.get_ticks_usec())
+   var until:=Time.get_ticks_msec()+leg_ms
+   while Time.get_ticks_msec()<until:
+    game.app_focused=true
+    var phase:=1.0-(until-Time.get_ticks_msec())/float(leg_ms)
+    game.yaw=.35*sin(phase*TAU)
+    game.player.rotation.y=game.yaw
+    route_marker_time=Time.get_ticks_usec()
+    await process_frame
+    var now:=Time.get_ticks_usec()
+    var ms:float=(now-previous)/1000.0
+    previous=now
+    frames.append(ms)
+    if ms>1000.0/60.0:over_budget+=1
+    worst_frame=maxf(worst_frame,ms)
+    if exploration and (slowest.size()<8 or ms>float(slowest.back().ms)):
+     slowest.append({
+      "ms":ms, "position":str(game.player.position), "phase":frame_phases.sample.duplicate(),
+      "viewport_gpu_ms":RenderingServer.viewport_get_measured_render_time_gpu(root.get_viewport_rid()),
+      "viewport_cpu_ms":RenderingServer.viewport_get_measured_render_time_cpu(root.get_viewport_rid()),
+      "scene_sections_us":route_section_us.duplicate(), "terrain_ms":exploration_terrain_stages.duplicate(),
+      "zombie_us":game.zombies.update_phase_us.duplicate(), "residents":game.zombies.residents.size(),
+      "water_us":game.lakes.last_process_us, "trees_us":game.vegetation.last_process_us,
+      "ecosystem_us":game.ecosystem.last_process_us, "cover_us":game.ground_cover.last_process_us})
+     slowest.sort_custom(func(a,b):return a.ms>b.ms)
+     if slowest.size()>8:slowest.pop_back()
+    if trader_route:
+     worst_trader_us=maxi(worst_trader_us,int(route_section_us.get(route_trader_section,0)))
+     var id:int=game.trader.actor.get_instance_id() if is_instance_valid(game.trader.actor) else 0
+     if last_trader_id!=id:
+      if id:
+       trader_arrivals+=1
+       trader_outfit_ok=trader_outfit_ok and game.trader.human.is_visible_in_tree() and game.trader.human.clothing.worn==PackedInt32Array([301,302,303]) and game.trader.human.animation_player.is_playing()
+      else:trader_retirements+=1
+      last_trader_id=id
+    if exploration:exploration_terrain_stages.clear()
+    for n in 3:
+     if ms>[20,33,50][n]:counts[n]+=1
+    streak=streak+1 if ms>20 else 0
+    longest=maxi(longest,streak)
+   game.controls.set_key(keycode,false,Time.get_ticks_usec())
+   if leg==0:
+    outward=game.player.position
+    var delta:Vector3=outward-start
+    check(Vector2(delta.x,delta.z).length()>4,"Grounded route actually traverses terrain")
+  rows.append({"lap":lap,"frames":frames.size(),"over_20_33_50":counts,"longest_over_20":longest,"p99_ms":percentile(frames,.99),"cap":Engine.max_fps,"start":str(start),"turnaround":str(outward),"end":str(game.player.position)})
+  rows.back().over_60fps_budget=over_budget
+  rows.back().max_ms=worst_frame
+  rows.back().slowest=slowest
+  if trader_route:rows.back().max_trader_subtree_us=worst_trader_us
+ if trader_route:
+  check(trader_arrivals>=2 and trader_retirements>0,"Player leaves and re-enters the shop residency radius")
+  check(trader_outfit_ok,"Returning shopkeeper has a visible woven outfit and active animation")
+ if exploration:
+  if route_samples.is_empty():RenderingServer.viewport_set_measure_render_time(root.get_viewport_rid(),false)
+  game.terrain.stage_measured.disconnect(record_exploration_stage)
+  game.zombies.profiling_enabled=prior_zombie_profiling
+  for marker in route_markers:marker.queue_free()
+  route_markers.clear()
+ game.session_menu.developer_hud.mouse_access=prior_access
+ FileAccess.open(evidence.path_join(filename),FileAccess.WRITE).store_string(JSON.stringify(rows,"  "))
+
+func check_authoring_brush()->void:
+ game.player_view.entry.finish()
+ var coastal:bool="--authoring-preparation" in OS.get_cmdline_user_args()
+ if coastal:
+  game.fly=true
+  game.teleport(Vector3(20,50,1008),50)
+  if not await ready("coastal brush preparation"):check(false,"Coastal authoring destination is resident");return
+ elif "--authoring-at-spawn" not in OS.get_cmdline_user_args():
+  game.teleport(Vector3(1000,80,1000))
+  if not await ready("inland authoring"):check(false,"Authoring destination is resident");return
+ if not game.session_menu.developer:game.session_menu.toggle_developer()
+ game.session_menu.set_open(false)
+ game.app_focused=true
+ Input.mouse_mode=Input.MOUSE_MODE_CAPTURED
+ for i in (1 if coastal else 3):
+  game.radius=2 if i==0 else 32
+  if i==1 and "--authoring-at-spawn" not in OS.get_cmdline_user_args():
+   game.fly=true
+   game.player.global_position+=Vector3.UP*65
+  game.session_menu.activate_developer_slot(i)
+  game.player_view.set_enabled(i==1,false)
+  var view:Camera3D=root.get_camera_3d()
+  view.look_at(Vector3(66,39.9,1008) if coastal else view.global_position+Vector3(.15,-1,-.1),Vector3.UP)
+  game._update_edit(0)
+  var shape_ok:bool=game.pointer.mesh==[game.sphere_preview,game.box_preview,game.block_preview][i]
+  check(game.pointer.visible and shape_ok,"Active camera shows the selected development brush "+str(i))
+  if game.latest_hit.is_empty():check(false,"Brush ray hits terrain");continue
+  var hit:Vector3=game.latest_hit.position
+  check((-view.global_basis.z).dot(view.global_position.direction_to(hit))>.999,"Aim follows the active camera")
+  var center:Vector3=hit-game.latest_hit.normal*game.radius*.55
+  if i==1:center=center.snapped(Vector3.ONE)
+  if i==2:center=(hit-game.latest_hit.normal*.015).floor()+Vector3.ONE*.5
+  check(game.pointer.position.is_equal_approx(center),"Preview matches brush centre")
+  check(game.pointer.scale.is_equal_approx(Vector3.ONE*(1 if i==2 else game.radius*2)),"Preview matches brush dimensions")
+  if i<2 and "--authoring-captures" in OS.get_cmdline_user_args() and DisplayServer.get_name()!="headless":
+   await RenderingServer.frame_post_draw
+   var capture_path:=evidence.path_join("authoring_brush_%d.png"%i)
+   check(root.get_texture().get_image().save_png(capture_path)==OK,"Rendered brush view retained")
+  if i==2 or failures>0:continue
+  var revision:int=game.terrain.published_revision
+  var ticket:int=game.terrain.edit_ticket
+  var click:=InputEventMouseButton.new()
+  click.button_index=MOUSE_BUTTON_LEFT;click.pressed=true
+  var started:=Time.get_ticks_usec()
+  Input.parse_input_event(click);Input.flush_buffered_events()
+  game._update_edit(1)
+  var preparing:bool=not game.preparing_stroke.is_empty()
+  var admitted:bool=game.terrain.pending_edit or preparing
+  if coastal:check(preparing,"One press is retained while the remote coastal brush prepares occupancy")
+  var feedback_us:=Time.get_ticks_usec()-started
+  if not admitted:
+   print("AUTHORING_REJECTION ",JSON.stringify({"target":str(hit),"captured":str(game.last_capture_signature),"queued":game.stroke_buffer.samples.size(),"message":game.status.text,"terrain_error":game.terrain.latest_error}))
+  click=click.duplicate();click.pressed=false
+  Input.parse_input_event(click);Input.flush_buffered_events()
+  check(admitted,"Development tool accepts the brush press")
+  if coastal and "--authoring-cancel" in OS.get_cmdline_user_args():
+   game.session_menu.activate_developer_slot(1)
+   check(game.preparing_stroke.is_empty(),"Changing tools cancels a preparing stroke")
+   check(await ready("cancelled authoring"),"Water preparation drains after brush cancellation")
+   check(game.terrain.edit_ticket==ticket and game.terrain.published_revision==revision,"A cancelled brush never mutates terrain")
+   return
+  if coastal and "--authoring-interrupt" in OS.get_cmdline_user_args():
+   check(game.terrain.sculpt_sphere(Vector3(60,72,1008),2,true,1),"Independent terrain command admitted during preparation")
+   check(await ready("intervening edit"),"Intervening terrain command publishes")
+   for frame in 5:await physics_frame
+   check(game.preparing_stroke.is_empty() and game.terrain.edit_ticket==ticket+1 and game.terrain.published_revision==revision+1,"A prepared brush cannot overwrite a newer terrain revision")
+   return
+  var frames:=0;var worst_us:=0;var previous:=started
+  while admitted and game.terrain.published_revision==revision and Time.get_ticks_usec()-started<60000000:
+   await process_frame
+   var now:=Time.get_ticks_usec()
+   worst_us=maxi(worst_us,now-previous);previous=now;frames+=1
+  check(game.terrain.published_revision>revision,"Authoring brush publishes a changed terrain revision")
+  if coastal:
+   for frame in 5:await physics_frame
+   check(game.terrain.edit_ticket==ticket+1 and game.terrain.published_revision==revision+1 and game.preparing_stroke.is_empty(),"Released coastal brush applies exactly once")
+  print("AUTHORING_EDIT ",JSON.stringify({"center":str(center),"radius":game.radius,"tool":game.tool,"preparing":preparing,"feedback_us":feedback_us,"admission_us":game.terrain.edit_accepted_us-started if game.terrain.edit_ticket>ticket else null,"publication_us":previous-started if game.terrain.published_revision>revision else null,"frames":frames,"worst_interval_us":worst_us}))
 func run()->void:
  var sea_completed:=false
+ var expected_source:=""
  for arg in OS.get_cmdline_user_args():
   if arg.begins_with("--check-evidence-dir="):evidence=arg.trim_prefix("--check-evidence-dir=")
   if arg.begins_with("--water-source-slot="):slot=arg.trim_prefix("--water-source-slot=")
+  if arg.begins_with("--water-source-sha256="):expected_source=arg.trim_prefix("--water-source-sha256=").to_lower()
  if not slot.is_valid_identifier() or evidence.is_empty():quit(2);return
  var path:="user://worlds/"+slot+".trw"
  if not FileAccess.file_exists(path):check(false,"Player source exists");quit(1);return
  var original:=FileAccess.get_sha256(path)
+ print("WATER_GAMEPLAY_INPUT ",JSON.stringify({"slot":slot,"source_sha256":original,"viewport":str(root.size),"gpu":RenderingServer.get_video_adapter_name()}))
+ if original.is_empty() or (not expected_source.is_empty() and original!=expected_source):
+  check(false,"Player source matches the pinned water workload");quit(1);return
  ProjectSettings.set_setting("terraforest/offscreen_session",true)
  preload("res://addons/world_runtime/session_options.gd").set_arguments(PackedStringArray(["--world-slot="+slot,"--snapshot-readonly","--temporary","--no-derived-cache","--gameplay-construction","--ground-cover","--actors"]),true)
+ route_scene_start=Time.get_ticks_usec()
  game=load("res://demo/world.tscn").instantiate();game.temporary_world=true;root.add_child(game)
+ var qualification:bool="--qualification-route" in OS.get_cmdline_user_args()
+ if qualification:begin_route_capture()
  check(await ready("initial"),"Actual player world loads read-only")
+ if "--authoring-brush" in OS.get_cmdline_user_args() and failures==0:await check_authoring_brush()
+ if qualification and failures==0:await qualification_travel()
+ if "--exploration-trader" in OS.get_cmdline_user_args():
+  check(game.trader.anchor.is_finite(),"Saved world has a trader destination")
+  if game.trader.anchor.is_finite():
+   game.teleport(game.trader.anchor+Vector3(0,0,16))
+   check(await ready("trader_exploration"),"Trader district becomes playable")
+ if "--grounded-pacing" in OS.get_cmdline_user_args():await measure_grounded_route()
  if "--water-load-only" in OS.get_cmdline_user_args():
   check(FileAccess.get_sha256(path)==original,"Original player save is unchanged")
   game.terrain.shutdown();game.free();await process_frame;await process_frame
@@ -410,9 +770,9 @@ func run()->void:
   check(closest<2,"Actual surrounding shoreline ground found near sea level")
   if point==Vector3.INF:point=Vector3(50,39,1008)
   print("PLAYER_SHORE_TARGET ",point," distance_from_sea_level=",closest)
-  await capture("player_shore_before",point,40)
   var id:int=await gameplay_barrel(point)
   if id>0:point=game.combat.barrel_position(id)
+  await capture("player_shore_before",point,40)
   var revision:int=game.terrain.published_revision
   print("PLAYER_BLAST_ADMISSION position=",game.combat.barrel_position(id)," revision=",revision," protected=",game.combat.barrels.is_removal_protected(id))
   start_timing("sea_shore_blast")
@@ -425,6 +785,7 @@ func run()->void:
   print("PLAYER_BLAST_PENDING ",game.terrain.pending_edit," ticket=",game.terrain.edit_ticket)
   await process_frame;await process_frame
   await local_response(point,"sea")
+  if qualification or "--water-immediate-contact" in OS.get_cmdline_user_args():check_crater_coverage(point,40,"sea immediate")
   if "--water-edit-response" in OS.get_cmdline_user_args():await capture("player_shore_after",point,40)
   sea_completed=await ready("coastal_blast")
   check(sea_completed,"Surrounding-ocean blast settles and republishes")
@@ -454,6 +815,7 @@ func run()->void:
     var p:Vector3=ground.position;var owned:int=owned_amount()
     var id:int=await gameplay_barrel(p)
     if id>0:p=game.combat.barrel_position(id)
+    if "--water-immediate-contact" in OS.get_cmdline_user_args():check_lake_region_seams(p,lake.level,"before blast")
     await capture("player_lake_before",p,lake.level)
     start_timing("lake_shore_blast")
     await shoot_barrel(id)
@@ -463,17 +825,21 @@ func run()->void:
      await process_frame
     check(not game.combat.barrels.get_ids().has(id),"Normal gameplay queue detonates lake shoreline barrel")
     await local_response(p,"lake")
+    if "--water-immediate-contact" in OS.get_cmdline_user_args():check_lake_region_seams(p,lake.level,"first publication")
+    if qualification or "--water-immediate-contact" in OS.get_cmdline_user_args():check_crater_coverage(p,lake.level,"lake immediate")
     if "--water-edit-response" in OS.get_cmdline_user_args():await capture("player_lake_after",p,lake.level)
-    if "--water-edit-response" in OS.get_cmdline_user_args():await bucket_response_cases(lake)
+    if "--water-edit-response" in OS.get_cmdline_user_args() and "--blast-only-timing" not in OS.get_cmdline_user_args():await bucket_response_cases(lake)
     check(await ready("lake_blast"),"Actual lake crater finishes finite equilibrium")
     finish_timing()
     check_crater_coverage(p,lake.level,"lake")
+    if "--water-immediate-contact" in OS.get_cmdline_user_args():check_lake_region_seams(p,lake.level,"settled")
     check(owned_amount()==owned,"Lake blast preserves every owned millilitre")
     check(game.lakes.depth_at(p-Vector3.UP)>.2,"Lake water occupies the excavated space below its former floor")
     if "--water-edit-response" not in OS.get_cmdline_user_args():await capture("player_lake_after",p,lake.level)
     await capture("player_lake_underwater",p,lake.level,true)
     if "--water-edit-response" in OS.get_cmdline_user_args():await mining_response_case(lake)
    if "--water-player-performance" in OS.get_cmdline_user_args():await measure_game(lake)
+ if qualification:finish_route_capture(original)
  check(FileAccess.get_sha256(path)==original,"Original player save is unchanged")
  game.terrain.shutdown();game.free();await process_frame;await process_frame
  print("WATER_PLAYER_WORLD failures=",failures);quit(failures)

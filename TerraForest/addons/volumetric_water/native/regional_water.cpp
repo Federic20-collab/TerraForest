@@ -12,6 +12,7 @@
 #include <godot_cpp/core/class_db.hpp>
 #include <godot_cpp/classes/time.hpp>
 #include <godot_cpp/classes/worker_thread_pool.hpp>
+#include <godot_cpp/classes/os.hpp>
 #include <godot_cpp/classes/hashing_context.hpp>
 #include <godot_cpp/classes/mesh.hpp>
 #include <godot_cpp/classes/mesh_instance3d.hpp>
@@ -266,6 +267,7 @@ void NativeRegionalWater::_bind_methods(){
     ClassDB::bind_method(D_METHOD("ocean_publication_mask"),&NativeRegionalWater::ocean_publication_mask);
     ClassDB::bind_method(D_METHOD("update_ocean_residency","center","budget"),&NativeRegionalWater::update_ocean_residency);
     ClassDB::bind_method(D_METHOD("prepare_ocean_edit","bounds"),&NativeRegionalWater::prepare_ocean_edit);
+    ClassDB::bind_method(D_METHOD("prepare_ocean_edit_status","bounds"),&NativeRegionalWater::prepare_ocean_edit_status);
     ClassDB::bind_method(D_METHOD("raycast_vacancy","from","to"),&NativeRegionalWater::raycast_vacancy);
     ClassDB::bind_method(D_METHOD("cell_geometry","point"),&NativeRegionalWater::cell_geometry);
     ClassDB::bind_method(D_METHOD("next_requests","limit","ocean_only"),&NativeRegionalWater::next_requests,DEFVAL(true));
@@ -300,9 +302,10 @@ void NativeRegionalWater::_bind_methods(){
     ClassDB::bind_method(D_METHOD("placement_mask","transforms"),&NativeRegionalWater::placement_mask);
     ClassDB::bind_method(D_METHOD("raycast_surface","from","to"),&NativeRegionalWater::raycast_surface);
     ClassDB::bind_method(D_METHOD("commit_mesh_batch","id","retiring","revealing"),&NativeRegionalWater::commit_mesh_batch,DEFVAL(Array()),DEFVAL(Array()));
-    ClassDB::bind_method(D_METHOD("next_mesh_batch","background"),&NativeRegionalWater::next_mesh_batch,DEFVAL(false));
+    ClassDB::bind_method(D_METHOD("next_mesh_batch","background","indexed_only"),&NativeRegionalWater::next_mesh_batch,DEFVAL(false),DEFVAL(false));
     ClassDB::bind_method(D_METHOD("next_mesh","include_contacts"),&NativeRegionalWater::next_mesh,DEFVAL(false));
     ClassDB::bind_method(D_METHOD("statistics"),&NativeRegionalWater::statistics);
+    ClassDB::bind_method(D_METHOD("total_water_ml"),&NativeRegionalWater::total_water_ml);
     ClassDB::bind_method(D_METHOD("runtime_state"),&NativeRegionalWater::runtime_state);
     ClassDB::bind_method(D_METHOD("capture_snapshot","catalog"),&NativeRegionalWater::capture_snapshot);
     ClassDB::bind_method(D_METHOD("retire_region","receipt","expected_revision"),&NativeRegionalWater::retire_region);
@@ -348,30 +351,33 @@ bool NativeRegionalWater::restore_ocean_cache(Key k){
     return true;
 }
 bool NativeRegionalWater::prepare_ocean_edit(const AABB &bounds){
-    if(!surrounding_ocean)return true;
-    if(!bounds.position.is_finite()||!bounds.size.is_finite())return false;
+    return prepare_ocean_edit_status(bounds)==OK;
+}
+int NativeRegionalWater::prepare_ocean_edit_status(const AABB &bounds){
+    if(!surrounding_ocean)return OK;
+    if(!bounds.position.is_finite()||!bounds.size.is_finite())return ERR_INVALID_PARAMETER;
     const AABB area=bounds.grow(4.0);
     Vector3i lo=Vector3i((area.position/4.0).floor()).max(Vector3i(0,7,0));
     Vector3i hi=Vector3i(((area.position+area.size)/4.0).floor()).min(Vector3i(499,10,499));
-    if(lo.x>hi.x||lo.y>hi.y||lo.z>hi.z)return true;
+    if(lo.x>hi.x||lo.y>hi.y||lo.z>hi.z)return OK;
     std::vector<Key> keys;
     for(int z=lo.z;z<=hi.z;++z)for(int x=lo.x;x<=hi.x;++x){
         if(std::min({x,z,499-x,499-z})>=35)continue;
-        for(int y=lo.y;y<=hi.y;++y){keys.push_back(key(Vector3i(x,y,z)));if(keys.size()>512)return false;}
+        for(int y=lo.y;y<=hi.y;++y){keys.push_back(key(Vector3i(x,y,z)));if(keys.size()>512)return ERR_PARAMETER_RANGE_ERROR;}
     }
     bool ready=true;int admitted=0;uint64_t until=Time::get_singleton()->get_ticks_usec()+2000000;
     for(Key k:keys){
         ocean_edit_interests[k]=until;
-        if(deferred_regions.count(k)){ready=false;continue;}
+        if(deferred_regions.count(k))return ERR_UNAVAILABLE;
         if(!regions.count(k)&&ocean_cache.count(k))restore_ocean_cache(k);
         if(!regions.count(k)){
             ready=false;if(admitted>=16)continue;
-            trim_ocean_cache();if(regions.size()>=MAX_REGIONS){limit=true;continue;}
+            trim_ocean_cache();if(regions.size()>=MAX_REGIONS){limit=true;return ERR_OUT_OF_MEMORY;}
             Region r;r.ocean_state=1;regions.emplace(k,std::move(r));request(k);invalidate_snapshot(false);++admitted;
         }
         if(!regions.at(k).valid)ready=false;
     }
-    return ready;
+    return ready?OK:ERR_BUSY;
 }
 Dictionary NativeRegionalWater::update_ocean_residency(const Vector3 &center,int64_t budget){
     Dictionary out;out["ok"]=false;
@@ -476,23 +482,42 @@ WaterCellProfile NativeRegionalWater::surface_profile(const Vector3i &p,bool sna
     // not tilt an unchanged cell's surface or silently change its connections.
     return profile(*r,index(p));
 }
+// Each bit represents one owner in the 3x3x3 neighbourhood. Union the
+// two-cell reconstruction halos of the actual edits, including diagonal seams.
+uint32_t NativeRegionalWater::mesh_owner_mask(int cell_index){
+    static constexpr auto masks=[](){
+        std::array<uint32_t,512> result{};
+        for(int i=0;i<512;++i){
+            int x=i%8,y=(i/8)%8,z=i/64;
+            for(int dz=-(z<2);dz<=(z>=6);++dz)
+                for(int dy=-(y<2);dy<=(y>=6);++dy)
+                    for(int dx=-(x<2);dx<=(x>=6);++dx)
+                        result[i]|=1u<<((dz+1)*9+(dy+1)*3+dx+1);
+        }
+        return result;
+    }();
+    return masks[cell_index];
+}
 void NativeRegionalWater::changed(const Vector3i &p){
+    changed_owners(region_key(p),mesh_owner_mask(index(p)));
+}
+void NativeRegionalWater::changed_owners(Key k,uint32_t owners){
     surface_budget_failed=false;
-    Key touched=region_key(p);auto found=regions.find(touched);
+    auto found=regions.find(k);
     if(!generating_ocean&&found!=regions.end()&&found->second.ocean_state==1)found->second.ocean_state=2;
-    invalidate_snapshot();++changes;Key k=region_key(p);if(mesh_set.insert(k).second)meshes.push_back(k);
+    invalidate_snapshot();++changes;
     const bool urgent=!generating_ocean&&!background_change&&!fill.running;
-    if(urgent)urgent_meshes.insert(k);
-    // Reconstruction reads adjacent levels as well as the meshing halo. Owners may
-    // be empty storage regions; they still own boundary triangles.
-    Vector3i lo=position(region_key(Vector3i(std::max(p.x-2,0),std::max(p.y-2,0),std::max(p.z-2,0))));
-    Vector3i hi=position(region_key(Vector3i(std::min(p.x+2,3999),std::min(p.y+2,508),std::min(p.z+2,3999))));
-    for(int z=lo.z;z<=hi.z;++z)for(int y=lo.y;y<=hi.y;++y)for(int x=lo.x;x<=hi.x;++x){Key other=key(Vector3i(x,y,z));
+    const Vector3i center=position(k);
+    for(int bit=0;owners;++bit,owners>>=1){
+        if(!(owners&1))continue;
+        Vector3i p=center+Vector3i(bit%3-1,(bit/3)%3-1,bit/9-1);
+        if(p.x<0||p.x>=500||p.z<0||p.z>=500||p.y<0||p.y>=64)continue;
+        Key other=key(p);
+        if(other!=k&&!batch_active&&!publish_pending&&!(surrounding_ocean&&std::min({p.x,p.z,499-p.x,499-p.z})<35)
+            &&!regions.count(other)&&!published_regions.count(other)&&!published_surfaces.count(other))continue;
         if(urgent)urgent_meshes.insert(other);
-        if(other!=k&&mesh_set.insert(other).second)meshes.push_back(other);}
-    for(const Vector3i &d:directions){Vector3i n=p+d;if(!in_domain(n))continue;Key other=region_key(n);
-        if(urgent)urgent_meshes.insert(other);
-        if(other!=k&&mesh_set.insert(other).second)meshes.push_back(other);}
+        if(mesh_set.insert(other).second)meshes.push_back(other);
+    }
 }
 Array NativeRegionalWater::next_requests(int64_t limit,bool ocean_only){
     Array result;if(limit<1||limit>(ocean_only?8:32))return result;
@@ -526,7 +551,7 @@ bool NativeRegionalWater::accept_patch(const Ref<NativeWaterTerrainPatch> &patch
     if(solid_cache_bytes-old_bytes+new_bytes>64*1024*1024)return false;
     // Resampling a region is not an edit of all its cells. Compare the exact
     // contact fragments too: density corners alone miss thin shoreline cuts.
-    std::array<bool,512> geometry_changed{};
+    uint32_t changed_owners_mask=0;
     const auto &old=it->second;
     for(int i=0;i<512;++i){
         bool different=!old.has_density||old.floor[i]!=patch->floor[i]||old.ceiling[i]!=patch->ceiling[i];
@@ -553,7 +578,7 @@ bool NativeRegionalWater::accept_patch(const Ref<NativeWaterTerrainPatch> &patch
             auto b=patch->structures?patch->structures->cells[i]:nullptr;
             different=a!=b; // New immutable solid profiles conservatively rebuild.
         }
-        geometry_changed[i]=different;
+        if(different)changed_owners_mask|=mesh_owner_mask(i);
     }
     invalidate_snapshot(!seed_ocean);preserve_mesh_region(k);if(restored_cache.count(k))++cache_rebuilds;
     // Occupancy edits never own water destruction. Quantities remain in their
@@ -577,12 +602,8 @@ bool NativeRegionalWater::accept_patch(const Ref<NativeWaterTerrainPatch> &patch
     }
 
     bool wet=false;for(int i=0;i<512;++i)wet|=it->second.water[i]!=0;
-    // Union changed-cell bounds once, retaining changed()'s exact seam halo.
-    // Empty cells still matter when they bound a wet neighbour.
-    Vector3i lo(8,8,8),hi(-1,-1,-1);
-    for(int i=0;i<512;++i)if(geometry_changed[i]){Vector3i p(i%8,(i/8)%8,i/64);lo=lo.min(p);hi=hi.max(p);}
-    if(hi.x>=0&&local_edit_regions.count(k))local_occupancy_regions.insert(k);
-    if(wet&&hi.x>=0)for(int corner=0;corner<8;++corner)changed(base+Vector3i((corner&1)?hi.x:lo.x,(corner&2)?hi.y:lo.y,(corner&4)?hi.z:lo.z));
+    if(changed_owners_mask&&local_edit_regions.count(k))local_occupancy_regions.insert(k);
+    if(wet&&changed_owners_mask)changed_owners(k,changed_owners_mask);
     generating_ocean=false;
     it->second.limited_building_edit=false;
     it->second.replace_water=false;
@@ -696,8 +717,23 @@ void NativeRegionalWater::settle_after_edit(const AABB &bounds){
     if(hi.x<lo.x||hi.y<lo.y||hi.z<lo.z)return;
     lo=position(region_key(lo));hi=position(region_key(hi));
     if(int64_t(hi.x-lo.x+1)*(hi.y-lo.y+1)*(hi.z-lo.z+1)>512)return;
+    // A shoreline cut can expose terrain on the dry side of the last stored
+    // water region. Sample those receivers up to the highest nearby wet layer.
+    // The connected-face solve decides whether any of them may actually fill.
+    int highest_wet_layer=-1;
+    for(int z=lo.z;z<=hi.z;++z)for(int y=lo.y;y<=hi.y;++y)for(int x=lo.x;x<=hi.x;++x){
+        if(y<=highest_wet_layer)continue;
+        auto found=regions.find(key(Vector3i(x,y,z)));
+        if(found==regions.end()||found->second.ocean_state)continue;
+        const Region &r=found->second;
+        if(std::any_of(r.water.begin(),r.water.end(),[](uint64_t ml){return ml>0;}))highest_wet_layer=y;
+    }
     for(int z=lo.z;z<=hi.z;++z)for(int y=lo.y;y<=hi.y;++y)for(int x=lo.x;x<=hi.x;++x){
         Key k=key(Vector3i(x,y,z));if(ocean_cache.count(k))restore_ocean_cache(k);wake_settling(k);
+        if(y<=highest_wet_layer&&!regions.count(k)&&!(surrounding_ocean&&std::min({x,z,499-x,499-z})<35)){
+            get(Vector3i(x*8,std::max(2,y*8),z*8),true);
+            if(regions.count(k))local_receiver_regions.insert(k);
+        }
         if(regions.count(k))local_edit_regions.insert(k);
     }
 }
@@ -1334,11 +1370,13 @@ Vector3 NativeRegionalWater::surface_near(const Vector3 &point,double radius) co
     Vector3 margin(radius+0.5,radius+0.5,radius+0.5);
     Vector3i lo=Vector3i(((point-margin)/4.0).floor()),hi=Vector3i(((point+margin)/4.0).floor());double distance=radius*radius;
     for(int z=std::max(0,lo.z);z<=std::min(499,hi.z);++z)for(int y=std::max(0,lo.y);y<=std::min(63,hi.y);++y)for(int x=std::max(0,lo.x);x<=std::min(499,hi.x);++x){
-        if(surrounding_ocean&&std::min({x,z,499-x,499-z})<35&&!ocean_column_published(x,z))continue;
+        const bool proxy=surrounding_ocean&&std::min({x,z,499-x,499-z})<35&&!ocean_column_published(x,z);
+        if(proxy&&(!publication_enabled||y<9||y>10))continue;
         Key k=key(Vector3i(x,y,z));if(!publication_enabled&&!surface_ready(k))continue;QuerySurface temporary;const QuerySurface *selected=query_surface(k,temporary);if(!selected)continue;const QuerySurface &mesh=*selected;
         Vector3 origin=Vector3(position(k))*4,local=point-origin;
         auto consider=[&](Vector3 q){double d=local.distance_squared_to(q);if(d<distance){distance=d;best=q+origin;}};
         for(int i=0;i<mesh.indices.size();i+=3){
+            if(proxy&&!mesh.on_ocean_proxy(i,y))continue;
             if((mesh.vertex(i+2)-mesh.vertex(i)).cross(mesh.vertex(i+1)-mesh.vertex(i)).y<=0)continue;
             Vector3 a=mesh.vertex(i),b=mesh.vertex(i+1),c=mesh.vertex(i+2);
             Vector3 u=b-a,v=c-a,n=u.cross(v);double n2=n.length_squared();if(n2<1e-16)continue;
@@ -1493,7 +1531,7 @@ int64_t NativeRegionalWater::interrupt_relaxation(){
     }
     return delta;
 }
-Dictionary NativeRegionalWater::next_mesh_batch(bool background){
+Dictionary NativeRegionalWater::next_mesh_batch(bool background,bool indexed_only){
     Dictionary result;publication_enabled=true;
     if(surface_budget_failed){result["batch"]=int64_t(batch_id);result["complete"]=false;result["failure"]="Water boundary preparation budget exceeded; last published water retained";return result;}
     if(publish_pending){result["batch"]=int64_t(batch_id);result["complete"]=true;return result;}
@@ -1528,12 +1566,23 @@ Dictionary NativeRegionalWater::next_mesh_batch(bool background){
     }
     result["batch"]=int64_t(batch_id);result["complete"]=false;
     uint64_t start=Time::get_singleton()->get_ticks_usec();
+    auto stage_dry=[&](Key owner){
+        if(published_surfaces.count(owner)||!dry_surface_owner(owner,true))return false;
+        staged_ready.insert(owner);
+        if(const Region *r=surface_region(owner,true))staged_occupancy.insert_or_assign(owner,*r);
+        return true;
+    };
     for(int attempt=0;attempt<8&&(!batch_queue.empty()||pending_mesh_job.is_valid());++attempt){
         Key k=0;SurfaceMesh mesh;
         if(pending_mesh_job.is_valid()){
             if(!pending_mesh_job->is_ready()){result["pending"]=true;return result;}
             k=pending_mesh_job->owners[pending_mesh_job->consumed];
             mesh=std::move(pending_mesh_job->results[pending_mesh_job->consumed++]);
+            // Callers can request the expanded diagnostic stream even after dispatch.
+            if(mesh.valid&&!indexed_only&&pending_mesh_job->indexed_only&&!mesh.render_indices.is_empty()){
+                mesh=SurfaceMesh{};
+                mesh=build_surface(k,true);
+            }
             mesh_worker_us=pending_mesh_job->elapsed_us;max_mesh_worker_us=std::max(max_mesh_worker_us,mesh_worker_us);
             if(pending_mesh_job->consumed==pending_mesh_job->results.size()){
                 // A dense group can fill its output allowance before all owners.
@@ -1545,28 +1594,35 @@ Dictionary NativeRegionalWater::next_mesh_batch(bool background){
             k=batch_queue.front();batch_queue.pop_front();
             if(!surface_ready(k,true)){if(mesh_set.insert(k).second)meshes.push_back(k);if(batch_urgent)urgent_meshes.insert(k);continue;}
             if(background){
+                if(stage_dry(k))continue;
                 // At most two retained jobs globally: one cancelled predecessor
                 // and one current job. The script starts only one task at once.
                 constexpr uint64_t charge=128*1024*1024,limit=2*charge;
                 uint64_t prior=NativeWaterMeshJob::pending_bytes.load();
                 do{if(prior>limit-charge){batch_queue.push_front(k);result["pending"]=true;return result;}}
                 while(!NativeWaterMeshJob::pending_bytes.compare_exchange_weak(prior,prior+charge));
-                Ref<NativeWaterMeshJob> job;job.instantiate();job->reserved_bytes=charge;job->owners.push_back(k);job->batch=batch_id;job->frozen.instantiate();
+                Ref<NativeWaterMeshJob> job;job.instantiate();job->reserved_bytes=charge;job->indexed_only=indexed_only;job->owners.push_back(k);job->batch=batch_id;job->frozen.instantiate();
                 // Amortize worker dispatch and frame latency across a bounded
                 // group; packets still upload under the main-thread budget.
-                while(job->owners.size()<64&&!batch_queue.empty()){
+                // Keep a local edit together when it fits the immutable
+                // snapshot. Background rebuilds retain their smaller slices.
+                const size_t owner_limit=batch_urgent?128:64;
+                for(size_t examined=0;examined<2*owner_limit&&job->owners.size()<owner_limit&&!batch_queue.empty();++examined){
                     Key next=batch_queue.front();batch_queue.pop_front();
-                    if(surface_ready(next,true))job->owners.push_back(next);
+                    if(surface_ready(next,true)){if(!stage_dry(next))job->owners.push_back(next);}
                     else {if(mesh_set.insert(next).second)meshes.push_back(next);if(batch_urgent)urgent_meshes.insert(next);}
                 }
                 uint64_t halo_bytes=0;
                 for(size_t owner_index=0;owner_index<job->owners.size();++owner_index){
                 Key owner=job->owners[owner_index];Vector3i c=position(owner);
+                std::array<std::pair<Key,const Region*>,27> additions;
+                size_t count=0;
                 uint64_t additional=0;
                 for(int z=-1;z<=1;++z)for(int y=-1;y<=1;++y)for(int x=-1;x<=1;++x){
                     Vector3i p=c+Vector3i(x,y,z);if(p.x<0||p.y<0||p.z<0||p.x>=500||p.y>=64||p.z>=500)continue;
                     Key neighbor=key(p);if(job->frozen->regions.count(neighbor))continue;
                     if(const Region *region=surface_region(neighbor,true)){
+                        additions[count++]={neighbor,region};
                         additional+=sizeof(Region)+Region::payload_bytes;
                         if(region->contacts)additional+=region->contacts->bytes;
                         if(region->structures)additional+=region->structures->bytes;
@@ -1577,17 +1633,16 @@ Dictionary NativeRegionalWater::next_mesh_batch(bool background){
                     job->owners.resize(owner_index);break;
                 }
                 halo_bytes+=additional;
-                for(int z=-1;z<=1;++z)for(int y=-1;y<=1;++y)for(int x=-1;x<=1;++x){
-                    Vector3i p=c+Vector3i(x,y,z);if(p.x<0||p.y<0||p.z<0||p.x>=500||p.y>=64||p.z>=500)continue;
-                    Key neighbor=key(p);const Region *region=surface_region(neighbor,true);
-                    if(region)job->frozen->regions.emplace(neighbor,*region);
-                }
+                // The live store cannot change during this main-thread call.
+                // Copy only newly admitted halo regions, once per snapshot.
+                for(size_t i=0;i<count;++i)
+                    job->frozen->regions.emplace(additions[i].first,*additions[i].second);
                 }
                 job->frozen->western_ocean=western_ocean;job->frozen->surrounding_ocean=surrounding_ocean;
                 pending_mesh_job=job;result["job"]=job;result["pending"]=true;
                 mesh_us=Time::get_singleton()->get_ticks_usec()-start;max_mesh_us=std::max(max_mesh_us,mesh_us);return result;
             }
-            mesh=build_surface(k,true);
+            mesh=build_surface(k,true,false,nullptr,nullptr,indexed_only);
         }
         if(!mesh.valid){cancel_mesh_batch();surface_budget_failed=true;result["failure"]="Water boundary preparation failed at "+String(position(k))+": "+String(mesh.faces.get("failure","unspecified geometry failure"));return result;}
         const uint64_t bytes=uint64_t(mesh.query_vertices.size())*sizeof(Vector3)+uint64_t(mesh.query_indices.size())*sizeof(int32_t)+mesh.owners.size()*sizeof(uint16_t)+mesh.reconstructed.size()*sizeof(ReconstructedCell);
@@ -1607,7 +1662,7 @@ Dictionary NativeRegionalWater::next_mesh_batch(bool background){
         staged_surfaces[k]={mesh.query_vertices,mesh.query_indices,std::move(mesh.owners),std::move(mesh.reconstructed)};
         Array compact;compact.resize(Mesh::ARRAY_MAX);
         compact[Mesh::ARRAY_VERTEX]=mesh.render_vertices;compact[Mesh::ARRAY_NORMAL]=mesh.render_normals;compact[Mesh::ARRAY_TEX_UV]=mesh.render_uv;compact[Mesh::ARRAY_COLOR]=mesh.render_colors;compact[Mesh::ARRAY_INDEX]=mesh.render_indices;
-        result["render_arrays"]=compact;result["coordinate"]=position(k);result["origin"]=Vector3(position(k))*4;result["faces"]=mesh.faces;result["arrays"]=arrays;result["vertices"]=mesh.vertices.size();break;
+        result["render_arrays"]=compact;result["coordinate"]=position(k);result["origin"]=Vector3(position(k))*4;result["faces"]=mesh.faces;result["arrays"]=indexed_only?compact:arrays;result["vertices"]=mesh.render_indices.size();break;
     }
     if(batch_queue.empty()&&pending_mesh_job.is_null()){
         result["complete"]=true;batch_active=false;publish_pending=true;mesh_snapshot.clear();mesh_snapshot_absent.clear();mesh_snapshot_dependencies.clear();
@@ -1664,12 +1719,14 @@ Dictionary NativeRegionalWater::raycast_surface(const Vector3 &from,const Vector
     // The five-metre reach bounds the candidate owner box. Build from precisely
     // the rendering source; never use an independent shoreline polygon or level.
     for(int z=std::max(0,lo.z);z<=std::min(499,hi.z);++z)for(int y=std::max(0,lo.y);y<=std::min(63,hi.y);++y)for(int x=std::max(0,lo.x);x<=std::min(499,hi.x);++x){
-        if(surrounding_ocean&&std::min({x,z,499-x,499-z})<35&&!ocean_column_published(x,z))continue;
+        const bool proxy=surrounding_ocean&&std::min({x,z,499-x,499-z})<35&&!ocean_column_published(x,z);
+        if(proxy&&(!publication_enabled||y<9||y>10))continue;
         Key k=key(Vector3i(x,y,z));if(!publication_enabled&&!surface_ready(k))continue;
         QuerySurface temporary;const QuerySurface *selected=query_surface(k,temporary);if(!selected)continue;const QuerySurface &mesh=*selected;
         Vector3 local_from=from-Vector3(position(k))*4;
         for(int i=0;i<mesh.indices.size();i+=3){
             if(mesh.owners[i/3]&0x8000)continue; // Buried contact is not a bucket target.
+            if(proxy&&!mesh.on_ocean_proxy(i,y))continue;
             Vector3 a=mesh.vertex(i),e1=mesh.vertex(i+1)-a,e2=mesh.vertex(i+2)-a;
             Vector3 h=direction.cross(e2);double determinant=e1.dot(h);if(std::abs(determinant)<1e-12)continue;
             double inverse=1.0/determinant;Vector3 offset=local_from-a;double u=offset.dot(h)*inverse;if(u< -1e-6||u>1.000001)continue;
@@ -1709,7 +1766,17 @@ struct WaterSurfaceProfileCache {
     std::unordered_map<uint64_t,Entry> cells;
     static constexpr size_t MAX_CELLS=8192;
 };
-NativeRegionalWater::SurfaceMesh NativeRegionalWater::build_surface(Key k,bool snapshot,bool include_contacts,const std::atomic<bool> *cancel,WaterSurfaceProfileCache *profiles) const {
+bool NativeRegionalWater::dry_surface_owner(Key k,bool snapshot) const {
+    const auto coordinate=position(k);
+    const Region *owner=surface_region(k,snapshot);
+    if(!owner)return !(surrounding_ocean&&std::min({coordinate.x,coordinate.z,499-coordinate.x,499-coordinate.z})<35);
+    if(!owner->valid||std::any_of(owner->water.begin(),owner->water.end(),[](uint64_t ml){return ml!=0;}))return false;
+    const Region *below=coordinate.y>0?surface_region(key(coordinate-Vector3i(0,1,0)),snapshot):nullptr;
+    if(below&&below->valid)for(int z=0;z<8;++z)for(int x=0;x<8;++x)
+        if(below->water[x+56+64*z])return false; // Reconstruction can cross the owner's lower face.
+    return true;
+}
+NativeRegionalWater::SurfaceMesh NativeRegionalWater::build_surface(Key k,bool snapshot,bool include_contacts,const std::atomic<bool> *cancel,WaterSurfaceProfileCache *profiles,bool indexed_only) const {
     using B=WaterBoundary;using C=WaterSolidClip;
     SurfaceMesh output;
     output.faces["top"]=0;output.faces["bottom"]=0;output.faces["side"]=0;output.faces["triangles"]=0;output.faces["exact_cut_cell_boundary"]=true;
@@ -1719,17 +1786,14 @@ NativeRegionalWater::SurfaceMesh NativeRegionalWater::build_surface(Key k,bool s
     // Empty finite-water owners cannot emit a face: each clipped boundary is
     // owned by its occupied cell. Only the procedural coastal reservoir can
     // supply an absent owner; avoid constructing a halo for every dry dirty key.
-    if(!owner_region&&!(surrounding_ocean&&std::min({owner_coordinate.x,owner_coordinate.z,499-owner_coordinate.x,499-owner_coordinate.z})<35))return output;
+    if(dry_surface_owner(k,snapshot))return output;
     std::array<const Region*,27> region_halo{};
     for(int z=-1;z<=1;++z)for(int y=-1;y<=1;++y)for(int x=-1;x<=1;++x){auto q=owner_coordinate+Vector3i(x,y,z);
         if(q.x>=0&&q.x<500&&q.y>=0&&q.y<64&&q.z>=0&&q.z<500)region_halo[x+1+3*(y+1+3*(z+1))]=surface_region(key(q),snapshot);
     }
     auto region_at=[&](Vector3i p)->const Region*{if(!in_domain(p))return nullptr;auto q=position(region_key(p))-owner_coordinate+Vector3i(1,1,1);return region_halo[q.x+3*(q.y+3*q.z)];};
     if(owner_region&&owner_region->valid&&std::none_of(owner_region->water.begin(),owner_region->water.end(),[](uint64_t ml){return ml!=0;})){
-        auto below=position(k)-Vector3i(0,1,0);const Region *lower=below.y>=0?surface_region(key(below),snapshot):nullptr;bool crossing=false;
-        if(lower&&lower->valid)for(int z=0;z<8;++z)for(int x=0;x<8;++x)crossing|=lower->water[x+8*7+64*z]>0;
-        if(!crossing)return output;
-        crossing=false;
+        bool crossing=false;
         for(int z=-1;z<=1;++z)for(int x=-1;x<=1;++x){const Region *neighbor=region_halo[x+1+3*(1+3*(z+1))];
             if(neighbor&&neighbor->valid)for(int dz=0;dz<8;++dz)for(int dx=0;dx<8;++dx)crossing|=neighbor->water[dx+64*dz]>0;
         }
@@ -1763,12 +1827,14 @@ NativeRegionalWater::SurfaceMesh NativeRegionalWater::build_surface(Key k,bool s
         return C::Point{coordinate(p.x),coordinate(p.y),coordinate(p.z)};
     };
     struct BoundaryPolygon {C::Face polygon;C::Plane plane;};
-    struct CellBoundary {WaterCellProfile shape;uint64_t amount=0;double head=0,bottom=0,top=0,free_head=-1e30;std::array<double,4> heights{};bool reconstructed=false,has_head=false,rectangular=false;C::Pieces pieces;std::vector<BoundaryPolygon> boundary;bool built=false,boundary_built=false,full=false;};
+    struct HeadSample { double reference=-1e30,height=-1e30; };
+    struct CellBoundary {WaterCellProfile shape;uint64_t amount=0;double head=0,bottom=0,top=0,free_head=-1e30;HeadSample column;std::array<double,4> heights{};bool reconstructed=false,has_head=false,rectangular=false;C::Pieces pieces;std::vector<BoundaryPolygon> boundary;bool initialized=false,built=false,boundary_built=false,full=false;};
     std::vector<CellBoundary> cells(3136);
     const Vector3i base=position(k)*8;
-    auto at=[&](Vector3i p)->CellBoundary&{auto q=p-base+Vector3i(3,4,3);return cells[q.x+14*(q.y+16*q.z)];};
-    for(int z=-3;z<=10;++z)for(int y=-4;y<=11;++y)for(int x=-3;x<=10;++x){
-        Vector3i p=base+Vector3i(x,y,z);auto &c=at(p);
+    auto at=[&](Vector3i p)->CellBoundary&{
+        auto q=p-base+Vector3i(3,4,3);auto &c=cells[q.x+14*(q.y+16*q.z)];
+        if(c.initialized)return c;
+        c.initialized=true;
         auto cached=profiles&&in_domain(p)?profiles->cells.find(key(p)):decltype(profiles->cells)::iterator{};
         if(profiles&&in_domain(p)&&cached!=profiles->cells.end()){
             c.shape=cached->second.shape;c.amount=cached->second.amount;c.head=cached->second.head;c.full=cached->second.full;
@@ -1788,13 +1854,20 @@ NativeRegionalWater::SurfaceMesh NativeRegionalWater::build_surface(Key k,bool s
         if(c.amount&&!c.shape.solid&&!c.shape.contact&&std::all_of(c.shape.floor.begin(),c.shape.floor.end(),[&](double value){return value==c.shape.floor[0];})){
             c.bottom=std::max(0.,c.shape.floor[0])*.001;c.top=std::min(c.head,c.shape.ceiling)*.001;c.rectangular=c.top>c.bottom;
         }
-    }
-    for(int z=-3;z<=10;++z)for(int y=-4;y<=11;++y)for(int x=-3;x<=10;++x){auto p=base+Vector3i(x,y,z);auto &c=at(p);
-        if(!c.amount||c.shape.solid)continue;
-        auto above=p+Vector3i(0,1,0);const Region *r=region_at(above);
-        if(c.head>=499.9999&&r&&r->water[index(above)])continue;
-        c.free_head=p.y*.5+c.head*.001;
-    }
+        if(c.amount&&!c.shape.solid){
+            auto above=p+Vector3i(0,1,0);const Region *r=region_at(above);
+            bool exposed=c.head<499.9999||!r||!r->water[index(above)];
+            // A filled cell underneath a solid ceiling ends at a contact face.
+            // Interpolating that face into the neighbouring free surface
+            // pulls a level lake down around a partially submerged block.
+            if(exposed&&c.head>=499.9999&&r&&r->valid){
+                const int i=index(above);
+                if(r->floor[i]==r->ceiling[i]||(r->structures&&r->structures->cells[i]&&!profile(*r,i).capacity()))exposed=false;
+            }
+            if(exposed)c.free_head=p.y*.5+c.head*.001;
+        }
+        return c;
+    };
     auto build=[&](CellBoundary &c){
         if(c.built)return true;c.built=true;
         if(!c.amount&&!c.reconstructed)return true;
@@ -1816,11 +1889,13 @@ NativeRegionalWater::SurfaceMesh NativeRegionalWater::build_surface(Key k,bool s
     // Reconstruct shared corner heights BEFORE intersecting terrain. Moving an
     // already clipped shoreline vertex would detach it from the terrain plane.
     auto column_head=[&](Vector3i p,double reference){
+        auto &sample=at(p).column;
+        if(sample.reference==reference)return sample.height;
         double selected=-1e30,distance=.75001;
         for(int dy=-2;dy<=2;++dy){const auto &c=at(p+Vector3i(0,dy,0));double level=c.free_head,d=std::abs(level-reference);
             if(d<distance){distance=d;selected=level;}
         }
-        return selected;
+        sample={reference,selected};return selected;
     };
     auto corner_height=[&](Vector3i p,C::Point v,double reference){
         const int ox=int(std::floor(v.x*2-.5)),oz=int(std::floor(v.z*2-.5));
@@ -1840,10 +1915,21 @@ NativeRegionalWater::SurfaceMesh NativeRegionalWater::build_surface(Key k,bool s
         double level=(heights[0]*(1-tx)+heights[1]*tx)*(1-tz)+(heights[2]*(1-tx)+heights[3]*tx)*tz;
         return level-p.y*.5;
     };
+    // A shared corner can belong to four columns. Cache the exact
+    // reconstruction for this immutable owner, keyed by lattice position and
+    // reference head so stacked pockets still select their own layer.
+    std::array<HeadSample,13*12*13> corner_samples;
     for(int z=-2;z<=9;++z)for(int y=-2;y<=9;++y)for(int x=-2;x<=9;++x){
-        auto p=base+Vector3i(x,y,z);auto &c=at(p);if(c.shape.solid||!c.shape.capacity())continue;
+        auto p=base+Vector3i(x,y,z);
         const Region *known=region_at(p);
         if(!known||!known->valid)continue; // Reconstruction cannot admit unknown air.
+        if(!known->water[index(p)]){
+            const auto below=p-Vector3i(0,1,0);
+            const Region *lower=region_at(below);
+            if(lower&&lower->valid){if(!lower->water[index(below)])continue;}
+            else if(!at(below).amount)continue;
+        }
+        auto &c=at(p);
         // Anchor to this occupied column, never a separate perched pocket below
         // it. An empty cell can only receive the continuation of its wet layer
         // immediately below; meshing must not fill air underneath floating water.
@@ -1857,9 +1943,13 @@ NativeRegionalWater::SurfaceMesh NativeRegionalWater::build_surface(Key k,bool s
             if(below.amount&&!below.shape.solid)reference=(p.y-1)*.5+below.head*.001;
         }
         if(reference< p.y*.5-.50001||reference>p.y*.5+1.00001)continue;
+        if(c.shape.solid||!c.shape.capacity())continue;
         c.has_head=true;
         for(int corner=0;corner<4;++corner){
-            c.heights[corner]=corner_height(p,{(corner&1)*.5,reference-p.y*.5,((corner>>1)&1)*.5},reference);
+            const int dx=corner&1,dz=corner>>1;
+            auto &sample=corner_samples[x+2+dx+13*(y+2+12*(z+2+dz))];
+            if(sample.reference!=reference)sample={reference,corner_height(p,{dx*.5,reference-p.y*.5,dz*.5},reference)};
+            c.heights[corner]=sample.height;
             c.reconstructed|=std::abs(std::clamp(c.heights[corner],0.,.5)-c.head*.001)>.00001;
         }
         if(c.reconstructed){c.rectangular=false;c.full=false;
@@ -1934,6 +2024,14 @@ NativeRegionalWater::SurfaceMesh NativeRegionalWater::build_surface(Key k,bool s
         }
         return true;
     };
+    // Build and repair triangles in contiguous native memory. Crossing the
+    // extension API for each vertex attribute makes dense crater meshes costly.
+    struct {
+        std::vector<Vector3> vertices,normals,render_vertices,render_normals,query_vertices;
+        std::vector<Vector2> uv,render_uv;
+        std::vector<Color> colors,render_colors;
+        std::vector<int32_t> render_indices,query_indices;
+    } buffers;
     std::map<std::array<int64_t,7>,int> render_ids;
     std::map<std::array<float,3>,int> query_ids;
     std::map<std::array<std::array<int64_t,3>,3>,std::pair<int,bool>> emitted_triangles;
@@ -1955,7 +2053,7 @@ NativeRegionalWater::SurfaceMesh NativeRegionalWater::build_surface(Key k,bool s
             // has only buried solid contacts. Prove that from capacities before
             // allocating its terrain polyhedra; retain full geometry for audits.
             bool buried_cell=!cell.reconstructed&&cell.amount>=cell.shape.capacity();
-            for(auto d:directions){const auto &n=at(p+d);buried_cell&=!n.reconstructed&&n.amount>=n.shape.capacity();}
+            for(auto d:directions){if(!buried_cell)break;const auto &n=at(p+d);buried_cell=!n.reconstructed&&n.amount>=n.shape.capacity();}
             if(buried_cell)continue;
         }
         if(!prepare_boundary(p)){output.valid=false;return output;}
@@ -1981,6 +2079,13 @@ NativeRegionalWater::SurfaceMesh NativeRegionalWater::build_surface(Key k,bool s
             C::Point shift{dx*.5,dy*.5,dz*.5};
             for(const auto &face:neighbor.boundary)for(auto point:face.polygon){
                 point=point+shift;
+                // Rounding to the shared grid can move a point by at most
+                // one grid step. Most vertices of a neighbouring polygon
+                // are strictly outside this cell and need no projection.
+                constexpr double margin=1./grid;
+                if(point.x < -margin || point.x > .5+margin ||
+                   point.y < -margin || point.y > .5+margin ||
+                   point.z < -margin || point.z > .5+margin)continue;
                 C::Point local=canonical(point);
                 if(local.x<0||local.x>.5||local.y<0||local.y>.5||local.z<0||local.z>.5)continue;
                 edge_points.emplace(std::array<int64_t,3>{llround(point.x*1e9),llround(point.y*1e9),llround(point.z*1e9)},point);
@@ -1994,13 +2099,25 @@ NativeRegionalWater::SurfaceMesh NativeRegionalWater::build_surface(Key k,bool s
             std::array<double,3> identity{point.x,point.y,point.z};
             auto cached=projection_cache.find(identity);if(cached!=projection_cache.end())return cached->second;
             auto result=canonical(point);
-            for(const auto &[key,candidate]:edge_points){auto delta=candidate-point;
+            // The map is ordered by rounded nanometres. Restrict the exact
+            // distance test to the x interval that can contain a match.
+            const int64_t first_x=llround((point.x-.5/grid)*1e9)-1;
+            const int64_t last_x=llround((point.x+.5/grid)*1e9)+1;
+            auto first=edge_points.lower_bound({first_x,INT64_MIN,INT64_MIN});
+            for(auto it=first;it!=edge_points.end()&&it->first[0]<=last_x;++it){
+                const auto candidate=it->second;
+                auto delta=candidate-point;
                 if(delta.dot(delta)>.25/(grid*grid))continue;
                 auto q=canonical(candidate);
                 if(std::tie(q.x,q.y,q.z)<std::tie(result.x,result.y,result.z))result=q;
             }
             projection_cache.emplace(identity,result);return result;
         };
+        // Every edge of this cell uses the same ordered candidates. Project
+        // them once, preserving insertion order for coincident subdivisions.
+        std::vector<C::Point> projected_points;
+        projected_points.reserve(edge_points.size());
+        for(const auto &[key,raw]:edge_points)projected_points.push_back(project(raw));
         for(const auto &boundary:cell.boundary){
                     if(!include_contacts&&buried(p,boundary))continue;
                     auto polygon=boundary.polygon;auto plane=boundary.plane;
@@ -2023,7 +2140,7 @@ NativeRegionalWater::SurfaceMesh NativeRegionalWater::build_surface(Key k,bool s
                     for(size_t edge=0;edge<polygon.size();++edge){
                         auto a=polygon[edge],b=polygon[(edge+1)%polygon.size()],d=b-a;double norm=d.dot(d);
                         std::map<double,C::Point> along;along.emplace(0,a);
-                        if(norm>0)for(const auto &[key,raw]:edge_points){auto v=project(raw);double t=(v-a).dot(d)/norm;
+                        if(norm>0)for(const auto &v:projected_points){double t=(v-a).dot(d)/norm;
                             if(t>0&&t<1){auto cross=(v-a).cross(d);if(cross.dot(cross)==0)along.emplace(t,v);}}
                         for(const auto &[t,v]:along)if(conforming.empty()||(conforming.back()-v).dot(conforming.back()-v)>0)conforming.push_back(v);
                     }
@@ -2078,15 +2195,15 @@ NativeRegionalWater::SurfaceMesh NativeRegionalWater::build_surface(Key k,bool s
                             Vector3 world(float(p.x*.5+v.x),float(p.y*.5+v.y),float(p.z*.5+v.z));
                             Vector3 vertex((p.x-base.x)*.5+v.x,(p.y-base.y)*.5+v.y,(p.z-base.z)*.5+v.z);
                             std::array<float,3> query_key{vertex.x,vertex.y,vertex.z};auto query_found=query_ids.find(query_key);int query_id;
-                            if(query_found==query_ids.end()){query_id=output.query_vertices.size();query_ids.emplace(query_key,query_id);output.query_vertices.push_back(vertex);}else query_id=query_found->second;
-                            output.query_indices.push_back(query_id);
+                            if(query_found==query_ids.end()){query_id=buffers.query_vertices.size();query_ids.emplace(query_key,query_id);buffers.query_vertices.push_back(vertex);}else query_id=query_found->second;
+                            buffers.query_indices.push_back(query_id);
                             if(contact&&!include_contacts)continue;
                             Color color(contact?0.f:1.f,1,1,1);Vector2 uv(world.x,world.z);
-                            output.vertices.push_back(vertex);output.normals.push_back(vertex_normal);output.uv.push_back(uv);output.colors.push_back(color);
+                            if(!indexed_only){buffers.vertices.push_back(vertex);buffers.normals.push_back(vertex_normal);buffers.uv.push_back(uv);buffers.colors.push_back(color);}
                             std::array<int64_t,7> key{int64_t(p.x)*2097152+llround(v.x*grid),int64_t(p.y)*2097152+llround(v.y*grid),int64_t(p.z)*2097152+llround(v.z*grid),llround(vertex_normal.x*1000000),llround(vertex_normal.y*1000000),llround(vertex_normal.z*1000000),int(contact)};
                             auto found=render_ids.find(key);int id;
-                            if(found==render_ids.end()){id=output.render_vertices.size();render_ids.emplace(key,id);output.render_vertices.push_back(vertex);output.render_normals.push_back(vertex_normal);output.render_uv.push_back(uv);output.render_colors.push_back(color);}
-                            else id=found->second;output.render_indices.push_back(id);
+                            if(found==render_ids.end()){id=buffers.render_vertices.size();render_ids.emplace(key,id);buffers.render_vertices.push_back(vertex);buffers.render_normals.push_back(vertex_normal);buffers.render_uv.push_back(uv);buffers.render_colors.push_back(color);}
+                            else id=found->second;buffers.render_indices.push_back(id);
                         }
                         output.owners.push_back(uint16_t(index(p)|(contact?0x8000:0)));if(normal.y>.001)++tops;else if(normal.y<-.001)++bottoms;else ++sides;
                     });
@@ -2098,40 +2215,48 @@ NativeRegionalWater::SurfaceMesh NativeRegionalWater::build_surface(Key k,bool s
         for(int i=0;i<int(output.owners.size());++i){
             const auto owner=output.owners[i];bool rendered=include_contacts||!(owner&0x8000);
             if(!removed_triangles[i]){
-                for(int e=0;e<3;++e)output.query_indices.set(kept*3+e,output.query_indices[i*3+e]);
+                for(int e=0;e<3;++e)buffers.query_indices[kept*3+e]=buffers.query_indices[i*3+e];
                 output.owners[kept++]=owner;
                 if(rendered){for(int e=0;e<3;++e){
-                    output.vertices.set(render_write+e,output.vertices[render_read+e]);output.normals.set(render_write+e,output.normals[render_read+e]);
-                    output.uv.set(render_write+e,output.uv[render_read+e]);output.colors.set(render_write+e,output.colors[render_read+e]);
-                    output.render_indices.set(render_write+e,output.render_indices[render_read+e]);
+                    if(!indexed_only){buffers.vertices[render_write+e]=buffers.vertices[render_read+e];buffers.normals[render_write+e]=buffers.normals[render_read+e];
+                    buffers.uv[render_write+e]=buffers.uv[render_read+e];buffers.colors[render_write+e]=buffers.colors[render_read+e];}
+                    buffers.render_indices[render_write+e]=buffers.render_indices[render_read+e];
                 }render_write+=3;}
             }
             if(rendered)render_read+=3;
         }
-        output.owners.resize(kept);output.query_indices.resize(kept*3);output.render_indices.resize(render_write);
-        output.vertices.resize(render_write);output.normals.resize(render_write);output.uv.resize(render_write);output.colors.resize(render_write);
+        output.owners.resize(kept);buffers.query_indices.resize(kept*3);buffers.render_indices.resize(render_write);
+        if(!indexed_only){buffers.vertices.resize(render_write);buffers.normals.resize(render_write);buffers.uv.resize(render_write);buffers.colors.resize(render_write);}
     }
     // Float projection can invert an extremely narrow contact triangle while
     // leaving its vertices shared correctly. Orient each connected component
     // from its largest face, preserving the outward geometric anchor rather
     // than independently trusting a collapsed clipping-plane normal.
-    struct EdgeUse {int triangle;bool forward;};
-    std::unordered_map<uint64_t,std::vector<EdgeUse>> edges;
+    struct EdgeUses {int first=-1,second=-1;bool forward=false,same=false;};
+    std::unordered_map<uint64_t,EdgeUses> edges;
     const int triangles=int(output.owners.size());
-    std::vector<std::vector<std::pair<int,bool>>> links(triangles);
-    std::vector<std::pair<double,int>> order;order.reserve(triangles);
+    const auto *indices=buffers.query_indices.data();
+    edges.reserve(triangles*2);
+    int inconsistent=0;
     for(int i=0;i<triangles;++i){
-        auto a=output.query_vertices[output.query_indices[i*3]],b=output.query_vertices[output.query_indices[i*3+1]],c=output.query_vertices[output.query_indices[i*3+2]];
-        order.push_back({double((b-a).cross(c-a).length_squared()),i});
-        for(int e=0;e<3;++e){int u=output.query_indices[i*3+e],v=output.query_indices[i*3+(e+1)%3];
-            uint64_t edge=(uint64_t(std::min(u,v))<<32)|uint32_t(std::max(u,v));edges[edge].push_back({i,u<v});}
-    }
-    bool inconsistent=false;
-    for(const auto &[key,uses]:edges)if(uses.size()==2){
-        bool same=uses[0].forward==uses[1].forward;inconsistent|=same;
-        links[uses[0].triangle].push_back({uses[1].triangle,same});links[uses[1].triangle].push_back({uses[0].triangle,same});
+        for(int e=0;e<3;++e){int u=indices[i*3+e],v=indices[i*3+(e+1)%3];
+            auto &uses=edges[(uint64_t(std::min(u,v))<<32)|uint32_t(std::max(u,v))];
+            if(uses.first<0){uses.first=i;uses.forward=u<v;}
+            else if(uses.second==-1){uses.second=i;uses.same=uses.forward==(u<v);inconsistent+=uses.same;}
+            else if(uses.second>=0){inconsistent-=uses.same;uses.second=-2;} // Only manifold pairs constrain winding.
+        }
     }
     if(inconsistent){
+        std::vector<std::vector<std::pair<int,bool>>> links(triangles);
+        for(const auto &[key,uses]:edges)if(uses.second>=0){
+            links[uses.first].push_back({uses.second,uses.same});links[uses.second].push_back({uses.first,uses.same});
+        }
+        std::vector<std::pair<double,int>> order;order.reserve(triangles);
+        const auto *vertices=buffers.query_vertices.data();
+        for(int i=0;i<triangles;++i){
+            auto a=vertices[indices[i*3]],b=vertices[indices[i*3+1]],c=vertices[indices[i*3+2]];
+            order.push_back({double((b-a).cross(c-a).length_squared()),i});
+        }
         std::sort(order.begin(),order.end(),std::greater<std::pair<double,int>>());
         std::vector<int8_t> flip(triangles,-1);std::vector<int> queue;
         for(const auto &[area,seed]:order)if(flip[seed]<0){
@@ -2147,19 +2272,39 @@ NativeRegionalWater::SurfaceMesh NativeRegionalWater::build_surface(Key k,bool s
         for(int i=0;i<triangles;++i){
             bool rendered=include_contacts||!(output.owners[i]&0x8000);
             if(flip[i]){
-                int second=output.query_indices[i*3+1];output.query_indices.set(i*3+1,output.query_indices[i*3+2]);output.query_indices.set(i*3+2,second);
+                int second=buffers.query_indices[i*3+1];buffers.query_indices[i*3+1]=buffers.query_indices[i*3+2];buffers.query_indices[i*3+2]=second;
                 if(rendered){
-                    for(int e=0;e<3;++e){int old=output.render_indices[render_offset+e],id=output.render_vertices.size();
-                        output.render_vertices.push_back(output.render_vertices[old]);output.render_normals.push_back(-output.render_normals[old]);
-                        output.render_uv.push_back(output.render_uv[old]);output.render_colors.push_back(output.render_colors[old]);output.render_indices.set(render_offset+e,id);
-                        output.normals.set(render_offset+e,-output.normals[render_offset+e]);}
-                    auto swap_values=[&](auto &values){auto value=values[render_offset+1];values.set(render_offset+1,values[render_offset+2]);values.set(render_offset+2,value);};
-                    swap_values(output.vertices);swap_values(output.normals);swap_values(output.uv);swap_values(output.colors);swap_values(output.render_indices);
+                    for(int e=0;e<3;++e){int old=buffers.render_indices[render_offset+e],id=buffers.render_vertices.size();
+                        buffers.render_vertices.push_back(buffers.render_vertices[old]);buffers.render_normals.push_back(-buffers.render_normals[old]);
+                        buffers.render_uv.push_back(buffers.render_uv[old]);buffers.render_colors.push_back(buffers.render_colors[old]);buffers.render_indices[render_offset+e]=id;
+                        if(!indexed_only)buffers.normals[render_offset+e]=-buffers.normals[render_offset+e];}
+                    auto swap_values=[&](auto &values){std::swap(values[render_offset+1],values[render_offset+2]);};
+                    if(!indexed_only){swap_values(buffers.vertices);swap_values(buffers.normals);swap_values(buffers.uv);swap_values(buffers.colors);}
+                    swap_values(buffers.render_indices);
                 }
             }
             if(rendered)render_offset+=3;
         }
     }
+    // Publish each final stream in one copy and release its working capacity
+    // before allocating the next packed array.
+    auto pack=[](auto &source,auto &destination){
+        if(source.empty())return;
+        destination.resize(source.size());
+        std::copy(source.begin(),source.end(),destination.ptrw());
+        std::decay_t<decltype(source)>().swap(source);
+    };
+    pack(buffers.vertices,output.vertices);
+    pack(buffers.normals,output.normals);
+    pack(buffers.uv,output.uv);
+    pack(buffers.colors,output.colors);
+    pack(buffers.render_vertices,output.render_vertices);
+    pack(buffers.render_normals,output.render_normals);
+    pack(buffers.render_uv,output.render_uv);
+    pack(buffers.render_colors,output.render_colors);
+    pack(buffers.render_indices,output.render_indices);
+    pack(buffers.query_vertices,output.query_vertices);
+    pack(buffers.query_indices,output.query_indices);
     output.faces["top"]=tops;output.faces["bottom"]=bottoms;output.faces["side"]=sides;
     output.faces["triangles"]=tops+bottoms+sides;output.faces["exact_cut_cell_boundary"]=true;
     return output;
@@ -2218,24 +2363,31 @@ void NativeWaterMeshJob::prepare(){
             uint64_t(surface.query_vertices.size())*sizeof(Vector3)+
             uint64_t(surface.query_indices.size())*sizeof(int32_t)+surface.owners.size()*sizeof(uint16_t)+surface.reconstructed.size()*sizeof(NativeRegionalWater::ReconstructedCell);
     };
-    if(!cancelled.load()&&frozen.is_valid()&&owners.size()>=8&&reserved_bytes>retained+24*1024*1024){
-        // Two native pool lanes share immutable input and disjoint output slots.
-        // Keep scratch inside the existing reservation; no new OS threads or
-        // expanded memory budget. Publication remains one ordered transaction.
+    // Each lane owns clipping scratch. Leave CPU capacity for rendering,
+    // terrain and physics, and deduct scratch from this job's reservation.
+    constexpr uint64_t lane_bytes=12*1024*1024;
+    const int cpu_lanes=std::clamp(OS::get_singleton()->get_processor_count()/3,1,4);
+    const int memory_lanes=reserved_bytes>retained?int((reserved_bytes-retained-1)/lane_bytes):0;
+    const int lanes=std::min({cpu_lanes,memory_lanes,owners.size()>=32?4:2});
+    if(!cancelled.load()&&frozen.is_valid()&&owners.size()>=8&&lanes>=2){
         struct Group {
             NativeWaterMeshJob *job;
             std::atomic<uint64_t> retained;
             std::atomic<size_t> first_overflow;
             uint64_t limit;
             decltype(surface_bytes) *bytes;
-        } group{this,retained,owners.size(),reserved_bytes-24*1024*1024,&surface_bytes};
+            std::atomic<size_t> next_owner{0};
+        } group{this,retained,owners.size(),reserved_bytes-lanes*lane_bytes,&surface_bytes};
         results.resize(owners.size());
-        auto task=[](void *context,uint32_t lane){
+        auto task=[](void *context,uint32_t){
             auto &g=*static_cast<Group*>(context);auto &job=*g.job;
             WaterSurfaceProfileCache profiles;profiles.cells.reserve(WaterSurfaceProfileCache::MAX_CELLS);
-            for(uint32_t index=lane;index<job.owners.size();index+=2){
-            if(job.cancelled.load()||index>=g.first_overflow.load())return;
-            auto surface=job.frozen->build_surface(job.owners[index],false,false,&job.cancelled,&profiles);
+            // A cut shoreline owner costs much more than a flooded interior.
+            // Give the next owner to whichever existing lane finishes first.
+            while(!job.cancelled.load()){
+            const size_t index=g.next_owner.fetch_add(1,std::memory_order_relaxed);
+            if(index>=g.first_overflow.load())return;
+            auto surface=job.frozen->build_surface(job.owners[index],false,false,&job.cancelled,&profiles,job.indexed_only);
             uint64_t bytes=(*g.bytes)(surface),prior=g.retained.load();bool admitted=false;
             while(prior<=g.limit&&bytes<=g.limit-prior){
                 if(g.retained.compare_exchange_weak(prior,prior+bytes)){admitted=true;break;}
@@ -2248,20 +2400,20 @@ void NativeWaterMeshJob::prepare(){
             }
         };
         auto *pool=WorkerThreadPool::get_singleton();
-        auto id=pool->add_native_group_task(task,&group,2,2,false,"Water boundary owners");
+        auto id=pool->add_native_group_task(task,&group,lanes,lanes,false,"Water boundary owners");
         if(id>=0)pool->wait_for_group_task_completion(id);
-        else for(uint32_t i=0;i<2;++i)task(&group,i);
+        else task(&group,0);
         if(group.first_overflow.load()==0&&!cancelled.load()){
             // Faster later owners may consume the group allowance before owner
             // zero finishes. Retry that owner alone under the original budget;
             // concurrency must not invent a failure for a serially valid mesh.
-            results.clear();auto surface=frozen->build_surface(owners.front(),false,false,&cancelled);
+            results.clear();auto surface=frozen->build_surface(owners.front(),false,false,&cancelled,nullptr,indexed_only);
             if(retained+surface_bytes(surface)>reserved_bytes){surface=NativeRegionalWater::SurfaceMesh{};surface.valid=false;surface.faces["failure"]="Water mesh owner exceeds reserved output capacity";}
             results.push_back(std::move(surface));
         }else results.resize(std::max(size_t(1),group.first_overflow.load()));
     }else if(!cancelled.load()&&frozen.is_valid())for(auto owner:owners){
         if(cancelled.load())break;
-        auto surface=frozen->build_surface(owner,false,false,&cancelled);
+        auto surface=frozen->build_surface(owner,false,false,&cancelled,nullptr,indexed_only);
         retained+=surface_bytes(surface);
         if(retained>reserved_bytes){
             if(results.empty()){surface.valid=false;surface.faces["failure"]="worker reservation exceeded: "+String::num_uint64(retained)+" bytes";results.push_back(std::move(surface));}
@@ -2428,7 +2580,7 @@ bool NativeRegionalWater::decode(const PackedByteArray &data,bool install,bool p
     }
     if(offset!=data.size())return false;
     if(sum!=expected)return false;if(!install)return true;
-    surface_budget_failed=false;equilibrium_dependencies.clear();local_edit_regions.clear();local_occupancy_regions.clear();relaxation_before.clear();relaxation_dirty_before.clear();urgent_meshes.clear();batch_urgent=false;deferred_regions.clear();settling.clear();settling_set.clear();settle_steps=settle_transfers=settle_us=0;
+    surface_budget_failed=false;equilibrium_dependencies.clear();local_edit_regions.clear();local_occupancy_regions.clear();local_receiver_regions.clear();relaxation_before.clear();relaxation_dirty_before.clear();urgent_meshes.clear();batch_urgent=false;deferred_regions.clear();settling.clear();settling_set.clear();settle_steps=settle_transfers=settle_us=0;
     ocean_cache.clear();ocean_cache_bytes=0;ocean_cache_hits=0;invalidate_snapshot();cancel_mesh_batch();published_regions.clear();published_occupancy.clear();staged_occupancy.clear();staged_ready.clear();published_surfaces.clear();published_batch=0;query_cache_bytes=0;query_builds=0;query_cache_hits=0;regions.swap(staged);solid_cache_bytes=structure_bytes;restored_cache.clear();cache_rebuilds=0;requests.clear();request_set.clear();meshes.clear();mesh_set.clear();fill=Fill{};total=sum;sampled=0;cache_hits=0;changes=0;last_us=max_us=mesh_us=max_mesh_us=0;limit=false;
     // Storage intermediates need validated records, not meshing/query admission.
     if(!prepare_render)return true;
@@ -2480,7 +2632,7 @@ bool NativeRegionalWater::restore_prepared(const Ref<NativeWaterMapIdentity> &pr
  // Single-owner handoff after the loading worker has joined. No decoding,
  // contact reconstruction, or traversal of incoming regions on this thread.
  auto &source=*prepared->decoded.ptr();prepared->consumed=true;
- local_edit_regions.clear();local_occupancy_regions.clear();urgent_meshes.clear();relaxation_before.swap(source.relaxation_before);relaxation_dirty_before.swap(source.relaxation_dirty_before);batch_urgent=false;
+ local_edit_regions.clear();local_occupancy_regions.clear();local_receiver_regions.clear();urgent_meshes.clear();relaxation_before.swap(source.relaxation_before);relaxation_dirty_before.swap(source.relaxation_dirty_before);batch_urgent=false;
  // Derived buffers belong to the old state too. Transfer ownership instead of
  // destructing every triangle, contact and frozen snapshot during installation.
  std::swap(saved_snapshot,source.saved_snapshot);std::swap(saved_catalog,source.saved_catalog);

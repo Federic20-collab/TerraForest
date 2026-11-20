@@ -1,3 +1,435 @@
+## November 20 shoreline mesh worker and publication
+
+The native mesh builder rejects out-of-cell subdivision candidates before
+quantization. It bounds the representative-point search by the possible
+x range and reuses each projected edge candidate across the cell's faces.
+Large jobs use up to four Godot pool lanes with 12 MiB of scratch charged
+per lane inside the existing 128 MiB reservation. On the pinned crater the
+median of four builds fell from 113.8 ms to 86.1 ms. Four lanes alone still
+left a second job between the first lake commit and draw.
+
+Urgent jobs can now take up to 128 owners if the halo and output fit.
+Only newly encountered regions are copied into the immutable snapshot.
+Background jobs retain their 64-owner cap. The 70-owner serial/parallel
+comparison, cancellation and release checks passed (`20261120T143908241770Z`).
+Surface continuity passed (`20261120T143908238653Z`), all 66 live ray
+samples matched (`20261120T143908259612Z`), and the rendered-array digest
+matched on four replays (`20261120T143908307836Z`).
+
+Installed capture-free run `20261120T143633262102Z` shows one worker job
+between the local lake commit and publication. Terrain-to-water latency
+was 158 ms at sea, 340 ms at the lake and 185 ms for mining. Action to draw
+took 1276, 759 and 221 ms. Frame interval p99 was 26.3, 23.1 and 18.7 ms.
+In the visual run the four bucket transfers took 47–84 ms. Lake edits
+still miss the 250 ms regression and the two-frame target. The worker
+was active from the 517 ms sample until completion observed at 678 ms.
+The prior valid surface remained visible until replacement. Retain the
+two-angle contact checks and the [water issue](../issues/explosive-combat/water-plan.md)
+when changing how the local boundary is reconstructed.
+
+## November 20 mesh dependencies after local edits
+
+Windows debug/release water libraries now invalidate mesh owners using the
+union of the actual changed-cell halos. The sparse diagonal case queues seven
+owners and the existing boundary continuity suite passes. The installed
+authority reproduced the prior complete edited archive byte for byte in
+`20261120T142331700710Z`.
+
+Cedar Vale capture `20261120T142005564440Z` reduced the lake blast's initial
+urgent owners from 140 to 132. All 66 live surface probes replayed with zero
+error (`20261120T142347391877Z`). The 43-owner rebuilt geometry retained
+its previous digest (`20261120T142347386838Z`). Captures, coverage and
+bucket interruption results are in the [water plan](../issues/explosive-combat/water-plan.md).
+
+Capture-free run `20261120T142220024763Z` measured terrain-to-water times
+of 154 ms at sea, 385 ms at the lake and 203 ms for mining. Corresponding
+action-to-draw times were 1283, 789 and 240 ms. Frame intervals at p99
+were 35.9, 25.6 and 24.7 ms. The lake timeline saw committed quantities
+at 526 ms and two successive mesh workers active by 546 and 673 ms, with
+the surface ready to publish by 776 ms. Return to these worker jobs and
+their handoff. Verify the same geometry digest and gameplay probes before
+accepting a faster path. The two-frame and stable-60 requirements remain open.
+
+## November 20 cross-boundary excavation cost
+
+The Windows authority now reports brush, patch sampling, snapshot, native
+solve and commit times through `edit-profile`. Native equilibrium indexes
+cut-cell volumes by elevation during the water-level search. Each candidate
+level reuses the saturated volume below it. Close numerical ties use the
+original summation order to preserve integer water allocation.
+
+Matched source-host runs `20261120T140214254634Z` and
+`20261120T140450718119Z` saved byte-identical edited archives
+(`6fc049f0b977a1d9c62f77abaa0bb3dc87be737506d51bf281a1d74fd63d39b5`).
+The level search and integer allocation together took 149.7 and 74.7 ms
+respectively. Full edits took 432.6 and 409.6 ms. Discovery took 214.3 ms
+in the latter run. These are single-operation samples. The synchronous
+authority edit still exceeds the 26.7 ms tick budget. Return to discovery
+and scheduling with matched saves and measured local publication latency.
+
+Packaged capture-free repeat `20261120T141232051671Z` reached both shores.
+Terrain publication to local water draw took 153 ms at sea, 454 ms at the
+lake and 251 ms after mining. End-to-end action to draw took 1275, 871
+and 290 ms respectively. Frame intervals at p99 were 37.6, 37.8 and
+28.2 ms on those intervals. Lake and mining exceeded the existing 250 ms
+check. The companion visual run and the replay of its committed lake
+surface are recorded in the project plan.
+
+## November 20 dedicated spatial queries
+
+The dedicated point query now reads the authoritative water counter directly.
+The previous call allocated a diagnostic dictionary and traversed all resident
+regions to return this single value. The versioned batch accepts one to eight
+points and returns height, density and water depth for each, with the shared
+revision and total quantity. The operator driver compares eight-point batches
+to eight individual reads in alternating order, validates repeated points and
+rejects invalid sizes and positions. Reads leave the mutation sequence intact.
+
+Scale fixture `20261120T135445733191Z` compared the scalar quantity with
+the full audit after a local brush edit. At 1, 16, 64 and 256 resident regions,
+1,024 reads took 134, 131, 134 and 130 µs respectively. The source-host pipe
+run `20261120T135353195089Z` measured 154 µs median for eight points batched
+and 248 µs for eight single requests. Both measurements include the pipe and
+client decoding. Network throughput and simultaneous peer capacity remain open.
+
+Installed host run `20261120T135811764900Z` passed the same comparisons,
+the legacy gameplay probes, save/reload, contention and receipt-retry cases.
+For 32 measured sets per mode, eight single reads took 251.45 µs median
+(389.4 µs maximum), and a batch took 157.75 µs median (198.6 µs maximum).
+The excavation took 439.051 ms. Game pack SHA-256 was
+`83b323f128d578f6cfa5da2b45ef63c780b34b6765c384dd83f878f90b741928`.
+
+## November 20 dedicated excavation retries
+
+The Windows host accepts a versioned excavation from its trusted operator.
+One ordered stream per slot retains a 36-byte receipt for the last committed
+request. The same ID and arguments replay the original acknowledgement.
+A conflicting brush, stale expected revision, skipped ID, superseded ID or
+unknown command version cannot mutate the world. The receipt and the terrain
+and water snapshots share one save transaction. The operator can reconnect
+after restart and read the saved sequence number. Older inland saves open
+without a receipt. See the [operator protocol](DEDICATED_AUTHORITY.md).
+
+Source-host run `20261120T134434366351Z` exercised the real pipe and
+headless gameplay comparison. A failed archive replacement followed by an
+unsaved process exit restored the previous request ID, quantities and
+terrain. Authenticated gameplay sessions, per-peer streams, remote
+admission latency and 30 Hz scheduling still require implementation and
+qualification.
+
+Installed run `20261120T134928161757Z` passed the same suite, including
+replaying request 1 after a legacy edit advanced terrain to revision 2.
+The acknowledgement still reported revision 1. Gameplay and the restarted
+host agreed on both sides of the boundary and on the outside probe.
+Total finite water was 36,032,293,119 mL. The first operator excavation
+round trip was 421.706 ms, with a sampled process peak working set of
+265,183,232 bytes. Game pack SHA-256 was
+`2d6e266bd9fe9b187cd8e685b761373f12fc47f4e612125849cf1f21839d39a2`.
+
+## November 20 first-draw and local surface qualification
+
+The installed water worker caches column and shared-corner height samples
+within an immutable mesh owner. Its two worker lanes take the next available
+owner when ready. The 43-owner pinned replay preserved the rendered-array
+digest on four runs (`20261120T133647618251Z`). A separate experiment
+deferred donor geometry and introduced a visible ridge. The
+[water issue](../issues/explosive-combat/water-plan.md) records the rejected
+handoff and its two-angle evidence.
+
+Cedar Vale run `20261120T133724057342Z` captures both shores from two
+angles. First-publication crater depths (81 per shore) and bank contact
+(23 sea, 26 lake) passed, as did the lake after a bucket interrupted
+background meshing. The native replay `20261120T133829927033Z` compared
+66 live ray samples to freshly reconstructed committed water at the same
+coordinates. Hit membership and heights matched exactly. The wider lake
+region-edge check found a maximum 0.004 mm height difference across
+28 pairs of wet probes separated horizontally by 0.5 mm.
+
+The installed construction cube fixture `20261120T133948089900Z` passed
+four wall contacts, solid exclusion and restoration after removal.
+Worker cancellation and mixed buffer requests passed in
+`20261120T134058858697Z`. The Windows authority and gameplay parity
+driver `20261120T134052295671Z` passed its cross-boundary excavation,
+archive ownership, interrupted save, restart and recovery checks.
+
+The installed timing pass `20261120T133849014781Z` used Cedar Vale,
+RTX 4050 Laptop, 1080p, with screenshots and bucket interruptions off.
+Times are milliseconds. First action is the first fire call against
+the barrel or the pickaxe strike. The draw timestamp is the first Godot
+post-draw signal after local publication. It includes weapon and terrain
+latency and does not measure monitor scanout.
+
+| Operation | Terrain publication to water | First action to drawn water | Frame interval p99 | Worst frame |
+| --- | ---: | ---: | ---: | ---: |
+| Sea barrel | 156.157 | 1287.842 | 28.591 | 53.058 |
+| Lake barrel | 314.787 | 683.190 | 24.443 | 27.509 |
+| Lake mining | 152.949 | 178.638 | 19.299 | 24.588 |
+
+Lake publication took 298.610 ms with visuals enabled. Both runs failed
+the 250 ms lake check. The two-frame publication and 60 Hz gates remain
+open. Future scheduling changes must preserve the committed surface across
+the visible lake. Avoid recomputing unchanged cell boundaries on the mesh
+worker's critical path, and compare first-draw samples to the same revision.
+
+## November 20 indexed water publication
+
+Installed submerged cube run `20261120T131750662534Z` passed all four
+wall contact probes following a four-wall failure. See the
+[object contact report](../issues/explosive-combat/water-plan.md).
+The captured lake crater kept its indexed digest after the contact fix
+(headless run `20261120T131809626819Z`).
+
+In the same installed build, run `20261120T131924658010Z` recorded both
+camera angles before and after each blast. The lake reverse view now sees
+the bank before excavation, clear of foreground foliage. Local publication
+took 146 ms at sea, 330 ms at the lake and 205 ms for mining. The four
+bucket actions took 40–71 ms and conserved the combined world and inventory
+quantity. The settled lake still passed its 81 depth and 24 bank probes
+after the bucket interrupted meshing. Water extension SHA-256 (loaded debug)
+was `8e3a6d747b9727b65b8f00452fc1e6bc30f4b08a45eb3cb7816e6519674d9495`.
+
+Repeat `20261120T132038800606Z` disabled screenshots and omitted bucket
+interruptions during blast timing. Sea, lake and mining publication took
+198, 365 and 200 ms. Corresponding process-frame interval p99 was 35.437,
+23.990 and 19.692 ms, with worst frames of 52.593, 26.141 and 21.278 ms.
+These are instrumented game frames. Fixed-refresh presentation qualification
+is still outstanding.
+
+The game requests indexed render and query geometry. Diagnostic callers can
+still request expanded triangle attributes. For the same 43 crater owners,
+the new game path omitted 892,224 bytes of expanded arrays and preserved the
+indexed geometry digest in every replay. Four-run median native batch times
+were 135.466 ms expanded and 103.306 ms indexed (runs
+`20261120T130415722483Z` and `20261120T130432751758Z`). A repeat indexed
+median of 162.231 ms shows the timing variance; the byte reduction is repeatable.
+
+Installed Cedar Vale runs `20261120T130949888605Z` and
+`20261120T131057238533Z` reached gameplay at spawn and after lake travel.
+At first water publication each crater passed 81 depth probes. All 23 sea
+and 26 lake shoreline probes passed. Sea response was 149 and 147 ms,
+lake 367 and 312 ms, and mining 183 and 180 ms. All exceed two frames.
+In the first run the finite lake solve took 18 ms, touched 51 regions and
+led to 140 urgent mesh owners. Two worker groups preceded local publication.
+The existing synchronized group of adjacent owners remains a latency
+bottleneck. Measure terrain-to-water handoff and mesh publication separately
+when qualifying a smaller revision-consistent publication unit.
+
+## November 20 sea and lake blast check
+
+Installed runs `20261120T125442238100Z` and `20261120T125622010762Z`
+passed 81 depth probes per shore, 23 sea bank contacts and 26 lake bank
+contacts. The latter captured both views at first publication and recorded
+Cedar Vale SHA-256 `988048ed6ae59676c66d8692e51cf5eb7636a94a686f4787bf42fa1fe269ba44`.
+Lake publication still missed its deadline at 435.169 and 348.592 ms.
+Two mesh worker groups remained on the gameplay critical path.
+
+The boundary worker now resolves cell profiles when reconstruction or
+clipping reads them. A ready dry region with no possible lower-face crossing
+and no prior surface to retire can publish occupancy without a worker.
+Replaying the same captured crater four times with the previous library
+(`496dfb55`, run `20261120T125816549038Z`) and the current library
+(`20261120T125724266704Z`) produced identical rendered arrays across 43
+owners. Median native batch processing fell from 136.698 ms to 112.711 ms
+and dispatched groups fell from two to one in this replay. The replay omits
+terrain sampling, the equilibrium solve, GPU uploads and presentation.
+Supply `--water-mesh-replay=<absolute local_response.water_regions path>`
+to the headless water_mesh_worker check. To pin a gameplay repeat, pass
+`--water-source-sha256=<save hash>` to water_player_world.
+
+The current mesh builder assembles vertex attributes and indices in native
+vectors through clipping and winding repair, then copies each completed stream
+once into its Godot packed array. Inland neighbourhood edits skip absent
+owners that have no mesh to retire. The fixed lake blast queued 140 urgent
+owners, compared with 150 previously. Installed no-capture run
+`20261120T124634361942Z` measured 151.372 ms for sea, 366.515 ms for lake,
+182.458 ms for mining and 46.375–48.620 ms for buckets. Paired-camera run
+`20261120T124732785411Z` measured 382.667 ms at the lake. The two runs
+passed the existing immediate depth and bank checks and failed the lake
+deadline. The former straight cutoff was absent in both camera views.
+Mesh worker, watertight topology and publication scaling checks passed;
+the inland corner regression is in `20261120T124845567592Z`.
+
+The installed receiver update passed all 81 depth probes at each shore and
+all 23 sea and 26 lake bank probes at first publication in two runs. The
+two immediate lake views in `20261120T123819287867Z` show a continuous
+crater waterline. Run `20261120T123947895282Z` repeated the edits without
+image capture. Sea, lake and mining publication took 172.180, 436.789 and
+200.645 ms from terrain publication. Four bucket updates took 47.044–53.057
+ms. Both runs failed the lake deadline. See
+[the water plan](../issues/explosive-combat/water-plan.md) for the installed
+library fingerprint and mesh-publication workload. Earlier failures below
+describe the reproduction that led to this update.
+
+Source-game run `20261120T122153098464Z` recorded the native cell geometry
+at each failed first-publication depth probe. Of 52 failures, 26 belonged
+to two absent regions, (171,10,192) and (172,10,192). The other 26 belonged
+to two resident regions with positive capacity in the probe cells and
+insufficient water depth. The missing-region line is at world Z = 772 m.
+Both receiver admission and finite water allocation affect this crater.
+The sea passed all 23 first-publication bank probes. Lake publication took
+269.258 ms in this run with another game process active.
+
+Mesh publication now installs only the changed region entries and updates
+the published over-capacity total by delta. It previously duplicated the
+entire resident mesh and face dictionaries for each batch and later walked
+their keys to retire the copies. Scale check `20261120T122305695396Z`
+exercised through 256 owners, loading and play, and full removal of one pool
+while retaining the same distant mesh instance. This bounds the scope of
+dictionary maintenance; the end-to-end latency gate remains open.
+
+In Cedar Vale the first sea publication had a resident top triangle at 40 m
+while the surrounding ocean still displayed its proxy at exactly 40 m. The
+column-wide pick filter rejected this triangle. During that handoff the
+surface ray and nearest-surface query now accept published, upward-facing
+free triangles coincident with the proxy. The triangle supplies its original
+water-cell owner. Dry locations and submerged triangles remain untargetable.
+Source reproduction `20261120T120957210252Z` and material test
+`20261120T121330648333Z` cover the transition and negative controls.
+
+Installed rendered run `20261120T121401316352Z` checked both gameplay
+barrels on the same read-only save. Sea contact passed at all 23 bank probes
+both at local publication and after settling. Sea publication took 176.252 ms.
+The paired immediate lake captures still show the abrupt cutoff. Immediate
+lake depth and bank contact failed, with publication at 255.855 ms. After
+settling all 81 lake depth probes and 24 contact probes passed. Mining took
+206.979 ms and the four bucket updates took 71.775–95.799 ms. This run
+remains failed on three lake assertions and does not qualify frame pacing.
+
+## In-game terrain authoring
+
+The development belt's sphere, snapped box and single-cell tools now preview
+the brush at the centre used by the terrain command. Picking follows the
+active viewport camera in first and third person. Preview meshes are reused
+across frames. The primary player views and normal inventory actions remain
+the default way to play.
+
+On read-only Cedar Vale, source-game run `20261120T113443205539Z` used the
+development belt and ordinary mouse events to excavate inland. The 2 m radius
+sphere admitted in 0.771 ms and published in 27.139 ms (two game frames).
+The snapped box with 32 m half-extent admitted in 1.456 ms and published in
+335.214 ms (21 frames, worst game interval 22.036 ms). Preview geometry and
+camera alignment passed for all three tools. At the saved coastal spawn the
+32 m brush entered the stroke buffer and failed admission without a user-facing
+reason in `20261120T113545983761Z`. Large-scale editing is unqualified. The
+coastal water preparation enumerates a maximum of 512 region keys per edit;
+this brush spans more. Resolve the admission and publication path while
+preserving conserved water, revision atomicity, collision and visible surfaces.
+
+Run `water_player_world --isolated-render --timeout 235 --require "WATER_PLAYER_WORLD failures=0" -- --water-source-slot=Cedar_Vale --water-load-only --authoring-brush`
+with `tools/run_godot_check.py`. Add `--authoring-at-spawn` to reproduce the
+coastal failure. Verify the overview authoring path, zoom transitions, undo,
+save/reopen and full rendered frame budgets before closing the authoring gate.
+
+Packaged run `20261120T114749733149Z` renders the 2 m sphere at ground level
+and the 32 m box from 65 m above the same inland area using the third-person
+camera. `authoring_brush_0.png` and `authoring_brush_1.png` show the selected
+footprints. The clicks took 0.992 and 1.842 ms through admission; the changed
+terrain revisions appeared after 52.299 and 341.028 ms respectively. The
+worst observed game intervals were 34.677 and 35.285 ms. These are two
+samples from a rendered check with image readbacks. The optional
+`--authoring-captures` switch keeps the image cost out of ordinary timing runs.
+When the camera is inside a large brush its outer boundary can be off-screen.
+A projected-grid trial streaked across the terrain and was rejected.
+
+Coastal preparation now distinguishes missing occupancy that is being built
+from unavailable saved regions, exhausted resident capacity and an oversized
+transaction. The authoring controller retains the captured brush and its
+terrain revision during preparation. Completed occupancy batches wake the
+request; it also renews its two-second native region lease. The original
+player-overlap and admission checks run again at submission. Travel, tool
+changes and intervening terrain revisions invalidate the pending intent.
+
+Packaged read-only run `20261120T120308111518Z` aimed a 2 m brush from
+offshore into coastal terrain outside the player's ready water area. A single
+press was released before preparation finished. Exactly one terrain revision
+published. The input handler took 1.290 ms, terrain admission occurred at
+222.509 ms and publication at 257.049 ms (15 frames). The worst observed
+game interval was 38.676 ms. This verifies reliable delivery while leaving
+the responsiveness and frame-time gates open. Use `--authoring-preparation`
+on the authoring route above. The large coastal brush remains a separate
+failed qualification case.
+
+Installed runs `20261120T120354226334Z` and `20261120T120444524289Z`
+verified that switching tools while preparing causes zero mutations and a
+competing command commits only its own change. Add `--authoring-cancel` or
+`--authoring-interrupt` to the preparation case to repeat them.
+`20261120T120537695881Z` still rejects the 64 m wide coastal box. The
+developer HUD now reports the coastal region limit at the point of rejection.
+
+## Dedicated hosting and client headroom
+
+Packaged Cedar Vale route `20261120T104316302094Z` recorded 9,645 frames.
+Forest, trader and underground p99 intervals were 20.077, 25.052 and
+18.458 ms respectively. The maximum trader interval was 40.517 ms.
+The process reached 2,278,596,608 bytes working set. This run disabled the
+cap during blast timing. The repeat `20261120T104953892882Z` preserved the
+launch cap and found 52 of 81 lake crater probes dry on first publication,
+then all 81 wet after settling. See the [water tracker](../issues/explosive-combat/water-plan.md)
+and [route command](PROJECT_PLAN.md). Stable 60 Hz and immediate local edits
+remain open.
+
+The native first-response path now selects an edit's recorded region keys
+directly and refreshes pending transfer work for changed regions. The
+4,096-pool and connected-lake regression passed 24 checks in
+`20261120T110833763121Z`. On the packaged Cedar Vale route
+`20261120T110909584324Z`, sea/lake/mining publication took
+193.35/282.347/182.658 ms. The sea surface ray, lake first-publication depth,
+lake bank contact and lake 250 ms deadline failed. The four bucket actions
+took 38.516–61.784 ms. Forest/trader frame intervals reached 21.431/28.445 ms
+at p99. This change removes scans of unrelated resident regions from bounded
+local jobs; these timings do not establish an end-to-end speedup.
+
+Repeat `20261120T111344946552Z` recorded 9,379 frames at 1080p on the
+i5-12450H / RTX 4050 Laptop. The game reported NVIDIA driver 32.0.16.1742,
+60 Hz, cap 60, Forward+, 1.0 render scale, VSync and shadows enabled.
+Forest/trader/underground p99 game intervals were 20.113/28.953/21.203 ms
+with viewport GPU p99 7.394/8.251/6.768 ms. Worst trader frame was 47.082 ms.
+The same four water assertions failed. Dedicated fixture receipt
+`20261120T111303245828Z/dedicated_world.json` records a passing restart and
+parity check, 532.42 ms edit round trip and 263,249,920 bytes peak working set
+through that edit. These are single-run Windows measurements.
+
+The [world systems design](WORLD_SYSTEMS_DESIGN.md#current-priority-one-world-for-dedicated-hosting-and-continuous-zoom) records the authority, plugin, zoom and scale milestones. The first native place query and publication event serve the trader today. The first standalone inland edit gate is exercised below. Paged saves, structures, authorization and asynchronous admission remain open. Dedicated hosting, zoom continuity and hundreds of concurrent players remain unqualified.
+
+The [dedicated host and regression command](DEDICATED_AUTHORITY.md) now run a
+cross-boundary excavation against native terrain and water in an independent
+Windows process. The installed game scene and saved/restarted host agreed at
+all three probes. Both excavated cells had density 2 and depth 5.458628 m.
+Total finite water stayed at 36,032,293,119 mL. The test also verified an
+exclusive writer, rejected stale revision, unchanged canonical save after
+unsaved process termination, previous-version backup and corrupt-input refusal.
+The installed operator round trip was 404.56 ms and the sampled peak working
+set was 265,318,400 bytes. Neither a 30 Hz service nor the full Linux host
+budget is qualified. The headless scene comparison does not measure display
+presentation. Current support covers inline inland terrain/water archives.
+
+The subsequent Windows publication-failure check passed after a forced sharing
+violation at final replacement. The unchanged canonical archive reopened, and
+local, dedicated and reloaded terrain revisions agreed. That run measured
+414.23 ms for the operator edit and 263,028,736 bytes peak working set.
+The Linux host is unavailable; its total-system capacity gate remains open.
+
+Packaged headless verification `20261120T100915069525Z` covers index invalidation, rejected input, event ordering relative to publication and exact snapshot roundtrip. With 1,024 road records the 64 full-plan reads took 45,308 microseconds total versus 12 microseconds for the indexed query. This benchmark measures local metadata reads only.
+
+The installed Cedar Vale trader route (`20261120T100935793737Z`) passed exit, re-entry, visible outfit, animation and unchanged-save checks. Per-lap p99 was 27.84 / 22.12 ms and maximum was 36.74 / 32.39 ms. The client still misses its 16.67 ms budget.
+
+## November 20 frame pacing
+
+An extended Cedar Vale walk now measures ordinary terrain and the trader district.
+Rebuilding the shopkeeper on residency changes caused repeated 200 ms hitches.
+The shop now prepares one dressed visual during loading and reuses it on return.
+The native boulder selection optimization reduces row checks, while the 60 FPS
+exploration target remains open. See the route measurements below.
+
+The [grounded route and handgun investigation](../issues/runtime-performance/README.md)
+tracks first-equip latency, counts of slow frames on cold and repeated walks,
+and the contribution of test-only quantity verification to lake explosion traces.
+General movement pacing remains open. Reproduce slow frames on the same route
+after the handgun fix, attribute the time inside those intervals, and require
+repeatable reductions in slow-frame counts and consecutive slow frames without
+regressing bucket, mining or shoreline response. A kernel scheduling trace
+requires a host with `CPU.Light` profiling permitted.
+
 ## Steam launch path correction — 2026-11-13
 
 Both original Steam desktop shortcuts are restored byte-for-byte after the user
@@ -7811,3 +8243,18 @@ Baseline stiffness remains known; further tuning is deferred until new feedback.
 Any future replacement needs comparative visual acceptance and live checks.
 Closed-book/whole-food
 presentation is still the simple scope; page turning/biting are not claimed.
+
+## Weapon audio default — 2026-11-20
+
+Shots (PX9, carbine and assault rifle) and explosions now use a Weapons slider
+under Audio, at 80% gain through the existing Effects bus: 20% below the previous
+level without lowering environmental effects. Existing Effects preferences remain
+applicable; reload and impact cues retain their existing levels.
+Runtime verification remains pending: the audio_runtime check was denied storage
+admission because reports occupied 4,518,915,778 bytes against a 4,294,967,296-byte
+budget. Evidence: reports/checks/20261120T145034243068Z/run.json. No engine test ran.
+After authorized retention brings reports within budget, rerun
+`python tools/run_godot_check.py audio_runtime --require "failures=0" --timeout 45`
+and confirm the in-game Weapons slider controls shots and explosions. The added
+checks cover 80% initial gain, routing through Effects and preservation of a
+selected gain across audio re-preparation. Listening acceptance remains unreviewed.

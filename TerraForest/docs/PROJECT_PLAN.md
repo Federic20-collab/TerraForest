@@ -1,3 +1,71 @@
+## World authority and qualification milestones (November 20)
+
+The following gates track the Windows-first hosting and strategy-to-first-person
+work. An engineering check closes only the behaviour it exercises.
+
+Installed run `20261120T143633262102Z` processed the 132 urgent lake mesh
+owners in one job. The first water update took 340 ms after the terrain
+edit. This remains above the interaction budget. The [foundation status](WORLD_FOUNDATION_STATUS.md)
+records both fixed-angle gameplay captures, geometry comparisons and bucket timings.
+
+The subsequent exact mesh dependency update reduced the tested crater from
+140 urgent owners to 132. Packaged run `20261120T142220024763Z` still spent
+385 ms publishing the local lake edit. See the [foundation status](WORLD_FOUNDATION_STATUS.md)
+for the two worker timings, geometry comparisons and dedicated archive check.
+
+Packaged run `20261120T140833686725Z` repeated the sea and lake explosions
+at 1080p with two camera angles each. Initial and settled contact probes
+passed at both shores. Lake water appeared 370 ms after terrain publication
+and 752 ms after the action. The local equilibrium worker used 15.8 ms.
+The timeline shows 140 urgent mesh owners queued at local commit and about
+250 ms between that commit and the draw. Prioritize the visible geometry
+handoff as well as authority discovery. The dedicated archive comparison
+passed on the installed executable in `20261120T141032140550Z`.
+
+November 20 installed gameplay run `20261120T133724057342Z` passed first
+and settled sea/lake shoreline coverage, including the bucket interruption.
+Both fixed lake views show the bank before and after the blast. A replay
+of committed water matched all 66 first-publication ray samples. The lake
+still failed its 250 ms check at 299 ms (315 ms without captures).
+Construction cube contact passed again in `20261120T133948089900Z`.
+The two-frame and 60 Hz gates remain open.
+See the [foundation status](WORLD_FOUNDATION_STATUS.md).
+
+| Gate | Required evidence | Status |
+| --- | --- | --- |
+| Packaged client baseline | Three cold and three warm forest, trader, underground, sea and lake routes. Pin build, save, configuration, camera paths and hardware. Record actual refresh misses, CPU/GPU times, queues, peaks, images and loading separately. | Open. Existing walks and two-angle water checks are inputs. Keep the lake contact failure after bucket interruption as a regression. |
+| Dedicated authority | Real client and dedicated processes commit the same cross-boundary edit. Verify density, water, unchanged neighbours, revisions, generation, save, crash recovery and restart. | Inland terrain/water slice implemented. See foundation status for verified coverage and unsupported save types. |
+| Shared operations | Use validated versioned commands, stable identity, idempotency, bounded queries and post-commit events for buckets, mining, barrels, construction, inventory, actors, vehicles, trade and remote orders. | Gameplay and hosting share terrain packet execution. The dedicated operator supports versioned excavation with checkpointed retries, and bounded terrain/water point queries on a shared revision. Per-peer identity, gameplay command migration and network replication remain open. |
+| Continuous zoom and local edits | Keep canonical simulation independent of camera zoom; share region simulation across players. Measure input feedback, admit/commit and visible publication separately. Verify two angles at each shore, submerged contact and transitions under repeated edits. | Open. |
+| Session replication | Forge discovery plus private direct joins. Two real clients, authenticated authority, late join, competing edits, faults, slow readers and recovery. Benchmark Forge traffic before selecting the gameplay transport. | Open. Existing community room traffic has no gameplay authority. |
+| Trusted extensions | Versioned server/client manifest, commands, queries, events, persistence and teardown. Sample out-of-tree mod in both camera modes and hosted play; dependency, unavailable-content and save preservation tests. | Open. |
+| Real-time world authoring | Use the existing development tools in the playable first- and third-person world. Add overview selection, camera-independent commands, bounded batch edits, cancel/undo and explicit revision conflicts. Compare single-cell edits, swept brushes and multi-region edits with concurrent exploration. | Open. Require next-frame feedback, committed local geometry within two frames, persistence and recovery, unchanged neighbours, and the same 60 Hz visual and frame-time gates across scales. |
+| Scale and distribution | Separate load generators at 32, 100 and 200 active players, including 64 in one hotspot. Qualify simultaneous exploration, edits and combat, autosaves, reconnect, crash recovery, installation, three repeats and an eight-hour soak. | Open. |
+| Small Linux host | Test an isolated 1-core, 400 MB total system with OS and Forge measured. Record boot, idle, first region, join, edit, peak save and restart. Increase players and regions until the first failure. | Open. Port archive locking, atomic publication and native terrain/water storage first. |
+
+At 1080p on the Lenovo reference the target is 13.3 ms p99 CPU and GPU work
+each, and zero game-attributable missed refreshes on the fixed 60 Hz routes.
+At 30 Hz the authority target is 26.7 ms p99 work with bounded queue age.
+Give input feedback by the next client frame, admit within one tick at p99,
+and publish local changes within two rendered frames at p99 after commit
+delivery. Measure end-to-end latency too. Publish working set, private memory,
+traffic per player, region and peer costs, performance under overload, and
+the last passing measured workload for each host class.
+
+The packaged baseline driver now supports `--qualification-route`. From the
+project directory run:
+
+```
+python tools/run_godot_check.py water_player_world --executable --isolated-render --timeout 600 --require "WATER_PLAYER_WORLD failures=0" -- --water-source-slot=Cedar_Vale --qualification-route --water-edit-response
+python tools/analyze_qualification_route.py reports/checks/<run-id>
+```
+
+Use the run manifest for engine, pack, native library and driver-script hashes
+and process-memory peaks. The frame stream includes position, yaw, terrain
+queue depth and asynchronous viewport timers. The engine frame signal does
+not observe actual presentation. The open baseline gate still needs external
+presentation measurements and the matched cold/warm campaign.
+
 ## Startup autosave corrected; paging promotion withheld - 2026-10-20
 
 Default-on compatibility checks passed model edit/save/fresh reopen and browser
@@ -1637,6 +1705,8 @@ Only one delivery milestone is active. Supporting work must name the coverage ro
 | M4 Combined area qualification | Forested settlement, interiors/props, underground terrain, lake, roads, entities and driving | Human checkpoint plus short automated mixed-workload tests; declared scene counts, travel route and frame/resource budgets precede performance runs |
 | M5 Scale and release qualification | Increased density/distance, endurance, recovery and distributable build | Stated workloads sustain target behavior; memory/VRAM/disk growth and failures are measured; clean-machine release checks pass |
 | M6 Multiplayer implementation and qualification | Authoritative session with interest-managed world/entity state | Server plus two clients and network fault tests first, then measured scaling. Architectural readiness remains a requirement throughout M1ā€“M5 |
+
+The November 20 priority brings the first dedicated-host authority path forward. Its scoped gate is a renderer-independent terrain and water command with save, restart and replay parity. Two-client transport and population qualification remain separate gates. See the [hosting and continuous zoom plan](WORLD_SYSTEMS_DESIGN.md#current-priority-one-world-for-dedicated-hosting-and-continuous-zoom).
 
 M6 is not authorization to market earlier milestones as completing the large-multiplayer goal. Reassess its placement after M4 before release scope is finalized. Likewise, a successful M4 scene does not prove an arbitrary city size.
 

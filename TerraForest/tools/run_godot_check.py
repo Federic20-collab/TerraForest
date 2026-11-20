@@ -25,21 +25,24 @@ from development_storage import admit, register_worlds
 BOUNDED_WATER_REPORTS = {
     "px9_handgun", "water_patch", "water_patch_contacts", "water_static_editing", "water_region_io",
     "water_region_retirement", "water_map_identity", "ocean_residency", "water_snapshot_cost",
-    "water_player_world", "water_local_surface", "water_equilibrium_scope", "water_ocean_equilibrium",
+    "water_player_world", "water_publication_scale", "water_local_surface", "water_equilibrium_scope", "water_ocean_equilibrium",
     "water_region_store", "water_region_transfer", "water_storage_snapshot", "water_streaming_save",
     "water_equilibrium_replay", "water_equilibrium", "water_mesh_worker", "water_material_surface", "water_surface_topology",
     "water_surface_continuity", "water_pool_topology", "water_contact_volume", "water_contact_visual", "water_contact_clip",
-    "launcher_world_flow", "block_pager", "combat_remote_world", "water_blast_terrain", "water_blast_settling", "water_barrel_world", "water_implicit_proof", "block_solid_samples",
+    "boulder_horizon_native", "launcher_world_flow", "block_pager", "combat_remote_world", "water_blast_terrain", "water_blast_settling", "water_barrel_world", "water_implicit_proof", "block_solid_samples",
 }
 
 # Export's audited contract suite emits small logs, except eight 1536x1536
 # RGB material sheets (under 64 MiB even before PNG compression).
 BOUNDED_CONTRACT_REPORTS = {
-    "terrain_block_contract", "terrain_block_catalog", "building_expansion",
+    "generated_region", "terrain_block_contract", "terrain_block_catalog", "building_expansion",
     "building_expansion_pack", "production_building_catalog", "door_dimensions",
 }
 
 def planned_report_bytes(command):
+    if "--authoring-captures" in command and any(Path(str(value)).name == "water_player_world.gd" for value in command):
+        # Two additional 1080p frames on top of the normal route allowance.
+        return 16 * 2**20 + planned_report_bytes([arg for arg in command if arg != "--authoring-captures"])
     if ("--water-load-only" in command or "--water-no-captures" in command) and any(Path(str(value)).name == "water_player_world.gd" for value in command):
         return 8 * 2**20  # One loaded-world capture plus bounded logs/JSON.
     if any(Path(str(value)).name in {"water_barrel_world.gd", "water_player_world.gd"} for value in command):

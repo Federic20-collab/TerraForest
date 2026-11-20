@@ -166,6 +166,14 @@ class NativeRegionalWater : public godot::RefCounted {
         std::vector<ReconstructedCell> reconstructed;
         uint64_t bytes() const {return uint64_t(vertices.size())*sizeof(godot::Vector3)+uint64_t(indices.size())*sizeof(int32_t)+owners.size()*sizeof(uint16_t)+reconstructed.size()*sizeof(ReconstructedCell);}
         godot::Vector3 vertex(int index) const {return vertices[indices[index]];}
+        // While the ocean proxy is visible, only a resident free surface
+        // coincident with that plane can supply a visible interaction owner.
+        bool on_ocean_proxy(int i,int region_y) const {
+            if(owners[i/3]&0x8000)return false;
+            const float level=40-region_y*4;
+            const auto a=vertex(i),b=vertex(i+1),c=vertex(i+2);
+            return a.y==level&&b.y==level&&c.y==level&&(c-a).cross(b-a).y>0;
+        }
     };
     std::map<Key,QuerySurface> published_surfaces,staged_surfaces;
     uint64_t staged_surface_bytes=0;
@@ -175,6 +183,7 @@ class NativeRegionalWater : public godot::RefCounted {
     std::unordered_set<Key> equilibrium_dependencies;
     std::unordered_set<Key> local_edit_regions;
     std::unordered_set<Key> local_occupancy_regions;
+    std::unordered_set<Key> local_receiver_regions;
     // Unpublished relaxation is speculative. A new player edit can discard it
     // without discarding that edit or waiting for a lake-wide mesh rebuild.
     struct RelaxationBefore {SnapshotArray<uint64_t,512> water;std::vector<uint32_t> vacancies;uint8_t ocean_state;};
@@ -247,6 +256,8 @@ class NativeRegionalWater : public godot::RefCounted {
     static bool in_domain(const godot::Vector3i &p);
     Region *get(const godot::Vector3i &p,bool request);
     const Region *get(const godot::Vector3i &p) const;
+    static uint32_t mesh_owner_mask(int cell_index);
+    void changed_owners(Key region, uint32_t owners);
     void changed(const godot::Vector3i &p);
     void request(Key k);
     void invalidate_regions(const godot::AABB &bounds,bool replace_water,bool buildings=false);
@@ -288,7 +299,8 @@ class NativeRegionalWater : public godot::RefCounted {
     godot::Ref<NativeWaterEquilibriumJob> continue_equilibrium_capture(uint64_t deadline);
     uint64_t mesh_worker_us=0,max_mesh_worker_us=0;
     bool surface_ready(Key owner,bool snapshot=false) const;
-    SurfaceMesh build_surface(Key owner,bool snapshot=false,bool include_contacts=false,const std::atomic<bool> *cancel=nullptr,WaterSurfaceProfileCache *profiles=nullptr) const;
+    bool dry_surface_owner(Key owner,bool snapshot) const;
+    SurfaceMesh build_surface(Key owner,bool snapshot=false,bool include_contacts=false,const std::atomic<bool> *cancel=nullptr,WaterSurfaceProfileCache *profiles=nullptr,bool indexed_only=false) const;
     bool decode(const godot::PackedByteArray &data,bool install,bool prepare_render=true);
 protected: static void _bind_methods();
 public:
@@ -317,10 +329,12 @@ public:
     godot::PackedByteArray ocean_publication_mask() const;
     godot::Dictionary update_ocean_residency(const godot::Vector3 &center,int64_t budget);
     bool prepare_ocean_edit(const godot::AABB &bounds);
+    int prepare_ocean_edit_status(const godot::AABB &bounds);
     // Conservative occupied-cell column envelope for cartography, not a mesh surface.
     godot::Dictionary survey_columns(int64_t cursor,int64_t expected_revision,int64_t region_budget) const;
     godot::String survey_cache_identity() const{return survey_saved_identity;}
     int64_t survey_revision_id() const {return int64_t(map_revision);}
+    int64_t total_water_ml() const {return int64_t(total);}
     godot::Dictionary survey_surfaces(int64_t cursor,int64_t expected_revision,int64_t region_budget) const;
     godot::Dictionary next_request();
     godot::Array next_requests(int64_t limit,bool ocean_only=true);
@@ -345,7 +359,7 @@ public:
     godot::Dictionary raycast_vacancy(const godot::Vector3 &from,const godot::Vector3 &to) const;
     godot::Dictionary raycast_surface(const godot::Vector3 &from,const godot::Vector3 &to) const;
     bool commit_mesh_batch(int64_t id,const godot::Array &retiring=godot::Array(),const godot::Array &revealing=godot::Array());
-    godot::Dictionary next_mesh_batch(bool background=false);
+    godot::Dictionary next_mesh_batch(bool background=false,bool indexed_only=false);
     // Diagnostic contact flag audits the closed volume with the same builder.
     // Runtime publication and picking use the same closed material boundary.
     godot::Dictionary next_mesh(bool include_contacts=false);
@@ -374,6 +388,7 @@ class NativeWaterEquilibriumJob : public godot::RefCounted {
     size_t hierarchy_cell_limit=131072;
     static std::atomic<uint64_t> pending_bytes;
     std::vector<uint64_t> required,changed_regions,capture_keys;
+    std::unordered_set<uint64_t> local_donors;
     size_t capture_cursor=0;
     std::shared_ptr<EquilibriumCaptureState> capture_selection;
     godot::String reason;
@@ -395,6 +410,7 @@ class NativeWaterMeshJob : public godot::RefCounted {
     std::vector<NativeRegionalWater::SurfaceMesh> results;
     std::vector<uint64_t> owners;
     size_t consumed=0;
+    bool indexed_only=false;
     uint64_t batch=0,elapsed_us=0,reserved_bytes=0;
     static std::atomic<uint64_t> pending_bytes;
     std::atomic<bool> started{false},ready{false},cancelled{false};

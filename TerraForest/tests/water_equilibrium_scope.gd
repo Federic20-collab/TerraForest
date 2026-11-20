@@ -1,7 +1,58 @@
 # SPDX-License-Identifier: 0BSD
 extends "res://tests/water_equilibrium.gd"
 func _initialize()->void:run_scope.call_deferred()
+func check_new_receiver_scope()->void:
+ var shore:=Vector3i(87,83,83)
+ var separate:=Vector3i(105,83,83)
+ var water:=fixture({shore:[0,500,125000],separate:[0,500,125000],separate+Vector3i.DOWN:[0,500,0]})
+ var pocket:=AABB(Vector3(separate)*.5,Vector3.ONE*.25)
+ var untouched:PackedByteArray=water.capture_local_snapshot(pocket)
+ check(untouched.size()>6000,"The disconnected pool has a stored regional payload")
+ var total:int=water.statistics().water_ml
+ water.settle_after_edit(AABB(Vector3(shore)*.5,Vector3(.75,.25,.25)))
+ var receiver:=Vector3i(11,10,10)
+ var requests:Array=water.next_requests(32,false)
+ check(receiver in requests,"Shore excavation requests the previously absent receiver")
+ check(water.begin_equilibrium(0,true)==null,"First response waits for the receiver occupancy")
+ if receiver not in requests:return
+ # A sealed new region exercises the membership of the enlarged donor window.
+ # The neighbouring pool could drain vertically if it were independently woken.
+ var patch=ClassDB.instantiate("NativeWaterTerrainPatch");patch.configure(receiver)
+ var terrain=preload("res://tests/water_publication_scale.gd").SolidTerrain.new()
+ while patch.sample_terrain(terrain,729,0,0)==0:pass
+ check(water.accept_patch(patch),"Receiver accepts sampled terrain")
+ var job:RefCounted=water.begin_equilibrium(0,true)
+ check(job!=null,"Sampled receiver admits the local response")
+ if job==null:return
+ job.prepare()
+ var result:Dictionary=water.finish_equilibrium(job)
+ check(result.get("snapshot_regions",0)==3,"The local snapshot includes the receiver, shore and disconnected candidate")
+ check(result.get("ok",false) and water.statistics().water_ml==total,"First response conserves the complete finite quantity")
+ check(water.capture_local_snapshot(pocket)==untouched,"A disconnected pool in the donor window remains byte-identical")
+func check_sparse_mesh_owners()->void:
+ var region:=Vector3i(10,10,10)
+ var cells:Dictionary={}
+ for z in range(-1,2):
+  for x in range(-1,2):
+   cells[(region+Vector3i(x,0,z))*8+Vector3i(3,3,3)]=[500,500,0]
+ for offset in [1,6]:
+  var high:=region*8+Vector3i(offset,3,offset)
+  cells[high]=[0,500,125001]
+  cells[high+Vector3i.DOWN]=[0,500,0]
+ var water:=fixture(cells)
+ while not water.next_mesh().is_empty():pass
+ var result:=await solve(water)
+ check(result.get("ok",false) and water.statistics().water_ml==250002,"Two diagonal pools settle in one region with conserved volume")
+ var owners:Array=[]
+ while true:
+  var mesh:Dictionary=water.next_mesh()
+  if mesh.is_empty():break
+  owners.append(mesh.coordinate-region)
+ var expected:=[Vector3i.ZERO,Vector3i.LEFT,Vector3i.RIGHT,Vector3i.FORWARD,Vector3i.BACK,Vector3i(-1,0,-1),Vector3i(1,0,1)]
+ check(owners.size()==expected.size() and expected.all(func(p):return owners.has(p)),"Sparse edits queue exactly the seven overlapping mesh owners: "+str(owners))
 func run_scope()->void:
+ await check_sparse_mesh_owners()
+ check_new_receiver_scope()
  var cells:Dictionary={}
  for z in 64:
   for x in 64:cells[Vector3i(11+x*24,83,11+z*24)]=[0,500,125000]
@@ -10,6 +61,13 @@ func run_scope()->void:
  var water:=fixture(cells)
  var total:int=water.statistics().water_ml
  water.settle_after_edit(AABB(Vector3(donor)*.5,Vector3.ONE*.5))
+ var first_response:RefCounted=water.begin_equilibrium(0,true)
+ check(first_response!=null,"Resident edit admits a first response among 4,096 pools")
+ if first_response!=null:
+  first_response.prepare()
+  var immediate:Dictionary=water.finish_equilibrium(first_response)
+  check(immediate.get("ok",false) and immediate.get("snapshot_regions",4096)<16,"First response stays in the edited neighbourhood")
+  check(water.statistics().water_ml==total and water.runtime_state().settling_regions>0,"First response conserves water and retains future relaxation")
  var result:=await solve(water)
  check(result.get("ok",false) and result.get("snapshot_regions",4096)<16,"Local edit snapshots only its affected group with 4,096 resident pools: "+str(result))
  check(water.statistics().water_ml==total,"Scoped equilibrium conserves the entire store quantity")

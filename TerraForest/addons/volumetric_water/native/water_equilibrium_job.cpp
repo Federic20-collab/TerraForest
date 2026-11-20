@@ -5,6 +5,7 @@
 #include <godot_cpp/classes/time.hpp>
 #include <algorithm>
 #include <cmath>
+#include <limits>
 #include <numeric>
 #include <queue>
 #include <bitset>
@@ -97,7 +98,8 @@ Ref<NativeWaterEquilibriumJob> NativeRegionalWater::continue_equilibrium_capture
     while(job->capture_cursor<job->capture_keys.size()){
         Key k=job->capture_keys[job->capture_cursor++];const auto &r=regions.at(k);
         auto inserted=job->frozen->regions.emplace(k,r);
-        if(job->local_response&&r.ocean_state!=1)inserted.first->second.settle_pending=true;
+        if(job->local_response&&r.ocean_state!=1)
+            inserted.first->second.settle_pending=!job->local_donors.count(k);
         for(auto ml:r.water)job->frozen->total+=ml;
         if(r.settle_pending){auto old=published_occupancy.find(k);if(old!=published_occupancy.end())job->frozen->published_occupancy.emplace(k,old->second);}
         if(expired()&&job->capture_cursor<job->capture_keys.size())return {};
@@ -115,7 +117,15 @@ Ref<NativeWaterEquilibriumJob> NativeRegionalWater::begin_equilibrium(int64_t bu
         for(const auto &[k,r]:regions)if(r.settle_pending&&r.ocean_state&&r.has_density)pending_ocean.push_back(k);
         for(Key k:pending_ocean)if(!prepare_ocean_edit(AABB(Vector3(position(k))*4,Vector3(4,4,4))))return {};
     }
-    for(const auto &[k,r]:regions)if(r.settle_pending&&!r.valid&&(!local_response||local_edit_regions.empty()||local_edit_regions.count(k)))return {};
+    const bool bounded_edit=local_response&&!local_edit_regions.empty();
+    if(bounded_edit){
+        for(Key k:local_edit_regions){
+            auto found=regions.find(k);
+            if(found!=regions.end()&&!found->second.valid)return {};
+        }
+    }else{
+        for(const auto &[k,r]:regions)if(r.settle_pending&&!r.valid)return {};
+    }
     if(!local_response)for(Key k:equilibrium_dependencies){
         auto found=regions.find(k);
         if(found==regions.end()||!found->second.valid){get(position(k)*8,true);return {};}
@@ -130,10 +140,16 @@ Ref<NativeWaterEquilibriumJob> NativeRegionalWater::begin_equilibrium(int64_t bu
     auto &s=*job->capture_selection;
     if(!local_response)s.candidate.insert(equilibrium_dependencies.begin(),equilibrium_dependencies.end());
     s.account_keys.assign(s.candidate.begin(),s.candidate.end());
-    for(const auto &[k,r]:regions){
-        bool selected=r.settle_pending&&(!local_response||local_edit_regions.empty()||local_edit_regions.count(k));
-        if(local_response&&!local_occupancy_regions.empty())selected=local_occupancy_regions.count(k)&&r.valid;
-        if(selected)s.seeds.push_back(k);
+    if(bounded_edit||(local_response&&!local_occupancy_regions.empty())){
+        const bool occupancy_changed=!local_occupancy_regions.empty();
+        const auto &keys=occupancy_changed?local_occupancy_regions:local_edit_regions;
+        for(Key k:keys){
+            auto found=regions.find(k);
+            if(found!=regions.end()&&(occupancy_changed?found->second.valid:found->second.settle_pending))s.seeds.push_back(k);
+        }
+        std::sort(s.seeds.begin(),s.seeds.end());
+    }else{
+        for(const auto &[k,r]:regions)if(r.settle_pending)s.seeds.push_back(k);
     }
     if(local_response){
         // One bounded union/accounting pass, rather than recopying and charging
@@ -142,6 +158,22 @@ Ref<NativeWaterEquilibriumJob> NativeRegionalWater::begin_equilibrium(int64_t bu
         for(Key k:s.seeds){s.candidate.insert(k);const auto p=position(k);
             for(auto d:adjacent){auto q=p+d;if(q.x<0||q.y<0||q.z<0||q.x>=500||q.y>=64||q.z>=500)continue;
                 auto found=regions.find(key(q));if(found!=regions.end()&&found->second.valid)s.candidate.insert(found->first);}
+        }
+        // If the excavation opens previously unsampled receivers, their
+        // initial quantity is zero. Include a bounded patch of resident
+        // donors before solving, so the crater draws from the lake.
+        const bool opened=std::any_of(s.seeds.begin(),s.seeds.end(),[&](Key k){
+            return local_receiver_regions.count(k)!=0;
+        });
+        if(opened)for(Key k:s.seeds){
+            auto p=position(k);
+            for(int dz=-3;dz<=3;++dz)for(int dx=-3;dx<=3;++dx){
+                auto q=p+Vector3i(dx,0,dz);
+                if(q.x<0||q.z<0||q.x>=500||q.z>=500)continue;
+                auto found=regions.find(key(q));
+                if(found!=regions.end()&&found->second.valid&&s.candidate.insert(found->first).second)
+                    job->local_donors.insert(found->first);
+            }
         }
         s.seeds.clear();s.account_keys.assign(s.candidate.begin(),s.candidate.end());
     }
@@ -190,7 +222,7 @@ Dictionary NativeRegionalWater::finish_equilibrium(const Ref<NativeWaterEquilibr
     if(!job->success){out["reason"]=job->reason;return out;}
     // Completed load/background transactions must retire their edit seeds too.
     // Otherwise the next player edit inherits every earlier pending region.
-    for(const auto &[k,r]:job->frozen->regions){local_edit_regions.erase(k);local_occupancy_regions.erase(k);}
+    for(const auto &[k,r]:job->frozen->regions){local_edit_regions.erase(k);local_occupancy_regions.erase(k);local_receiver_regions.erase(k);}
     equilibrium_dependencies.clear();
     total=uint64_t(int64_t(total)+job->ocean_exchange_ml);
     // All quantities install together. Render/query/immersion remain on their
@@ -202,26 +234,34 @@ Dictionary NativeRegionalWater::finish_equilibrium(const Ref<NativeWaterEquilibr
         if(live==regions.end()||prepared==job->frozen->regions.end())continue;
         auto &r=live->second;const auto &source=prepared->second;
         const auto &before=static_cast<const Region &>(r).water;
-        Vector3i lo(7,7,7),hi;bool any=false;
-        for(int i=0;i<512;++i)if(before[i]!=source.water[i]){auto q=Vector3i(i%8,(i/8)%8,i/64);lo=lo.min(q);hi=hi.max(q);any=true;}
-        if(!any)continue;
+        uint32_t owners=0;
+        for(int i=0;i<512;++i)if(before[i]!=source.water[i])owners|=mesh_owner_mask(i);
+        if(!owners)continue;
         if(!job->local_response&&publication_enabled)relaxation_before.emplace(k,RelaxationBefore{r.water,r.vacancies,r.ocean_state});
         r.water=source.water;
         if(job->frozen->surrounding_ocean&&r.ocean_state)r.vacancies=source.vacancies;
         else r.vacancies.clear();
         if(r.ocean_state==1)r.ocean_state=2;
-        const auto base=position(k)*8;
-        for(int corner=0;corner<8;++corner)changed(base+Vector3i((corner&1)?hi.x:lo.x,(corner&2)?hi.y:lo.y,(corner&4)?hi.z:lo.z));
+        changed_owners(k,owners);
     }
     background_change=false;
-    settling.clear();settling_set.clear();
-    for(auto &[k,r]:regions){
-        const auto prepared=job->frozen->regions.find(k);
-        // A local response is a conservative transient, not a claim that the
-        // connected body has reached equilibrium. Persist its pending work.
-        if(!job->local_response&&prepared!=job->frozen->regions.end())r.settle_pending=prepared->second.settle_pending;
-        r.settle_mask.fill(0);
-        if(r.settle_pending)wake_settling(k);
+    if(job->local_response){
+        // Only changed quantities can change which faces of a pending region
+        // need another transfer. Keep distant pending work in queue order.
+        for(Key k:job->changed_regions){
+            auto found=regions.find(k);
+            if(found==regions.end()||!found->second.settle_pending)continue;
+            found->second.settle_mask.fill(0);
+            wake_settling(k);
+        }
+    }else{
+        settling.clear();settling_set.clear();
+        for(auto &[k,r]:regions){
+            const auto prepared=job->frozen->regions.find(k);
+            if(prepared!=job->frozen->regions.end())r.settle_pending=prepared->second.settle_pending;
+            r.settle_mask.fill(0);
+            if(r.settle_pending)wake_settling(k);
+        }
     }
     invalidate_snapshot();
     out["ok"]=true;out["changed_regions"]=int64_t(job->changed_regions.size());return out;
@@ -617,19 +657,37 @@ void NativeWaterEquilibriumJob::prepare(){
             mark(1);
             uint64_t quantity=0;double low=upper;
             std::vector<WaterVolumeQuery> queries;queries.reserve(cells.size());
-            std::array<uint32_t,512> air_layers{};std::vector<int> boundary_cells;
+            std::array<uint32_t,512> air_layers{};
+            std::array<std::vector<int>,512> cut_layers;
+            std::array<double,513> volume_below{};
             for(size_t i=0;i<cells.size();++i){const auto &c=cells[i];quantity+=c.before;low=std::min(low,c.p.y*.5);queries.emplace_back(c.shape);
-                if(full_air(c.shape))++air_layers[c.p.y];else boundary_cells.push_back(int(i));}
+                if(full_air(c.shape))++air_layers[c.p.y];
+                else{
+                    cut_layers[c.p.y].push_back(int(i));
+                    volume_below[c.p.y+1]+=std::min(double(queries[i].capacity()),queries[i].volume(500.));
+                }}
             if(!quantity)continue;
+            for(size_t y=0;y<air_layers.size();++y)
+                volume_below[y+1]+=volume_below[y]+125000.*air_layers[y];
             double high=upper;
             // Resolve less than one ml over the entire connected surface, not
             // only a fixed head precision. Large full lakes can differ by 1 ml.
             for(int iteration=0;iteration<48;++iteration){
-                const double middle=(low+high)*.5;double volume=0;
-                // Interior volumes share one linear curve per elevation. Only
-                // cut cells need their individual terrain/solid evaluator.
-                for(size_t y=0;y<air_layers.size();++y)if(air_layers[y])volume+=air_layers[y]*std::clamp((middle-y*.5)*250000.,0.,125000.);
-                for(int i:boundary_cells)volume+=std::min(double(queries[i].capacity()),queries[i].volume((middle-cells[i].p.y*.5)*1000.));
+                const double middle=(low+high)*.5;
+                const int layer=std::clamp(int(std::floor(middle*2)),0,511);
+                const double depth=std::clamp((middle-layer*.5)*1000.,0.,500.);
+                double volume=volume_below[layer]+air_layers[layer]*depth*250.;
+                for(int i:cut_layers[layer])volume+=std::min(double(queries[i].capacity()),queries[i].volume(depth));
+                // Reordering positive sums can change a bisection decision at
+                // a roundoff tie. Preserve the original sum order there so that
+                // deterministic millilitre remainders survive save and replay.
+                const double error=4.*(cells.size()+512)*std::numeric_limits<double>::epsilon()*std::max(volume,double(quantity));
+                if(std::abs(volume-double(quantity))<=error){
+                    volume=0;
+                    for(size_t y=0;y<air_layers.size();++y)if(air_layers[y])volume+=air_layers[y]*std::clamp((middle-y*.5)*250000.,0.,125000.);
+                    for(size_t i=0;i<cells.size();++i)if(!full_air(cells[i].shape))
+                        volume+=std::min(double(queries[i].capacity()),queries[i].volume((middle-cells[i].p.y*.5)*1000.));
+                }
                 if(volume<double(quantity))low=middle;else high=middle;
                 if((high-low)*double(cells.size())*250000.<.25)break;
             }
