@@ -15,6 +15,20 @@
       "name": "Boat",
       "scene": "res://boat_demo/scenes/boat_world.tscn",
       "adapter": "res://addons/vehicle_runtime/boat_adapter.gd"
+    },
+    {
+      "capability": "vehicle",
+      "id": "terraforest.taxi.v1",
+      "name": "Taxi",
+      "scene": "res://vehicle_demo/scenes/taxi.tscn",
+      "adapter": "res://addons/vehicle_runtime/city_vehicle_adapter.gd"
+    },
+    {
+      "capability": "vehicle",
+      "id": "terraforest.ambulance.v1",
+      "name": "Ambulance",
+      "scene": "res://vehicle_demo/scenes/ambulance.tscn",
+      "adapter": "res://addons/vehicle_runtime/city_vehicle_adapter.gd"
     }
   ]
 }

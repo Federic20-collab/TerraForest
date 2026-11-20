@@ -22,3 +22,22 @@ wheel-contact sampling and spring forces; effects reuse its samples. Impact
 recovery and interaction retain the original behavior; damage deformation and accessory springs now run in native helpers.
 The isolated demo preserves 120 Hz physics and uses TerraForest's fullscreen
 1920x1080 Forward+ rendering for comparison. The vehicle also integrates into the streamed main world through vehicle_runtime, with parked-pose persistence and collision readiness checks. It is not yet qualified for fleets or multiplayer.
+
+## City vehicle additions (2026-11-20)
+
+The user supplied `assets/city/Taxi.glb` (SHA-256
+`523d57d71d9f75a3f0b207bca493b874997d0dfe738441452ad39b71c02c55d8`) and
+`assets/city/Ambulance.glb` (SHA-256
+`9d67008959130bed6623baee8c2319b5385e518bddc42c7bfa92208e351aec50`) from
+their local Downloads folder and requested their integration as spawnable
+TerraForest vehicles. Both are single full meshes with embedded base-color and
+metallic-roughness PNGs; they contain no animation, skin or separate wheel/door
+nodes, so the integration uses the existing chassis controller as a static-shell
+visual and adds no wheel or door animation.
+
+No separate asset license text was embedded in either GLB and the integration
+request did not state one. `license_inventory.json` `GAP-005` records that pending
+asset-specific rights evidence. The integration is retained at the maintainer's
+direction; existing 0BSD controller code is reused unchanged and no third-party
+dependency was added.
+
