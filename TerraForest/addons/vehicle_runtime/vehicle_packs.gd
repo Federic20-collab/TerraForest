@@ -17,7 +17,7 @@ func prepare(load_external: bool = true) -> bool:
 	var definitions: Array[Dictionary]=registry.entries("vehicle")
 	definitions.sort_custom(func(first:Dictionary,second:Dictionary):return first.id==DEFAULT if first.id==DEFAULT or second.id==DEFAULT else first.id<second.id)
 	for entry: Dictionary in definitions:
-		if vehicles.size() >= 8:
+		if vehicles.size() >= 16:
 			errors.append("Vehicle provider limit reached: " + entry.id); continue
 		if not entry.get("scene", null) is String or not entry.get("adapter", null) is String or not entry.get("name", null) is String:
 			errors.append("Invalid vehicle provider: " + entry.id); continue

@@ -36,6 +36,27 @@
       "name": "FireTruck",
       "scene": "res://vehicle_demo/scenes/firetruck.tscn",
       "adapter": "res://addons/vehicle_runtime/firetruck_adapter.gd"
+    },
+    {
+      "capability": "vehicle",
+      "id": "terraforest.police.v1",
+      "name": "Police",
+      "scene": "res://vehicle_demo/scenes/police.tscn",
+      "adapter": "res://addons/vehicle_runtime/city_vehicle_adapter.gd"
+    },
+    {
+      "capability": "vehicle",
+      "id": "terraforest.train.v1",
+      "name": "Train",
+      "scene": "res://vehicle_demo/scenes/train.tscn",
+      "adapter": "res://addons/vehicle_runtime/train_adapter.gd"
+    },
+    {
+      "capability": "vehicle",
+      "id": "terraforest.aircraft.v1",
+      "name": "AirCraft",
+      "scene": "res://vehicle_demo/scenes/aircraft.tscn",
+      "adapter": "res://addons/vehicle_runtime/aircraft_adapter.gd"
     }
   ]
 }

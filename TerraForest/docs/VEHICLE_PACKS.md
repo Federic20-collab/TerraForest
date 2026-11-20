@@ -44,7 +44,7 @@ by this loader; existing compatible installed GDExtensions can be wrapped.
 ```
 
 IDs: 1–96 lowercase ASCII letters, digits, `.`, `_`, `-`. Manifests: at most
-64 KiB, 32 providers, 32 modules. At most eight vehicle providers are admitted,
+64 KiB, 32 providers, 32 modules. At most sixteen vehicle providers are admitted,
 including the reserved built-in Ranger. Duplicate identities/API mismatches reject
 registration atomically. Dev Spawner exposes installed vehicle choices; diagnostics
 there report invalid registrations. No second discovery scan occurs during play.
@@ -76,16 +76,17 @@ controller must enforce ready collision along its swept path, as Ranger does via
 `bind_streamed_world`; the host publishes focus/velocity but does not replace a
 pack's physics. Independent systems need their own travel and exit qualification.
 
-The built-in manifest also exposes Taxi, Ambulance and FireTruck providers. They
-are single full-mesh city vehicles without separate wheel or door nodes, so they
-reuse the Ranger chassis/suspension/driving policy as a static-shell visual. Their
-placement adapter samples terrain-only ground (`collision_mask` 1) over a level
-footprint, aligns the parked basis to the sampled slope, and clears world,
-structure and character layers including trunk collision. This avoids treating
-tree trunks (world layer 2) as ground. FireTruck supplies a larger footprint for
-its 6.4 m body while remaining inside the API 1 envelope. No wheel or door
-animation is created; the imported mesh remains the exact near and distant
-prototype part.
+The built-in manifest also exposes Taxi, Ambulance, FireTruck, Police, Train and
+AirCraft providers. They are single full-mesh city vehicles without separate
+wheel or door nodes, so they reuse the Ranger chassis/suspension/driving policy
+as a static-shell visual. Their placement adapter samples terrain-only ground
+(`collision_mask` 1) over a level footprint, aligns the parked basis to the
+sampled slope, and clears world, structure and character layers including trunk
+collision. This avoids treating tree trunks (world layer 2) as ground. FireTruck,
+Train and AirCraft supply larger footprints for their 6.4–6.5 m bodies while
+remaining inside the API 1 envelope. Police, Train and AirCraft are ground-driven;
+no rail-following or flight controller is added. No wheel or door animation is
+created; the imported mesh remains the exact near and distant prototype part.
 
 
 Four live physics bodies total; pooling is type-specific. Nearby parked batches

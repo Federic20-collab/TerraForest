@@ -30,13 +30,20 @@ The user supplied `assets/city/Taxi.glb` (SHA-256
 `assets/city/Ambulance.glb` (SHA-256
 `9d67008959130bed6623baee8c2319b5385e518bddc42c7bfa92208e351aec50`), plus
 `assets/city/FireTRUCK.glb` (SHA-256
-`396372e442919674e35d58c35f120adb6ca6f7ccaa6adac215a631c44583afcb`), from
+`396372e442919674e35d58c35f120adb6ca6f7ccaa6adac215a631c44583afcb`),
+`assets/city/Police.glb` (SHA-256
+`e9fae2c66640bd52b53479d5779cf6d3687eb5b9e68174c7761ba32e269327fd`),
+`assets/city/Train.glb` (SHA-256
+`5fa5875a0be6d3c2018bacfbf4e71df54b806796331f64834df22e11bd5c5882`), and
+`assets/city/AirCraft.glb` (SHA-256
+`e0b83b5283a78a8aa7ebf849efde53c422131ff11b86328e4010d646bc7b0207`), from
 their local Downloads folder and requested their integration as spawnable
 TerraForest vehicles. All are single full meshes with embedded base-color and
 metallic-roughness PNGs; they contain no animation, skin or separate wheel/door
 nodes, so the integration uses the existing chassis controller as a static-shell
-visual and adds no wheel or door animation. FireTruck is mounted at a 6.4 m
-authored length with its own larger placement footprint.
+visual and adds no wheel or door animation. FireTruck, Train and AirCraft use
+their own larger placement footprints. Police, Train and AirCraft are ground-
+driven; no rail-following or flight controller was added.
 
 No separate asset license text was embedded in any GLB and the integration
 request did not state one. `license_inventory.json` `GAP-005` records that pending

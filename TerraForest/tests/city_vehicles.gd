@@ -1,7 +1,7 @@
 # SPDX-License-Identifier: 0BSD
 extends SceneTree
 
-## Static-shell city vehicle providers: full-mesh Taxi/Ambulance/FireTruck scenes must load,
+## Static-shell city vehicle providers: full-mesh Taxi/Ambulance/FireTruck/Police/Train/AirCraft scenes must load,
 ## keep the proven chassis/suspension layout, expose one parked render part, and
 ## present their authored dimensions on the established forward axis.
 
@@ -10,6 +10,9 @@ const VEHICLES := {
 	"terraforest.taxi.v1": {"name": "Taxi", "length": 4.7, "height": 1.772, "half_length": 2.60},
 	"terraforest.ambulance.v1": {"name": "Ambulance", "length": 5.411, "height": 2.528, "half_length": 2.60},
 	"terraforest.firetruck.v1": {"name": "FireTruck", "length": 6.413, "height": 2.768, "half_length": 3.20},
+	"terraforest.police.v1": {"name": "Police", "length": 4.808, "height": 1.725, "half_length": 2.60},
+	"terraforest.train.v1": {"name": "Train", "length": 6.408, "height": 2.659, "half_length": 3.20},
+	"terraforest.aircraft.v1": {"name": "AirCraft", "length": 6.511, "height": 1.998, "half_length": 3.20},
 }
 var failures := 0
 
