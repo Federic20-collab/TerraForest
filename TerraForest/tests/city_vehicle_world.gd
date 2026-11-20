@@ -1,13 +1,14 @@
 # SPDX-License-Identifier: 0BSD
 extends SceneTree
 
-## Actual-world check: spawn the Taxi and Ambulance providers through the Dev
-## Spawner, confirm their full meshes are visible, drive the Taxi, and verify
-## both typed fleet records persist in the compound vehicle snapshot.
+## Actual-world check: spawn the Taxi, FireTruck and Ambulance providers through
+## the Dev Spawner, confirm their full meshes are visible, drive the Taxi, and
+## verify all typed fleet records persist in the compound vehicle snapshot.
 
 const Scene = preload("res://demo/world.tscn")
 const TAXI := "terraforest.taxi.v1"
 const AMBULANCE := "terraforest.ambulance.v1"
+const FIRETRUCK := "terraforest.firetruck.v1"
 var game: Node3D
 var failures := 0
 var output := "res://reports/city_vehicle_world"
@@ -102,9 +103,9 @@ func run() -> void:
 	var indices := {}
 	for index in spawner.vehicle_kind.item_count:
 		var kind: String = spawner.vehicle_kind.get_item_metadata(index)
-		if kind in [TAXI, AMBULANCE]: indices[kind] = index
-	check(indices.has(TAXI) and indices.has(AMBULANCE), "Dev Spawner lists both city vehicle providers")
-	if not (indices.has(TAXI) and indices.has(AMBULANCE)):
+		if kind in [TAXI, AMBULANCE, FIRETRUCK]: indices[kind] = index
+	check(indices.has(TAXI) and indices.has(AMBULANCE) and indices.has(FIRETRUCK), "Dev Spawner lists all city vehicle providers")
+	if not (indices.has(TAXI) and indices.has(AMBULANCE) and indices.has(FIRETRUCK)):
 		await finish()
 		return
 	game.set_physics_process(true)
@@ -154,6 +155,46 @@ func run() -> void:
 	game.yaw = taxi.global_rotation.y
 	await create_timer(0.3).timeout
 	game.set_physics_process(true)
+	var firetruck_id: int = await spawn(indices[FIRETRUCK], FIRETRUCK)
+	if firetruck_id == 0:
+		await finish()
+		return
+	var firetruck: RigidBody3D = game.world_vehicle.activation.residents.get(firetruck_id)
+	check(is_instance_valid(firetruck) and game.world_vehicle.kind_of(firetruck) == FIRETRUCK, "FireTruck becomes a live fleet resident")
+	if not is_instance_valid(firetruck):
+		await finish()
+		return
+	await create_timer(1.2).timeout
+	game.set_physics_process(false)
+	game._clear_motion()
+	await frame_vehicle(firetruck, -1.0, "firetruck_spawned")
+	await top_vehicle(firetruck, "firetruck_top")
+	var firetruck_bounds := _visual_bounds(firetruck)
+	check(firetruck_bounds.size.z > 6.2 and firetruck_bounds.size.z < 6.6, "FireTruck full mesh is visible at truck length " + str(snappedf(firetruck_bounds.size.z, 0.01)))
+	check(_ground_gap(firetruck) < 0.25, "FireTruck parks on the actual sampled ground")
+	print("CITY_VEHICLE_GROUND firetruck body=", firetruck.global_position, " gap=", _ground_gap(firetruck), " ground=", _ground(firetruck))
+	check(await _mesh_visible(firetruck), "FireTruck full mesh renders after its wheel/door bindings are skipped")
+	game.set_physics_process(true)
+	game.player.global_position = firetruck.global_position + firetruck.global_basis.x * 3.2
+	game.player.velocity = Vector3.ZERO
+	game._clear_motion()
+	await physics_frame
+	game.app_focused = true
+	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
+	check(game.world_vehicle.enter(game, firetruck_id), "player enters the FireTruck through the standard vehicle host")
+	var truck_start := firetruck.global_position
+	_press(KEY_W, true)
+	for frame in 150:
+		firetruck.set_controls_enabled(true)
+		game.app_focused = true
+		await physics_frame
+	_press(KEY_W, false)
+	var truck_moved := Vector2(firetruck.global_position.x - truck_start.x, firetruck.global_position.z - truck_start.z).length()
+	check(truck_moved > 1.0, "FireTruck drives under throttle using the existing chassis controller: " + str(snappedf(truck_moved, 0.1)) + " m")
+	check(game.world_vehicle.exit_vehicle(game).length() > 0 and not game.world_vehicle.driving, "player exits the FireTruck")
+	game.player.rotation.y = wrapf(game.player.rotation.y + PI, -PI, PI)
+	game.yaw = game.player.rotation.y
+	game.set_physics_process(true)
 	var ambulance_id: int = await spawn(indices[AMBULANCE], AMBULANCE)
 	if ambulance_id == 0:
 		await finish()
@@ -175,7 +216,7 @@ func run() -> void:
 	check(await _mesh_visible(ambulance), "Ambulance full mesh renders after its wheel/door bindings are skipped")
 	var snapshot: PackedByteArray = game.world_vehicle.capture_snapshot()
 	check(not snapshot.is_empty() and game.world_vehicle.storage.validate_fleet_snapshot(snapshot), "city vehicle fleet snapshot is valid versioned storage")
-	check(game.world_vehicle.fleet.first_of_kind(TAXI) > 0 and game.world_vehicle.fleet.first_of_kind(AMBULANCE) > 0, "snapshot retains both typed vehicle identities")
+	check(game.world_vehicle.fleet.first_of_kind(TAXI) > 0 and game.world_vehicle.fleet.first_of_kind(AMBULANCE) > 0 and game.world_vehicle.fleet.first_of_kind(FIRETRUCK) > 0, "snapshot retains all typed vehicle identities")
 	await finish()
 
 func _visual_bounds(body: RigidBody3D) -> AABB:

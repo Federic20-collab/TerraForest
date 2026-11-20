@@ -62,7 +62,7 @@ func _press(key: Key, pressed: bool) -> void:
 func run() -> void:
 	GDExtensionManager.load_extension("res://addons/vehicle_runtime/vehicle_runtime.gdextension")
 	var packs := Packs.new()
-	check(packs.prepare(false) and packs.vehicles.size() == 4, "built-in providers include Ranger, Boat, Taxi and Ambulance")
+	check(packs.prepare(false) and packs.vehicles.size() == 5, "built-in providers include Ranger, Boat, Taxi, Ambulance and FireTruck")
 	check(packs.vehicles.has(Packs.DEFAULT) and packs.vehicles.has(KIND), "both built-in vehicle kinds are present")
 	check(packs.vehicles.has(KIND) and packs.vehicles[KIND].name == "Boat", "boat provider is registered by the built-in module")
 	var driver: RefCounted = packs.adapter(KIND)

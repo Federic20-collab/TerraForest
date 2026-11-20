@@ -206,17 +206,17 @@
     },
     {
       "id": "GAP-005",
-      "name": "City vehicle Taxi and Ambulance full meshes",
+      "name": "City vehicle Taxi, Ambulance and FireTruck full meshes",
       "category": "asset_provenance",
       "status": "provenance_review_pending",
       "declared_terms": "NOASSERTION: user-supplied local GLBs; no separate asset license text found in the supplied files or request",
       "scope": ["vehicle_demo/assets/city/"],
-      "origin": "User supplied Taxi.glb (SHA-256 523d57d71d9f75a3f0b207bca493b874997d0dfe738441452ad39b71c02c55d8) and Ambulance.glb (SHA-256 9d67008959130bed6623baee8c2319b5385e518bddc42c7bfa92208e351aec50) from local Downloads on 2026-11-20 and requested their integration as spawnable TerraForest vehicles. Both are single full meshes with embedded base-color and metallic-roughness PNGs; no animation, skin or separate wheel/door nodes were present. Imported texture PNGs are extracted siblings in the same folder.",
-      "evidence": ["vehicle_demo/PROVENANCE.md", "vehicle_demo/assets/city/Taxi.glb", "vehicle_demo/assets/city/Ambulance.glb"],
+      "origin": "User supplied Taxi.glb (SHA-256 523d57d71d9f75a3f0b207bca493b874997d0dfe738441452ad39b71c02c55d8), Ambulance.glb (SHA-256 9d67008959130bed6623baee8c2319b5385e518bddc42c7bfa92208e351aec50) and FireTRUCK.glb (SHA-256 396372e442919674e35d58c35f120adb6ca6f7ccaa6adac215a631c44583afcb) from local Downloads on 2026-11-20 and requested their integration as spawnable TerraForest vehicles. All are single full meshes with embedded base-color and metallic-roughness PNGs; no animation, skin or separate wheel/door nodes were present. Imported texture PNGs are extracted siblings in the same folder.",
+      "evidence": ["vehicle_demo/PROVENANCE.md", "vehicle_demo/assets/city/Taxi.glb", "vehicle_demo/assets/city/Ambulance.glb", "vehicle_demo/assets/city/FireTRUCK.glb"],
       "distribution_boundary": "Runtime city vehicle assets, imported texture payloads and full source archives. The vehicles reuse existing 0BSD controller code and add no third-party dependency.",
       "reason_retained": "The maintainer requested this integration; the current task does not add asset-specific rights evidence beyond the supplied files.",
-      "next_step": "Obtain an explicit asset-specific license or dedication covering both models and their texture maps, or authorize replacement. Do not widen use on an assumed default basis.",
-      "closure_evidence": ["Asset-specific grant covering both GLBs and embedded/extracted textures", "Verified source-archive and export notice coverage for the integrated city vehicles"]
+      "next_step": "Obtain an explicit asset-specific license or dedication covering all three models and their texture maps, or authorize replacement. Do not widen use on an assumed default basis.",
+      "closure_evidence": ["Asset-specific grant covering all three GLBs and embedded/extracted textures", "Verified source-archive and export notice coverage for the integrated city vehicles"]
     }
   ]
 }

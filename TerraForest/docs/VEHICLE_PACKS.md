@@ -76,14 +76,16 @@ controller must enforce ready collision along its swept path, as Ranger does via
 `bind_streamed_world`; the host publishes focus/velocity but does not replace a
 pack's physics. Independent systems need their own travel and exit qualification.
 
-The built-in manifest also exposes Taxi and Ambulance providers. They are single
-full-mesh city vehicles without separate wheel or door nodes, so they reuse the
-Ranger chassis/suspension/driving policy as a static-shell visual. Their placement
-adapter samples terrain-only ground (`collision_mask` 1) over a level footprint,
-aligns the parked basis to the sampled slope, and clears world, structure and
-character layers including trunk collision. This avoids treating tree trunks
-(world layer 2) as ground. No wheel or door animation is created; the imported
-mesh remains the exact near and distant prototype part.
+The built-in manifest also exposes Taxi, Ambulance and FireTruck providers. They
+are single full-mesh city vehicles without separate wheel or door nodes, so they
+reuse the Ranger chassis/suspension/driving policy as a static-shell visual. Their
+placement adapter samples terrain-only ground (`collision_mask` 1) over a level
+footprint, aligns the parked basis to the sampled slope, and clears world,
+structure and character layers including trunk collision. This avoids treating
+tree trunks (world layer 2) as ground. FireTruck supplies a larger footprint for
+its 6.4 m body while remaining inside the API 1 envelope. No wheel or door
+animation is created; the imported mesh remains the exact near and distant
+prototype part.
 
 
 Four live physics bodies total; pooling is type-specific. Nearby parked batches

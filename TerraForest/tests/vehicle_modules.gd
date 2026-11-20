@@ -62,7 +62,7 @@ func run() -> void:
 	check(not packs.registry.register_manifest(MANIFEST).ok and packs.registry.modules.is_empty(), "untrusted scripts never auto-enabled")
 	check(packs.registry.register_manifest(MANIFEST,true).ok, "trusted independent vehicle module registered")
 	check(not packs.registry.register_manifest(MANIFEST,true).ok and packs.registry.entries("vehicle").size()==2, "duplicate module rejects without partial providers")
-	check(packs.prepare(false) and packs.vehicles.size()==6, "default adapter, boat, city vehicles and independent systems coexist")
+	check(packs.prepare(false) and packs.vehicles.size()==7, "default adapter, boat, city vehicles and independent systems coexist")
 	check(packs.request("test.cart.v1") and packs.request("test.cart.v2") and packs.requested.size()==1, "shared scene requests deduplicated")
 	check(packs.take("test.cart.v1")==packs.take("test.cart.v2") and packs.requested.is_empty(), "every accepted scene request drained once")
 	var world:=Fixture.new();root.add_child(world)

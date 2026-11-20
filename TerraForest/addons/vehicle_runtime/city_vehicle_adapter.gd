@@ -7,14 +7,20 @@ extends "res://addons/vehicle_runtime/ranger_adapter.gd"
 ## better than freezing a full-mesh vehicle in mid-air or across a cliff.
 
 const RIDE_HEIGHT := 0.85
-const HALF_WIDTH := 1.25
-const HALF_LENGTH := 2.60
-const FOOTPRINT := [
-	Vector3(0, 0, 0),
-	Vector3(-1.0, 0, -2.2), Vector3(0, 0, -2.2), Vector3(1.0, 0, -2.2),
-	Vector3(-1.0, 0, 0), Vector3(1.0, 0, 0),
-	Vector3(-1.0, 0, 2.2), Vector3(0, 0, 2.2), Vector3(1.0, 0, 2.2),
-]
+
+func half_width() -> float:
+	return 1.25
+
+func half_length() -> float:
+	return 2.60
+
+func footprint() -> Array[Vector3]:
+	return [
+		Vector3(0, 0, 0),
+		Vector3(-1.0, 0, -2.2), Vector3(0, 0, -2.2), Vector3(1.0, 0, -2.2),
+		Vector3(-1.0, 0, 0), Vector3(1.0, 0, 0),
+		Vector3(-1.0, 0, 2.2), Vector3(0, 0, 2.2), Vector3(1.0, 0, 2.2),
+	]
 
 func requested_pose(world: Node) -> Dictionary:
 	var heading := Basis(Vector3.UP, world.player.global_rotation.y + PI)
@@ -51,7 +57,7 @@ func _ground_pose(world: Node, heading: Basis, point: Vector3) -> Dictionary:
 	var lowest := INF
 	var highest := -INF
 	var normal_sum := Vector3.ZERO
-	for sample: Vector3 in FOOTPRINT:
+	for sample: Vector3 in footprint():
 		var at: Vector3 = center_hit.position + heading * sample
 		var ray := PhysicsRayQueryParameters3D.create(at + Vector3.UP * 3.0, at - Vector3.UP * 8.0, 1, exclusions)
 		var hit: Dictionary = space.intersect_ray(ray)
@@ -79,7 +85,7 @@ func _ground_pose(world: Node, heading: Basis, point: Vector3) -> Dictionary:
 	if world.get("world_vehicle") != null and not world.world_vehicle.ready_bounds(world, bounds):
 		return {"ok": false, "reason": "Vehicle area is still loading"}
 	var probe := BoxShape3D.new()
-	probe.size = Vector3(HALF_WIDTH * 2.0, 2.6, HALF_LENGTH * 2.0)
+	probe.size = Vector3(half_width() * 2.0, 2.6, half_length() * 2.0)
 	var query := PhysicsShapeQueryParameters3D.new()
 	query.shape = probe
 	query.collision_mask = 15 | (1 << 16)

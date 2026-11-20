@@ -1,15 +1,15 @@
 # SPDX-License-Identifier: 0BSD
 extends SceneTree
 
-## Static-shell city vehicle providers: full-mesh Taxi/Ambulance scenes must load,
+## Static-shell city vehicle providers: full-mesh Taxi/Ambulance/FireTruck scenes must load,
 ## keep the proven chassis/suspension layout, expose one parked render part, and
 ## present their authored dimensions on the established forward axis.
 
 const Packs = preload("res://addons/vehicle_runtime/vehicle_packs.gd")
-const Adapter = preload("res://addons/vehicle_runtime/city_vehicle_adapter.gd")
 const VEHICLES := {
-	"terraforest.taxi.v1": {"name": "Taxi", "length": 4.7, "height": 1.772},
-	"terraforest.ambulance.v1": {"name": "Ambulance", "length": 5.411, "height": 2.528},
+	"terraforest.taxi.v1": {"name": "Taxi", "length": 4.7, "height": 1.772, "half_length": 2.60},
+	"terraforest.ambulance.v1": {"name": "Ambulance", "length": 5.411, "height": 2.528, "half_length": 2.60},
+	"terraforest.firetruck.v1": {"name": "FireTruck", "length": 6.413, "height": 2.768, "half_length": 3.20},
 }
 var failures := 0
 
@@ -57,9 +57,10 @@ func run() -> void:
 		check(absf(bounds.size.z - expected.length) < 0.08, label + " faces +Z at authored length " + str(snappedf(bounds.size.z, 0.01)))
 		check(absf(bounds.size.y - expected.height) < 0.08, label + " authored height " + str(snappedf(bounds.size.y, 0.01)))
 		check(bounds.position.y < -0.75 and bounds.position.y > -0.9, label + " mesh bottom sits at the suspension ride height " + str(snappedf(bounds.position.y, 0.01)))
-		var adapter: RefCounted = Adapter.new()
+		var adapter: RefCounted = load(packs.vehicles[kind].adapter).new()
 		check(adapter.accepts(body), label + " accepts the standard vehicle adapter")
 		check(adapter.collision(body) != null, label + " adapter exposes its parked chassis collision")
+		check(is_equal_approx(adapter.half_length(), expected.half_length), label + " uses its size-aware placement footprint")
 		var parts: Array = []
 		for node: MeshInstance3D in body.find_children("*", "MeshInstance3D", true, false):
 			if node.mesh != null and node.is_visible_in_tree():

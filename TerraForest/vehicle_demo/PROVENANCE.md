@@ -28,14 +28,17 @@ The isolated demo preserves 120 Hz physics and uses TerraForest's fullscreen
 The user supplied `assets/city/Taxi.glb` (SHA-256
 `523d57d71d9f75a3f0b207bca493b874997d0dfe738441452ad39b71c02c55d8`) and
 `assets/city/Ambulance.glb` (SHA-256
-`9d67008959130bed6623baee8c2319b5385e518bddc42c7bfa92208e351aec50`) from
+`9d67008959130bed6623baee8c2319b5385e518bddc42c7bfa92208e351aec50`), plus
+`assets/city/FireTRUCK.glb` (SHA-256
+`396372e442919674e35d58c35f120adb6ca6f7ccaa6adac215a631c44583afcb`), from
 their local Downloads folder and requested their integration as spawnable
-TerraForest vehicles. Both are single full meshes with embedded base-color and
+TerraForest vehicles. All are single full meshes with embedded base-color and
 metallic-roughness PNGs; they contain no animation, skin or separate wheel/door
 nodes, so the integration uses the existing chassis controller as a static-shell
-visual and adds no wheel or door animation.
+visual and adds no wheel or door animation. FireTruck is mounted at a 6.4 m
+authored length with its own larger placement footprint.
 
-No separate asset license text was embedded in either GLB and the integration
+No separate asset license text was embedded in any GLB and the integration
 request did not state one. `license_inventory.json` `GAP-005` records that pending
 asset-specific rights evidence. The integration is retained at the maintainer's
 direction; existing 0BSD controller code is reused unchanged and no third-party

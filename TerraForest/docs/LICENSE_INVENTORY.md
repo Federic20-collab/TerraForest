@@ -31,7 +31,7 @@ generator field and an asset's file hash are not license grants.
 | LEG-002 | Supplied vehicle model and offline parked-mesh derivative | Existing 0BSD author declaration | Keep its current grant; derived-model receipt/provenance identify source hashes; code follows the code default. |
 | LEG-003 | Original Zombie Lab source code | Existing CC0 dedication | Preserve CC0 source and file-specific notices; no blanket rewrite to the new code default. |
 | GAP-004 | Optional image-generated grass detail textures | Prompt/tool provenance retained; CC0 scope not established separately | Review output/reference rights and declaration scope before claiming CC0 coverage. |
-| GAP-005 | City vehicle Taxi and Ambulance full meshes | No asset-specific grant found in the supplied GLBs or integration request; imported maps are extracted siblings | Obtain a model/texture-specific dedication or replacement authorization before widening use. |
+| GAP-005 | City vehicle Taxi, Ambulance and FireTruck full meshes | No asset-specific grant found in the supplied GLBs or integration request; imported maps are extracted siblings | Obtain a model/texture-specific dedication or replacement authorization before widening use. |
 | INF-001 | Build/authoring tools and linked runtimes | External software plus unreviewed output/runtime coverage | Audit actual shipped artifacts and their notices; toolchain pins alone do not certify output licensing. |
 
 `EX` records known non-default terms retained for existing use. `LEG` records

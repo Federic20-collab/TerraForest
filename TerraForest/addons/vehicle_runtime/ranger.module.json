@@ -29,6 +29,13 @@
       "name": "Ambulance",
       "scene": "res://vehicle_demo/scenes/ambulance.tscn",
       "adapter": "res://addons/vehicle_runtime/city_vehicle_adapter.gd"
+    },
+    {
+      "capability": "vehicle",
+      "id": "terraforest.firetruck.v1",
+      "name": "FireTruck",
+      "scene": "res://vehicle_demo/scenes/firetruck.tscn",
+      "adapter": "res://addons/vehicle_runtime/firetruck_adapter.gd"
     }
   ]
 }
