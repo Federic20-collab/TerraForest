@@ -41,9 +41,10 @@ their local Downloads folder and requested their integration as spawnable
 TerraForest vehicles. All are single full meshes with embedded base-color and
 metallic-roughness PNGs; they contain no animation, skin or separate wheel/door
 nodes, so the integration uses the existing chassis controller as a static-shell
-visual and adds no wheel or door animation. FireTruck, Train and AirCraft use
-their own larger placement footprints. Police, Train and AirCraft are ground-
-driven; no rail-following or flight controller was added.
+visual and adds no wheel or door animation. FireTruck and Train use their own
+larger placement footprints. Police and Train are ground-driven; AirCraft has a
+dedicated arcade flight controller at a 10 m authored wingspan. No rail-following
+controller was added.
 
 No separate asset license text was embedded in any GLB and the integration
 request did not state one. `license_inventory.json` `GAP-005` records that pending

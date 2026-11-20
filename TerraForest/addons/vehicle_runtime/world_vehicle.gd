@@ -274,7 +274,12 @@ func safe_exit_position(world: Node) -> Vector3:
 	return safe_exit_for(world,car,world.player.get_rid())
 func safe_exit_for(world:Node,body:RigidBody3D,occupant:RID)->Vector3:
 	if not is_instance_valid(body): return Vector3.INF
-	for offset:Vector3 in [Vector3(2.8,0,0),Vector3(-2.8,0,0),Vector3(0,0,-3.8),Vector3(3.8,0,0),Vector3(-3.8,0,0)]:
+	var offsets:Array=[Vector3(2.8,0,0),Vector3(-2.8,0,0),Vector3(0,0,-3.8),Vector3(3.8,0,0),Vector3(-3.8,0,0)]
+	var driver:Variant=body.get_meta("vehicle_adapter",null)
+	if driver!=null and driver.has_method("exit_offsets"):
+		var custom:Array=driver.exit_offsets()
+		if not custom.is_empty(): offsets=custom
+	for offset:Vector3 in offsets:
 		var desired: Vector3=body.position+body.global_basis*offset
 		var ray:=PhysicsRayQueryParameters3D.create(desired+Vector3.UP*2,desired-Vector3.UP*3,3,[body.get_rid(),occupant])
 		var hit: Dictionary=world.get_world_3d().direct_space_state.intersect_ray(ray)

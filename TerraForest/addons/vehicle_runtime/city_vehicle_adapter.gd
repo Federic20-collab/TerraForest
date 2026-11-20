@@ -14,6 +14,15 @@ func half_width() -> float:
 func half_length() -> float:
 	return 2.60
 
+func clearance_height() -> float:
+	return 2.6
+
+func ground_spread_limit() -> float:
+	return 0.30
+
+func ground_normal_min() -> float:
+	return 0.7
+
 func footprint() -> Array[Vector3]:
 	return [
 		Vector3(0, 0, 0),
@@ -52,7 +61,7 @@ func _ground_pose(world: Node, heading: Basis, point: Vector3) -> Dictionary:
 	var center_hit := space.intersect_ray(PhysicsRayQueryParameters3D.create(start, start - Vector3.UP * 30.0, 1, exclusions))
 	if center_hit.is_empty():
 		return {"ok": false, "reason": ""}
-	if center_hit.normal.dot(Vector3.UP) < 0.7:
+	if center_hit.normal.dot(Vector3.UP) < ground_normal_min():
 		return {"ok": false, "reason": "Vehicle ground is too steep"}
 	var lowest := INF
 	var highest := -INF
@@ -63,12 +72,12 @@ func _ground_pose(world: Node, heading: Basis, point: Vector3) -> Dictionary:
 		var hit: Dictionary = space.intersect_ray(ray)
 		if hit.is_empty():
 			return {"ok": false, "reason": "Vehicle footprint has missing support"}
-		if hit.normal.dot(Vector3.UP) < 0.7:
+		if hit.normal.dot(Vector3.UP) < ground_normal_min():
 			return {"ok": false, "reason": "Vehicle ground is too uneven"}
 		lowest = minf(lowest, hit.position.y)
 		highest = maxf(highest, hit.position.y)
 		normal_sum += hit.normal
-	if highest - lowest > 0.30 or highest - center_hit.position.y > 0.30:
+	if highest - lowest > ground_spread_limit() or highest - center_hit.position.y > ground_spread_limit():
 		return {"ok": false, "reason": "Vehicle ground is too uneven"}
 	var up := normal_sum.normalized()
 	var forward: Vector3 = heading.z.slide(up)
@@ -79,18 +88,27 @@ func _ground_pose(world: Node, heading: Basis, point: Vector3) -> Dictionary:
 	if right.length_squared() < 0.0001: right = heading.x
 	var basis := Basis(right, up, forward)
 	var pose := Transform3D(basis, center_hit.position + up * RIDE_HEIGHT)
-	if AABB(pose.origin - Vector3(3.25, 1, 3.25), Vector3(6.5, 3, 6.5)).has_point(world.player.global_position):
+	if AABB(pose.origin - Vector3(half_width(), 1, half_length()), Vector3(half_width() * 2.0, 3, half_length() * 2.0)).has_point(world.player.global_position):
 		return {"ok": false, "reason": "Place the vehicle farther from the player"}
-	var bounds := AABB(pose.origin - Vector3(3.25, 2, 3.25), Vector3(6.5, 4, 6.5))
-	if world.get("world_vehicle") != null and not world.world_vehicle.ready_bounds(world, bounds):
+	var bounds := AABB(pose.origin - Vector3(half_width(), clearance_height() * 0.5, half_length()), Vector3(half_width() * 2.0, clearance_height() + 2.0, half_length() * 2.0))
+	if not _region_ready(world, bounds):
 		return {"ok": false, "reason": "Vehicle area is still loading"}
 	var probe := BoxShape3D.new()
-	probe.size = Vector3(half_width() * 2.0, 2.6, half_length() * 2.0)
+	probe.size = Vector3(half_width() * 2.0, clearance_height(), half_length() * 2.0)
 	var query := PhysicsShapeQueryParameters3D.new()
 	query.shape = probe
 	query.collision_mask = 15 | (1 << 16)
-	query.transform = Transform3D(basis, pose.origin + up * 0.5)
+	query.transform = Transform3D(basis, pose.origin + up * (clearance_height() * 0.5 - 0.8))
 	query.exclude = exclusions
 	if not space.intersect_shape(query, 1).is_empty():
 		return {"ok": false, "reason": "Vehicle space is obstructed"}
 	return {"ok": true, "pose": pose, "reason": ""}
+
+func _region_ready(world: Node, bounds: AABB) -> bool:
+	if not is_instance_valid(world.terrain) or not world.terrain.is_collision_region_ready(bounds):
+		return false
+	if "structures" in world and world.structures != null and not world.structures.is_collision_region_ready(bounds):
+		return false
+	if "vegetation" in world and world.vegetation != null and not world.vegetation.is_collision_region_ready(bounds):
+		return false
+	return true

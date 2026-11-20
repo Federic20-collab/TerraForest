@@ -12,7 +12,7 @@ const VEHICLES := {
 	"terraforest.firetruck.v1": {"name": "FireTruck", "length": 6.413, "height": 2.768, "half_length": 3.20},
 	"terraforest.police.v1": {"name": "Police", "length": 4.808, "height": 1.725, "half_length": 2.60},
 	"terraforest.train.v1": {"name": "Train", "length": 6.408, "height": 2.659, "half_length": 3.20},
-	"terraforest.aircraft.v1": {"name": "AirCraft", "length": 6.511, "height": 1.998, "half_length": 3.20},
+	"terraforest.aircraft.v1": {"name": "AirCraft", "length": 10.018, "height": 3.074, "half_length": 4.20, "aircraft": true},
 }
 var failures := 0
 
@@ -53,9 +53,12 @@ func run() -> void:
 		await process_frame
 		var label: String = expected.name
 		check(body.get_node_or_null("ChassisCollision") != null, label + " keeps one chassis collision proxy")
-		check(body.get_node_or_null("VehicleVisual/RuntimeBody") != null, label + " builds the shared runtime body")
-		check(body.wheel_rays.size() == 4 and body.wheel_rays.all(func(ray: RayCast3D): return ray != null), label + " keeps four suspension rays")
-		check(body.driving_policy != null and body.streaming == null, label + " loads the native driving policy before world install")
+		if expected.get("aircraft", false):
+			check(body.has_method("set_controls_enabled") and body.has_method("bind_streamed_world") and body.has_method("reset_aircraft"), label + " loads the flight controller before world install")
+		else:
+			check(body.get_node_or_null("VehicleVisual/RuntimeBody") != null, label + " builds the shared runtime body")
+			check(body.wheel_rays.size() == 4 and body.wheel_rays.all(func(ray: RayCast3D): return ray != null), label + " keeps four suspension rays")
+			check(body.driving_policy != null and body.streaming == null, label + " loads the native driving policy before world install")
 		var bounds := local_visual_bounds(body)
 		check(absf(bounds.size.z - expected.length) < 0.08, label + " faces +Z at authored length " + str(snappedf(bounds.size.z, 0.01)))
 		check(absf(bounds.size.y - expected.height) < 0.08, label + " authored height " + str(snappedf(bounds.size.y, 0.01)))
