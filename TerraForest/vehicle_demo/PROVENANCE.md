@@ -38,13 +38,24 @@ The user supplied `assets/city/Taxi.glb` (SHA-256
 `assets/city/AirCraft.glb` (SHA-256
 `e0b83b5283a78a8aa7ebf849efde53c422131ff11b86328e4010d646bc7b0207`), from
 their local Downloads folder and requested their integration as spawnable
-TerraForest vehicles. All are single full meshes with embedded base-color and
-metallic-roughness PNGs; they contain no animation, skin or separate wheel/door
-nodes, so the integration uses the existing chassis controller as a static-shell
-visual and adds no wheel or door animation. FireTruck and Train use their own
-larger placement footprints. Police and Train are ground-driven; AirCraft has a
-dedicated arcade flight controller at a 10 m authored wingspan. No rail-following
-controller was added.
+TerraForest vehicles. These originals are single full meshes with embedded
+base-color and metallic-roughness PNGs; they contain no animation, skin or
+separate wheel/door nodes, so their static-shell integration adds no wheel or
+door animation. FireTruck and Train use their own larger placement footprints.
+Police and Train are ground-driven; AirCraft has a dedicated arcade flight
+controller at a 10 m authored wingspan. No rail-following controller was added.
+
+On 2026-11-22 the user supplied animated remakes
+`assets/city/Taxi_Full_Remake.glb` (SHA-256
+`0ebbae6c8c9053d0ae747feac04a158a4bd1ddc5627b44d91ced5308eb67bda8`) and
+`assets/city/PoliceMesh.glb` (SHA-256
+`17b009b349d859e2b5b69cfb9219ad0a0993ec0daf9559efdad39867d827ed2a`).
+The Taxi and Police providers now use those authored wheel/steer/door
+hierarchies. The game drives wheel spin and steering from suspension/velocity,
+and opens the driver door on entry; the Taxi's disassembly/reassembly clip is a
+showcase animation and is not played while driving. Their parked/far
+representation is merged by material into compact static parts to stay within
+the native 64-part limit.
 
 No separate asset license text was embedded in any GLB and the integration
 request did not state one. `license_inventory.json` `GAP-005` records that pending

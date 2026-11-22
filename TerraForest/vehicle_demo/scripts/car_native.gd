@@ -62,10 +62,11 @@ func _ready() -> void:
 	if not accessories.configure(_accessory_mounts,PackedFloat32Array(_accessory_profiles)):
 		push_error("Vehicle accessory configuration failed")
 	for ray in wheel_rays: ray.enabled=false # Native pass explicitly updates once.
-	# Runtime visuals retain shared mesh/material resources. The hidden import
-	# hierarchy was only a setup template and needs no per-vehicle scene nodes.
-	model_instance.queue_free()
-	model_instance=null
+	# Runtime visuals retain shared mesh/material resources. Animated city
+	# vehicles keep the authored hierarchy for wheel and door pivots.
+	if not model_hierarchy_visuals:
+		model_instance.queue_free()
+		model_instance=null
 	if profile_setup:
 		setup_timings={"native_us":native_done-begin,"visuals_us":visuals_done-native_done,"finalize_us":Time.get_ticks_usec()-visuals_done,"visual_parts":visual_timings}
 func _reset_accessory_motion() -> void:

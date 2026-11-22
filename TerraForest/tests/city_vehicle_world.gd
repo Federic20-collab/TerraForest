@@ -127,7 +127,8 @@ func run() -> void:
 	check(taxi_bounds.size.z > 4.4 and taxi_bounds.size.z < 5.0, "Taxi full mesh is visible at car length " + str(snappedf(taxi_bounds.size.z, 0.01)))
 	check(_ground_gap(taxi) < 0.25, "Taxi parks on the actual sampled ground")
 	print("CITY_VEHICLE_GROUND taxi body=", taxi.global_position, " gap=", _ground_gap(taxi), " ground=", _ground(taxi))
-	check(await _mesh_visible(taxi), "Taxi full mesh renders after its wheel/door bindings are skipped")
+	check(await _mesh_visible(taxi), "Taxi full mesh renders with its animated hierarchy")
+	check(game.world_vehicle.activation.parked_views.has(TAXI), "Taxi compact parked prototype configures")
 	# Reuse the proven chassis controller: enter the Taxi and drive onto the open
 	# grass. The second spawn then happens in that clear area.
 	game.set_physics_process(true)
@@ -140,6 +141,10 @@ func run() -> void:
 	game.world_vehicle.interaction_available = func() -> bool: return true
 	check(game.world_vehicle.enter(game, taxi_id), "player enters the Taxi through the standard vehicle host")
 	check(game.world_vehicle.driving and Engine.physics_ticks_per_second == 120, "Taxi entry owns input and the 120 Hz physics rate")
+	if taxi.get("model_hierarchy_visuals") == true:
+		await create_timer(0.8).timeout
+		var hinge: Variant = taxi.get("driver_door_hinge")
+		check(hinge != null and is_instance_valid(hinge) and absf(hinge.rotation.y) > 0.2, "Taxi door opens on entry")
 	var start := taxi.global_position
 	_press(KEY_W, true)
 	for frame in 240:
@@ -149,6 +154,9 @@ func run() -> void:
 	_press(KEY_W, false)
 	var moved := Vector2(taxi.global_position.x - start.x, taxi.global_position.z - start.z).length()
 	check(moved > 2.0, "Taxi drives under throttle using the existing chassis controller: " + str(snappedf(moved, 0.1)) + " m")
+	if taxi.get("model_hierarchy_visuals") == true:
+		var spins: Variant = taxi.get("wheel_spin_pivots")
+		check(spins != null and spins is Array and spins.size() == 4 and is_instance_valid(spins[0]) and absf(spins[0].rotation.x) > 0.01, "Taxi wheels spin while driving")
 	await frame_vehicle(taxi, 1.0, "taxi_driving")
 	check(game.world_vehicle.exit_vehicle(game).length() > 0 and not game.world_vehicle.driving, "player exits the Taxi")
 	game.player.rotation.y = taxi.global_rotation.y

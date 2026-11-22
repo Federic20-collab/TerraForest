@@ -273,6 +273,17 @@ var _accessory_toggle_was_down: bool = false
 
 
 @export var startup_logging:=false
+@export var model_hierarchy_visuals:=false
+
+## Optional direct-model hooks. The default runtime body copies and consolidates
+## the imported hierarchy; animated city vehicles instead keep their authored
+## wheel and door nodes alive and bind those pivots here.
+func _bind_model_wheels() -> void:
+	pass
+
+func _bind_model_door() -> void:
+	pass
+
 func _ready() -> void:
 	wheel_rays.append(front_left_ray)
 	wheel_rays.append(front_right_ray)
@@ -287,13 +298,17 @@ func _ready() -> void:
 	wheel_spin_pivots.append(rear_left_spin)
 	wheel_spin_pivots.append(rear_right_spin)
 
-	_build_runtime_body_visuals()
-	_bind_wheel_visual(front_left_visual, "Wheel_Front_Left")
-	_bind_wheel_visual(front_right_visual, "Wheel_Front_Right")
-	_bind_wheel_visual(rear_left_visual, "Wheel_Rear_Left")
-	_bind_wheel_visual(rear_right_visual, "Wheel_Rear_Right")
-	_bind_driver_door_visual()
-	model_instance.visible = false
+	if model_hierarchy_visuals:
+		_bind_model_wheels()
+		_bind_model_door()
+	else:
+		_build_runtime_body_visuals()
+		_bind_wheel_visual(front_left_visual, "Wheel_Front_Left")
+		_bind_wheel_visual(front_right_visual, "Wheel_Front_Right")
+		_bind_wheel_visual(rear_left_visual, "Wheel_Rear_Left")
+		_bind_wheel_visual(rear_right_visual, "Wheel_Rear_Right")
+		_bind_driver_door_visual()
+		model_instance.visible = false
 	_setup_visual_damage()
 
 	_spawn_transform = global_transform

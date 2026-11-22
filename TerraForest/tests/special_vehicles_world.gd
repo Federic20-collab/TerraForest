@@ -1,14 +1,13 @@
 # SPDX-License-Identifier: 0BSD
 extends SceneTree
 
-## Actual-world check for the Police, Train and AirCraft full-mesh packs. Each
-## must spawn through Dev Spawner, sit on sampled terrain, render and drive; the
-## typed fleet snapshot must retain all three identities.
+## Actual-world check for the Police and Train full-mesh packs. The Police
+## exercises its authored door/wheel hierarchy; both spawn through Dev Spawner,
+## sit on sampled terrain, render and drive. AirCraft has its own flight test.
 
 const Scene = preload("res://demo/world.tscn")
 const POLICE := "terraforest.police.v1"
 const TRAIN := "terraforest.train.v1"
-const AIRCRAFT := "terraforest.aircraft.v1"
 var game: Node3D
 var failures := 0
 var output := "res://reports/special_vehicles_world"
@@ -87,6 +86,10 @@ func drive_vehicle(body: RigidBody3D, identity: int, label: String) -> void:
 	game.app_focused = true
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	check(game.world_vehicle.enter(game, identity), "player enters the " + label)
+	if body.get("model_hierarchy_visuals") == true:
+		await create_timer(0.8).timeout
+		var hinge: Variant = body.get("driver_door_hinge")
+		check(hinge != null and is_instance_valid(hinge) and absf(hinge.rotation.y) > 0.2, label + " door opens on entry")
 	var start := body.global_position
 	_press(KEY_W, true)
 	for frame in 150:
@@ -96,6 +99,9 @@ func drive_vehicle(body: RigidBody3D, identity: int, label: String) -> void:
 	_press(KEY_W, false)
 	var moved := Vector2(body.global_position.x - start.x, body.global_position.z - start.z).length()
 	check(moved > 1.0, label + " drives under throttle using the existing chassis controller: " + str(snappedf(moved, 0.1)) + " m")
+	if body.get("model_hierarchy_visuals") == true:
+		var spins: Variant = body.get("wheel_spin_pivots")
+		check(spins != null and spins is Array and spins.size() == 4 and is_instance_valid(spins[0]) and absf(spins[0].rotation.x) > 0.01, label + " wheels spin while driving")
 	check(game.world_vehicle.exit_vehicle(game).length() > 0 and not game.world_vehicle.driving, "player exits the " + label)
 
 func run() -> void:
@@ -123,9 +129,9 @@ func run() -> void:
 	var indices := {}
 	for index in spawner.vehicle_kind.item_count:
 		var kind: String = spawner.vehicle_kind.get_item_metadata(index)
-		if kind in [POLICE, TRAIN, AIRCRAFT]: indices[kind] = index
-	check(indices.has(POLICE) and indices.has(TRAIN) and indices.has(AIRCRAFT), "Dev Spawner lists Police, Train and AirCraft")
-	if not (indices.has(POLICE) and indices.has(TRAIN) and indices.has(AIRCRAFT)):
+		if kind in [POLICE, TRAIN]: indices[kind] = index
+	check(indices.has(POLICE) and indices.has(TRAIN), "Dev Spawner lists Police and Train")
+	if not (indices.has(POLICE) and indices.has(TRAIN)):
 		await finish()
 		return
 	game.world_vehicle.interaction_available = func() -> bool: return true
@@ -147,7 +153,8 @@ func run() -> void:
 	var police_bounds := _visual_bounds(police)
 	check(police_bounds.size.z > 4.6 and police_bounds.size.z < 5.0, "Police full mesh is visible at car length " + str(snappedf(police_bounds.size.z, 0.01)))
 	check(_ground_gap(police) < 0.25, "Police parks on the actual sampled ground")
-	check(await _mesh_visible(police), "Police full mesh renders after its wheel/door bindings are skipped")
+	check(await _mesh_visible(police), "Police full mesh renders with its animated hierarchy")
+	check(game.world_vehicle.activation.parked_views.has(POLICE), "Police compact parked prototype configures")
 	await drive_vehicle(police, police_id, "Police")
 	await create_timer(0.3).timeout
 	game.player.rotation.y = police.global_rotation.y
@@ -172,31 +179,9 @@ func run() -> void:
 	check(_ground_gap(train) < 0.25, "Train parks on the actual sampled ground")
 	check(await _mesh_visible(train), "Train full mesh renders after its wheel/door bindings are skipped")
 	await drive_vehicle(train, train_id, "Train")
-	game.player.rotation.y = wrapf(game.player.rotation.y + PI, -PI, PI)
-	game.yaw = game.player.rotation.y
-	game.set_physics_process(true)
-	var aircraft_id: int = await spawn(indices[AIRCRAFT], AIRCRAFT)
-	if aircraft_id == 0:
-		await finish()
-		return
-	var aircraft: RigidBody3D = game.world_vehicle.activation.residents.get(aircraft_id)
-	check(is_instance_valid(aircraft) and game.world_vehicle.kind_of(aircraft) == AIRCRAFT, "AirCraft becomes a live fleet resident")
-	if not is_instance_valid(aircraft):
-		await finish()
-		return
-	await create_timer(1.2).timeout
-	game.set_physics_process(false)
-	game._clear_motion()
-	await frame_vehicle(aircraft, -1.0, "aircraft_spawned")
-	await top_vehicle(aircraft, "aircraft_top")
-	var aircraft_bounds := _visual_bounds(aircraft)
-	check(aircraft_bounds.size.z > 9.7 and aircraft_bounds.size.z < 10.3, "AirCraft full mesh is visible at wingspan " + str(snappedf(aircraft_bounds.size.z, 0.01)))
-	print("CITY_VEHICLE_GROUND aircraft body=", aircraft.global_position, " gap=", _ground_gap(aircraft), " ground=", _ground(aircraft), " bounds=", aircraft_bounds)
-	check(_ground_gap(aircraft) < 0.25, "AirCraft parks on the actual sampled ground")
-	check(await _mesh_visible(aircraft), "AirCraft full mesh renders after its wheel/door bindings are skipped")
 	var snapshot: PackedByteArray = game.world_vehicle.capture_snapshot()
 	check(not snapshot.is_empty() and game.world_vehicle.storage.validate_fleet_snapshot(snapshot), "special vehicle fleet snapshot is valid versioned storage")
-	check(game.world_vehicle.fleet.first_of_kind(POLICE) > 0 and game.world_vehicle.fleet.first_of_kind(TRAIN) > 0 and game.world_vehicle.fleet.first_of_kind(AIRCRAFT) > 0, "snapshot retains all special vehicle identities")
+	check(game.world_vehicle.fleet.first_of_kind(POLICE) > 0 and game.world_vehicle.fleet.first_of_kind(TRAIN) > 0, "snapshot retains Police and Train identities")
 	await finish()
 
 func _visual_bounds(body: RigidBody3D) -> AABB:

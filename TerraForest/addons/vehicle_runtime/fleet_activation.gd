@@ -74,13 +74,16 @@ func prepare_parked_view(world: Node,body: RigidBody3D) -> void:
 	_stage(world,"vehicle prototype collect",measured);measured=Time.get_ticks_usec()
 	var distant_parts:Array=owner.adapter(body).parked_render_parts(body,parts)
 	_stage(world,"vehicle prototype distant parts",measured);measured=Time.get_ticks_usec()
-	var configured:bool=chassis!=null and view.configure(owner.fleet,parts,64,kind)
+	var parked_parts:Array=parts if parts.size()<=64 else distant_parts
+	var configured:bool=chassis!=null and view.configure(owner.fleet,parked_parts,64,kind)
 	_stage(world,"vehicle prototype native configure",measured);measured=Time.get_ticks_usec()
 	var collision_ready:bool=configured and view.configure_collision(chassis.shape,body.global_transform.affine_inverse()*chassis.global_transform)
 	_stage(world,"vehicle prototype collision",measured);measured=Time.get_ticks_usec()
 	var horizon_ready:bool=collision_ready and view.enable_horizon(distant_parts)
 	_stage(world,"vehicle prototype horizon",measured)
-	if not horizon_ready:parked_status={"ok":false,"reason":"prototype_configuration","parts":parts.size()};view.free();return
+	if not horizon_ready:
+		var reason:="prototype_configuration" if not configured else ("prototype_collision" if not collision_ready else "prototype_horizon")
+		parked_status={"ok":false,"reason":reason,"parts":parts.size()};view.free();return
 	parked_views[kind]=view
 	if kind==owner.Packs.DEFAULT:parked_view=view
 func prepare_from_saved(world: Node) -> bool:

@@ -7,10 +7,10 @@ extends SceneTree
 
 const Packs = preload("res://addons/vehicle_runtime/vehicle_packs.gd")
 const VEHICLES := {
-	"terraforest.taxi.v1": {"name": "Taxi", "length": 4.7, "height": 1.772, "half_length": 2.60},
+	"terraforest.taxi.v1": {"name": "Taxi", "length": 4.727, "height": 1.771, "half_length": 2.60, "animated": true},
 	"terraforest.ambulance.v1": {"name": "Ambulance", "length": 5.411, "height": 2.528, "half_length": 2.60},
 	"terraforest.firetruck.v1": {"name": "FireTruck", "length": 6.413, "height": 2.768, "half_length": 3.20},
-	"terraforest.police.v1": {"name": "Police", "length": 4.808, "height": 1.725, "half_length": 2.60},
+	"terraforest.police.v1": {"name": "Police", "length": 4.806, "height": 1.720, "half_length": 2.60, "animated": true},
 	"terraforest.train.v1": {"name": "Train", "length": 6.408, "height": 2.659, "half_length": 3.20},
 	"terraforest.aircraft.v1": {"name": "AirCraft", "length": 10.018, "height": 3.074, "half_length": 4.20, "aircraft": true},
 }
@@ -71,8 +71,13 @@ func run() -> void:
 		for node: MeshInstance3D in body.find_children("*", "MeshInstance3D", true, false):
 			if node.mesh != null and node.is_visible_in_tree():
 				parts.append({"mesh": node.mesh, "transform": body.global_transform.affine_inverse() * node.global_transform, "material": node.material_override})
-		check(parts.size() == 1, label + " presents one full-mesh parked prototype part")
-		check(adapter.parked_render_parts(body, parts) == parts, label + " keeps the exact full mesh for distant parking")
+		if expected.get("animated", false):
+			check(parts.size() > 1, label + " keeps its authored animated mesh hierarchy")
+			var far_parts: Array = adapter.parked_render_parts(body, parts)
+			check(far_parts.size() > 0 and far_parts.size() <= 64 and far_parts.size() < parts.size(), label + " merges a bounded parked/far prototype: " + str(far_parts.size()) + " parts")
+		else:
+			check(parts.size() == 1, label + " presents one full-mesh parked prototype part")
+			check(adapter.parked_render_parts(body, parts) == parts, label + " keeps the exact full mesh for distant parking")
 		body.free()
 		await process_frame
 	packs.finish()

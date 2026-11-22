@@ -77,14 +77,16 @@ controller must enforce ready collision along its swept path, as Ranger does via
 pack's physics. Independent systems need their own travel and exit qualification.
 
 The built-in manifest also exposes Taxi, Ambulance, FireTruck, Police, Train and
-AirCraft providers. They are single full-mesh vehicles without separate wheel or
-door nodes. Taxi, Ambulance, FireTruck, Police and Train reuse the Ranger
-chassis/suspension/driving policy as a static-shell visual. AirCraft uses a
-dedicated arcade flight controller with thrust, lift, banking, pitch, landing,
-120 Hz physics and a flight chase camera; it is mounted at a 10 m authored
-wingspan. Controls are W/S throttle, A/D bank, Up/Down pitch, Space brake, Shift
-boost and R reset. Police and Train remain ground-driven; no rail-following
-controller is added.
+AirCraft providers. Ambulance, FireTruck and Train use single static-shell
+meshes. Taxi and Police use their authored animated hierarchies: wheel/steer
+pivots are driven by the existing suspension and velocity, and the driver door
+opens on entry and closes on exit. Their parked/far representation is merged by
+material into compact static parts so the native 64-part limit is respected.
+AirCraft uses a dedicated arcade flight controller with thrust, lift, banking,
+pitch, landing, 120 Hz physics and a flight chase camera; it is mounted at a
+10 m authored wingspan. Controls are W/S throttle, A/D bank, Up/Down pitch,
+Space brake, Shift boost and R reset. Police and Train remain ground-driven; no
+rail-following controller is added.
 
 Placement samples terrain-only ground (`collision_mask` 1) over a level
 footprint, aligns the parked basis to the sampled slope, and clears world,
@@ -92,8 +94,9 @@ structure and character layers including trunk collision. This avoids treating
 tree trunks (world layer 2) as ground. FireTruck and Train supply larger
 footprints for their 6.4 m bodies while remaining inside the API 1 envelope;
 AirCraft uses a separate 10 m flight envelope and only parks on flatter ground
-so its wingtips do not cut into the slope. No wheel or door animation is created;
-the imported mesh remains the exact near and distant prototype part.
+so its wingtips do not cut into the slope. Static-shell providers keep their
+exact imported part; animated Taxi/Police use merged material prototypes for
+parked/far representation while the live body retains its animated hierarchy.
 
 
 Four live physics bodies total; pooling is type-specific. Nearby parked batches
