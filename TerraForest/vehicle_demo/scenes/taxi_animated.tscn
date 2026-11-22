@@ -43,7 +43,7 @@ scale = Vector3(4.7, 4.7, 4.7)
 [node name="DriverDoorVisual" type="MeshInstance3D" parent="VehicleVisual/DriverDoorHinge"]
 
 [node name="FrontLeft" type="Node3D" parent="."]
-position = Vector3(0.8413, 0.05, 1.363)
+position = Vector3(0.8413, -0.177, 1.363)
 
 [node name="Ray" type="RayCast3D" parent="FrontLeft"]
 target_position = Vector3(0, -0.906, 0)
@@ -59,7 +59,7 @@ position = Vector3(0, -0.30, 0)
 [node name="Visual" type="MeshInstance3D" parent="FrontLeft/Steer/Spin"]
 
 [node name="FrontRight" type="Node3D" parent="."]
-position = Vector3(-0.8413, 0.05, 1.363)
+position = Vector3(-0.8413, -0.177, 1.363)
 
 [node name="Ray" type="RayCast3D" parent="FrontRight"]
 target_position = Vector3(0, -0.906, 0)
@@ -75,7 +75,7 @@ position = Vector3(0, -0.30, 0)
 [node name="Visual" type="MeshInstance3D" parent="FrontRight/Steer/Spin"]
 
 [node name="RearLeft" type="Node3D" parent="."]
-position = Vector3(0.8413, 0.05, -1.3583)
+position = Vector3(0.8413, -0.177, -1.3583)
 
 [node name="Ray" type="RayCast3D" parent="RearLeft"]
 target_position = Vector3(0, -0.906, 0)
@@ -91,7 +91,7 @@ position = Vector3(0, -0.30, 0)
 [node name="Visual" type="MeshInstance3D" parent="RearLeft/Steer/Spin"]
 
 [node name="RearRight" type="Node3D" parent="."]
-position = Vector3(-0.8413, 0.05, -1.3583)
+position = Vector3(-0.8413, -0.177, -1.3583)
 
 [node name="Ray" type="RayCast3D" parent="RearRight"]
 target_position = Vector3(0, -0.906, 0)

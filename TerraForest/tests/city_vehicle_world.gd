@@ -142,9 +142,12 @@ func run() -> void:
 	check(game.world_vehicle.enter(game, taxi_id), "player enters the Taxi through the standard vehicle host")
 	check(game.world_vehicle.driving and Engine.physics_ticks_per_second == 120, "Taxi entry owns input and the 120 Hz physics rate")
 	if taxi.get("model_hierarchy_visuals") == true:
-		await create_timer(0.8).timeout
+		await create_timer(0.5).timeout
 		var hinge: Variant = taxi.get("driver_door_hinge")
 		check(hinge != null and is_instance_valid(hinge) and absf(hinge.rotation.y) > 0.2, "Taxi door opens on entry")
+		check(_ride_height_ok(taxi), "Taxi body rides at the animated wheel height")
+		await create_timer(1.5).timeout
+		check(hinge != null and is_instance_valid(hinge) and absf(hinge.rotation.y) < 0.1, "Taxi door closes after entry")
 	var start := taxi.global_position
 	_press(KEY_W, true)
 	for frame in 240:
@@ -157,6 +160,7 @@ func run() -> void:
 	if taxi.get("model_hierarchy_visuals") == true:
 		var spins: Variant = taxi.get("wheel_spin_pivots")
 		check(spins != null and spins is Array and spins.size() == 4 and is_instance_valid(spins[0]) and absf(spins[0].rotation.x) > 0.01, "Taxi wheels spin while driving")
+		check(_ride_height_ok(taxi), "Taxi keeps its wheel ride height while driving")
 	await frame_vehicle(taxi, 1.0, "taxi_driving")
 	check(game.world_vehicle.exit_vehicle(game).length() > 0 and not game.world_vehicle.driving, "player exits the Taxi")
 	game.player.rotation.y = taxi.global_rotation.y
@@ -242,6 +246,10 @@ func _ground(body: RigidBody3D) -> Variant:
 	var ray := PhysicsRayQueryParameters3D.create(body.global_position + Vector3.UP * 30.0, body.global_position - Vector3.UP * 60.0, 1, [body.get_rid()])
 	var hit: Dictionary = game.get_world_3d().direct_space_state.intersect_ray(ray)
 	return hit.position if not hit.is_empty() else null
+
+func _ride_height_ok(body: RigidBody3D) -> bool:
+	var ground = _ground(body)
+	return ground != null and absf(body.global_position.y - float(ground.y) - 0.85) < 0.3
 
 func _ground_gap(body: RigidBody3D) -> float:
 	var lowest := INF

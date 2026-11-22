@@ -52,10 +52,19 @@ On 2026-11-22 the user supplied animated remakes
 `17b009b349d859e2b5b69cfb9219ad0a0993ec0daf9559efdad39867d827ed2a`).
 The Taxi and Police providers now use those authored wheel/steer/door
 hierarchies. The game drives wheel spin and steering from suspension/velocity,
-and opens the driver door on entry; the Taxi's disassembly/reassembly clip is a
-showcase animation and is not played while driving. Their parked/far
-representation is merged by material into compact static parts to stay within
-the native 64-part limit.
+opens the driver door on entry and closes it shortly afterward or on exit, and
+adds red/blue beacon lights plus a looping siren to Police while driving. The
+Taxi's disassembly/reassembly clip is a showcase animation and is not played
+while driving. Their parked/far representation is merged by material into
+compact static parts to stay within the native 64-part limit.
+
+`assets/city/police_siren.wav` (SHA-256
+`d57eb1bb6f44622f8be1e5d15d2d2f8745aa1ca7c4b9fbbb47e764d6f85e8b0d`) is an
+original procedurally generated two-tone loop created
+for TerraForest on 2026-11-22; it is not derived from a third-party recording.
+`scripts/police_siren.gd` is original 0BSD code; the WAV follows the project
+CC0-1.0 asset default. `GAP-005` applies to the user-supplied GLBs and their
+textures, not this generated siren.
 
 No separate asset license text was embedded in any GLB and the integration
 request did not state one. `license_inventory.json` `GAP-005` records that pending

@@ -79,9 +79,11 @@ pack's physics. Independent systems need their own travel and exit qualification
 The built-in manifest also exposes Taxi, Ambulance, FireTruck, Police, Train and
 AirCraft providers. Ambulance, FireTruck and Train use single static-shell
 meshes. Taxi and Police use their authored animated hierarchies: wheel/steer
-pivots are driven by the existing suspension and velocity, and the driver door
-opens on entry and closes on exit. Their parked/far representation is merged by
-material into compact static parts so the native 64-part limit is respected.
+pivots are driven by the existing suspension and velocity, the driver door opens
+on entry and closes shortly afterward or on exit, and Police adds red/blue
+beacon lights plus a looping siren while driving. Their parked/far representation
+is merged by material into compact static parts so the native 64-part limit is
+respected.
 AirCraft uses a dedicated arcade flight controller with thrust, lift, banking,
 pitch, landing, 120 Hz physics and a flight chase camera; it is mounted at a
 10 m authored wingspan. Controls are W/S throttle, A/D bank, Up/Down pitch,

@@ -86,10 +86,23 @@ func drive_vehicle(body: RigidBody3D, identity: int, label: String) -> void:
 	game.app_focused = true
 	Input.mouse_mode = Input.MOUSE_MODE_CAPTURED
 	check(game.world_vehicle.enter(game, identity), "player enters the " + label)
+	var siren: Node = body.get_node_or_null("Siren")
 	if body.get("model_hierarchy_visuals") == true:
-		await create_timer(0.8).timeout
+		await create_timer(0.5).timeout
 		var hinge: Variant = body.get("driver_door_hinge")
 		check(hinge != null and is_instance_valid(hinge) and absf(hinge.rotation.y) > 0.2, label + " door opens on entry")
+		check(_ride_height_ok(body), label + " body rides at the animated wheel height")
+		if siren != null:
+			check(siren.is_active(), label + " siren activates while driving")
+			check(siren.audio_ready(), label + " siren audio stream loads")
+			var lit := false
+			for frame in 40:
+				await process_frame
+				var state: Dictionary = siren.light_state()
+				lit = lit or state.blue > 0.5 or state.red > 0.5
+			check(lit, label + " red/blue beacon lights flash")
+		await create_timer(1.5).timeout
+		check(hinge != null and is_instance_valid(hinge) and absf(hinge.rotation.y) < 0.1, label + " door closes after entry")
 	var start := body.global_position
 	_press(KEY_W, true)
 	for frame in 150:
@@ -103,6 +116,9 @@ func drive_vehicle(body: RigidBody3D, identity: int, label: String) -> void:
 		var spins: Variant = body.get("wheel_spin_pivots")
 		check(spins != null and spins is Array and spins.size() == 4 and is_instance_valid(spins[0]) and absf(spins[0].rotation.x) > 0.01, label + " wheels spin while driving")
 	check(game.world_vehicle.exit_vehicle(game).length() > 0 and not game.world_vehicle.driving, "player exits the " + label)
+	if siren != null:
+		await create_timer(0.25).timeout
+		check(not siren.is_active(), label + " siren stops on exit")
 
 func run() -> void:
 	game = Scene.instantiate()
@@ -208,6 +224,10 @@ func _ground_gap(body: RigidBody3D) -> float:
 	var ground = _ground(body)
 	if ground == null or not is_finite(lowest): return INF
 	return absf(lowest - float(ground.y))
+
+func _ride_height_ok(body: RigidBody3D) -> bool:
+	var ground = _ground(body)
+	return ground != null and absf(body.global_position.y - float(ground.y) - 0.85) < 0.3
 
 func _mesh_visible(body: RigidBody3D) -> bool:
 	await RenderingServer.frame_post_draw

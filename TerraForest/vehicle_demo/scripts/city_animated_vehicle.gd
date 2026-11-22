@@ -6,6 +6,7 @@ extends "res://vehicle_demo/scripts/car_native.gd"
 ## stay on the existing Ranger controller; only the visual pivots are rebound.
 
 var _model_wheel_bases: Array[Vector3] = [Vector3.ZERO, Vector3.ZERO, Vector3.ZERO, Vector3.ZERO]
+var _door_close_serial := 0
 
 func _find_model_node(names: Array) -> Node3D:
 	if model_instance == null: return null
@@ -64,9 +65,19 @@ func _update_wheel_visuals(delta: float) -> void:
 			spin.rotation.x = _wheel_spin_angles[index]
 
 func set_controls_enabled(enabled: bool) -> void:
+	var was_enabled := controls_enabled
 	super.set_controls_enabled(enabled)
 	if not model_hierarchy_visuals or not is_instance_valid(driver_door_hinge): return
 	if enabled:
-		open_driver_door()
+		if not was_enabled:
+			_door_close_serial += 1
+			open_driver_door()
+			_close_door_after_entry(_door_close_serial)
 	else:
+		_door_close_serial += 1
 		close_driver_door()
+
+func _close_door_after_entry(serial: int) -> void:
+	await get_tree().create_timer(0.8).timeout
+	if not is_instance_valid(self) or serial != _door_close_serial or not controls_enabled: return
+	close_driver_door()

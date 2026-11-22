@@ -1,7 +1,8 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://vehicle_demo/scripts/city_animated_vehicle.gd" id="1_police"]
 [ext_resource type="PackedScene" path="res://vehicle_demo/assets/city/PoliceMesh.glb" id="2_model"]
+[ext_resource type="Script" path="res://vehicle_demo/scripts/police_siren.gd" id="3_siren"]
 
 [sub_resource type="PhysicsMaterial" id="PhysicsMaterial_police"]
 friction = 0.8
@@ -43,7 +44,7 @@ scale = Vector3(4.8, 4.8, 4.8)
 [node name="DriverDoorVisual" type="MeshInstance3D" parent="VehicleVisual/DriverDoorHinge"]
 
 [node name="FrontLeft" type="Node3D" parent="."]
-position = Vector3(0.854, 0.05, 1.451)
+position = Vector3(0.854, -0.182, 1.451)
 
 [node name="Ray" type="RayCast3D" parent="FrontLeft"]
 target_position = Vector3(0, -0.906, 0)
@@ -59,7 +60,7 @@ position = Vector3(0, -0.30, 0)
 [node name="Visual" type="MeshInstance3D" parent="FrontLeft/Steer/Spin"]
 
 [node name="FrontRight" type="Node3D" parent="."]
-position = Vector3(-0.854, 0.05, 1.451)
+position = Vector3(-0.854, -0.182, 1.451)
 
 [node name="Ray" type="RayCast3D" parent="FrontRight"]
 target_position = Vector3(0, -0.906, 0)
@@ -75,7 +76,7 @@ position = Vector3(0, -0.30, 0)
 [node name="Visual" type="MeshInstance3D" parent="FrontRight/Steer/Spin"]
 
 [node name="RearLeft" type="Node3D" parent="."]
-position = Vector3(0.854, 0.05, -1.361)
+position = Vector3(0.854, -0.182, -1.361)
 
 [node name="Ray" type="RayCast3D" parent="RearLeft"]
 target_position = Vector3(0, -0.906, 0)
@@ -91,7 +92,7 @@ position = Vector3(0, -0.30, 0)
 [node name="Visual" type="MeshInstance3D" parent="RearLeft/Steer/Spin"]
 
 [node name="RearRight" type="Node3D" parent="."]
-position = Vector3(-0.854, 0.05, -1.361)
+position = Vector3(-0.854, -0.182, -1.361)
 
 [node name="Ray" type="RayCast3D" parent="RearRight"]
 target_position = Vector3(0, -0.906, 0)
@@ -105,3 +106,6 @@ position = Vector3(0, -0.30, 0)
 [node name="Spin" type="Node3D" parent="RearRight/Steer"]
 
 [node name="Visual" type="MeshInstance3D" parent="RearRight/Steer/Spin"]
+
+[node name="Siren" type="Node3D" parent="."]
+script = ExtResource("3_siren")
