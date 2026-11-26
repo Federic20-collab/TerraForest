@@ -32,6 +32,7 @@ generator field and an asset's file hash are not license grants.
 | LEG-003 | Original Zombie Lab source code | Existing CC0 dedication | Preserve CC0 source and file-specific notices; no blanket rewrite to the new code default. |
 | GAP-004 | Optional image-generated grass detail textures | Prompt/tool provenance retained; CC0 scope not established separately | Review output/reference rights and declaration scope before claiming CC0 coverage. |
 | GAP-005 | City vehicles, including animated Taxi/Police remakes | No asset-specific grant found in the supplied GLBs or integration request; imported maps are extracted siblings | Obtain a model/texture-specific dedication or replacement authorization before widening use. |
+| GAP-006 | BMX42_7K tank GLB and Godot addon | No asset-specific grant found in the supplied delivery; only a separate font license in uncopied authoring material | Obtain a model/script-specific dedication or replacement authorization before provider integration or wider use. |
 | INF-001 | Build/authoring tools and linked runtimes | External software plus unreviewed output/runtime coverage | Audit actual shipped artifacts and their notices; toolchain pins alone do not certify output licensing. |
 
 `EX` records known non-default terms retained for existing use. `LEG` records

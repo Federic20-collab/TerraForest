@@ -217,6 +217,20 @@
       "reason_retained": "The maintainer requested this integration; the current task does not add asset-specific rights evidence beyond the supplied files.",
       "next_step": "Obtain an explicit asset-specific license or dedication covering all supplied models and their texture maps, or authorize replacement. Do not widen use on an assumed default basis.",
       "closure_evidence": ["Asset-specific grant covering all supplied GLBs and embedded/extracted textures", "Verified source-archive and export notice coverage for the integrated city vehicles"]
+    },
+    {
+      "id": "GAP-006",
+      "name": "BMX42_7K tank GLB and Godot addon",
+      "category": "asset_provenance",
+      "status": "provenance_review_pending",
+      "declared_terms": "NOASSERTION: no asset-specific license or dedication found in the supplied BMX42_7K delivery",
+      "scope": ["addons/vehicle_runtime/bmx42_7k/"],
+      "origin": "User-supplied BMX42_7K desktop delivery (BMX42_7K_Complete, 2026-11-22). The copied GLB SHA-256 is 12aac5099381faf0ca12d9f902b4aca5ef45249cb93fde92328d1345fa1df1c9. The reusable addon includes the GLB, bmx42_7k.gd, bmx42_7k.tscn, track_driver.gd and track_contract.json. The delivery identifies an authored reconstruction, excludes its reference TRELLIS from export, and includes only a separate font license in the retained authoring material, which was not copied.",
+      "evidence": ["addons/vehicle_runtime/bmx42_7k/PROVENANCE.md", "addons/vehicle_runtime/bmx42_7k/BMX42_7K.glb", "addons/vehicle_runtime/bmx42_7k/bmx42_7k.gd", "addons/vehicle_runtime/bmx42_7k/track_driver.gd"],
+      "distribution_boundary": "Copied into vehicle_runtime and included in source archives; not yet registered as a TerraForest vehicle provider. The GLB and addon scripts are not covered by a new project default merely because they were copied.",
+      "reason_retained": "The maintainer requested the copy for future integration; the current task does not add asset-specific rights evidence.",
+      "next_step": "Obtain an explicit license or dedication for BMX42_7K.glb and its addon scripts, or authorize replacement. Do not widen use on an assumed default basis.",
+      "closure_evidence": ["Asset-specific grant covering the GLB, embedded textures and addon scripts", "Verified source-archive and distribution notice coverage for any later provider integration"]
     }
   ]
 }

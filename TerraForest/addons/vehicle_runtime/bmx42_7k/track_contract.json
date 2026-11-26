@@ -1,0 +1,7951 @@
+{
+  "asset": "BMX42_7K",
+  "coordinate_space": "blender_world",
+  "vehicle_root": "Vehicle_Root",
+  "vehicle_rig": "Vehicle_Rig",
+  "turret_node": "Turret_Pivot",
+  "gun_node": "Gun_Elevation",
+  "gun_recoil_node": "Gun_Recoil",
+  "muzzle_node": "Muzzle_Exit",
+  "hatch_node": "Commander_Hatch_Pivot",
+  "clips": {
+    "Idle": {
+      "duration": 2.4,
+      "loop": true,
+      "drivetrain": false
+    },
+    "Turret_Scan": {
+      "duration": 6.5,
+      "loop": false,
+      "drivetrain": false
+    },
+    "Gun_Elevation": {
+      "duration": 5.0,
+      "loop": false,
+      "drivetrain": false
+    },
+    "Fire_Single": {
+      "duration": 0.4,
+      "loop": false,
+      "drivetrain": false
+    },
+    "Fire_Burst_3": {
+      "duration": 1.4,
+      "loop": false,
+      "drivetrain": false
+    },
+    "Hatch_Open": {
+      "duration": 1.6,
+      "loop": false,
+      "drivetrain": false
+    },
+    "Hatch_Close": {
+      "duration": 1.4,
+      "loop": false,
+      "drivetrain": false
+    },
+    "Hatch_Cycle": {
+      "duration": 3.8,
+      "loop": false,
+      "drivetrain": false
+    },
+    "Drive_Forward": {
+      "duration": 4.0,
+      "loop": false,
+      "drivetrain": true,
+      "left_speed_mps": 1,
+      "right_speed_mps": 1,
+      "left_travel_m": 4,
+      "right_travel_m": 4
+    },
+    "Drive_Reverse": {
+      "duration": 4.0,
+      "loop": false,
+      "drivetrain": true,
+      "left_speed_mps": -1,
+      "right_speed_mps": -1,
+      "left_travel_m": -4,
+      "right_travel_m": -4
+    },
+    "Turn_Left": {
+      "duration": 4.0,
+      "loop": false,
+      "drivetrain": true,
+      "left_speed_mps": -1,
+      "right_speed_mps": 1,
+      "left_travel_m": -4,
+      "right_travel_m": 4
+    },
+    "Turn_Right": {
+      "duration": 4.0,
+      "loop": false,
+      "drivetrain": true,
+      "left_speed_mps": 1,
+      "right_speed_mps": -1,
+      "left_travel_m": 4,
+      "right_travel_m": -4
+    }
+  },
+  "required_clips": [
+    "Idle",
+    "Turret_Scan",
+    "Gun_Elevation",
+    "Fire_Single",
+    "Fire_Burst_3",
+    "Hatch_Open",
+    "Hatch_Close",
+    "Hatch_Cycle",
+    "Drive_Forward",
+    "Drive_Reverse",
+    "Turn_Left",
+    "Turn_Right"
+  ],
+  "required_transform_nodes": [
+    "Vehicle_Rig",
+    "Turret_Pivot",
+    "Gun_Elevation",
+    "Gun_Recoil",
+    "Commander_Hatch_Pivot",
+    "Wheel_Left_01",
+    "Wheel_Left_02",
+    "Wheel_Left_03",
+    "Wheel_Left_04",
+    "Wheel_Left_05",
+    "Wheel_Left_06",
+    "Wheel_Left_07",
+    "Wheel_Left_08",
+    "Wheel_Right_01",
+    "Wheel_Right_02",
+    "Wheel_Right_03",
+    "Wheel_Right_04",
+    "Wheel_Right_05",
+    "Wheel_Right_06",
+    "Wheel_Right_07",
+    "Wheel_Right_08",
+    "Muzzle_Exit"
+  ],
+  "expected_parents": {
+    "Vehicle_Rig": "Vehicle_Root",
+    "Hull_Upper_Armor": "Vehicle_Rig",
+    "Hull_Underbody": "Vehicle_Rig",
+    "Side_Armor_Left": "Vehicle_Rig",
+    "Skirt_Left_01": "Side_Armor_Left",
+    "Skirt_Left_02": "Side_Armor_Left",
+    "Skirt_Left_03": "Side_Armor_Left",
+    "Skirt_Left_04": "Side_Armor_Left",
+    "Skirt_Left_05": "Side_Armor_Left",
+    "Skirt_Left_06": "Side_Armor_Left",
+    "Skirt_Left_07": "Side_Armor_Left",
+    "Skirt_Left_08": "Side_Armor_Left",
+    "Side_Armor_Right": "Vehicle_Rig",
+    "Skirt_Right_01": "Side_Armor_Right",
+    "Skirt_Right_02": "Side_Armor_Right",
+    "Skirt_Right_03": "Side_Armor_Right",
+    "Skirt_Right_04": "Side_Armor_Right",
+    "Skirt_Right_05": "Side_Armor_Right",
+    "Skirt_Right_06": "Side_Armor_Right",
+    "Skirt_Right_07": "Side_Armor_Right",
+    "Skirt_Right_08": "Side_Armor_Right",
+    "Headlight_Left_Housing": "Vehicle_Rig",
+    "Headlight_Left_Lens": "Vehicle_Rig",
+    "Headlight_Left_AuxLens": "Vehicle_Rig",
+    "Marker_Left_Amber": "Vehicle_Rig",
+    "Front_Fender_Left": "Vehicle_Rig",
+    "Headlight_Right_Housing": "Vehicle_Rig",
+    "Headlight_Right_Lens": "Vehicle_Rig",
+    "Headlight_Right_AuxLens": "Vehicle_Rig",
+    "Marker_Right_Amber": "Vehicle_Rig",
+    "Front_Fender_Right": "Vehicle_Rig",
+    "Tow_Mount_Left": "Vehicle_Rig",
+    "Tow_Shackle_Left": "Vehicle_Rig",
+    "Tow_Mount_Right": "Vehicle_Rig",
+    "Tow_Shackle_Right": "Vehicle_Rig",
+    "Hull_Lift_Left_0": "Vehicle_Rig",
+    "Hull_Lift_Left_1": "Vehicle_Rig",
+    "Hull_Lift_Right_0": "Vehicle_Rig",
+    "Hull_Lift_Right_1": "Vehicle_Rig",
+    "Shoulder_Deck_Cover_Left": "Vehicle_Rig",
+    "Shoulder_Deck_Cover_Right": "Vehicle_Rig",
+    "Driver_Deck_Hatch": "Vehicle_Rig",
+    "Turret_Pivot": "Vehicle_Rig",
+    "Turret_Race": "Turret_Pivot",
+    "Turret_Armor": "Turret_Pivot",
+    "Commander_Hatch_Collar": "Turret_Pivot",
+    "Commander_Recess_Backstop": "Turret_Pivot",
+    "Commander_Hatch_Pivot": "Turret_Pivot",
+    "Commander_Hatch_Lid": "Commander_Hatch_Pivot",
+    "Commander_Hatch_Handle": "Commander_Hatch_Pivot",
+    "Secondary_Roof_Cap": "Turret_Pivot",
+    "Primary_Optic_Housing": "Turret_Pivot",
+    "Primary_Optic_Rim": "Turret_Pivot",
+    "Primary_Optic_Glass": "Turret_Pivot",
+    "Roof_Dual_Optic_Housing": "Turret_Pivot",
+    "Roof_Optic_Glass_1": "Turret_Pivot",
+    "Roof_Optic_Glass_2": "Turret_Pivot",
+    "Roof_Optic_Handle": "Turret_Pivot",
+    "Roof_Periscope_0": "Turret_Pivot",
+    "Roof_Periscope_1": "Turret_Pivot",
+    "Radio_Base_1": "Turret_Pivot",
+    "Antenna_1": "Turret_Pivot",
+    "Radio_Base_2": "Turret_Pivot",
+    "Antenna_2": "Turret_Pivot",
+    "Antenna_3": "Turret_Pivot",
+    "Gun_Elevation": "Turret_Pivot",
+    "Gun_Recoil": "Gun_Elevation",
+    "Gun_Mantlet": "Gun_Elevation",
+    "Gun_Sleeve": "Gun_Recoil",
+    "Gun_Barrel": "Gun_Recoil",
+    "Gun_Muzzle_Brake": "Gun_Recoil",
+    "Muzzle_Dark_Bore": "Gun_Recoil",
+    "Muzzle_Exit": "Gun_Recoil",
+    "Wheel_Left_01": "Vehicle_Rig",
+    "Wheel_Left_02": "Vehicle_Rig",
+    "Wheel_Left_03": "Vehicle_Rig",
+    "Wheel_Left_04": "Vehicle_Rig",
+    "Wheel_Left_05": "Vehicle_Rig",
+    "Wheel_Left_06": "Vehicle_Rig",
+    "Wheel_Left_07": "Vehicle_Rig",
+    "Wheel_Left_08": "Vehicle_Rig",
+    "Wheel_Right_01": "Vehicle_Rig",
+    "Wheel_Right_02": "Vehicle_Rig",
+    "Wheel_Right_03": "Vehicle_Rig",
+    "Wheel_Right_04": "Vehicle_Rig",
+    "Wheel_Right_05": "Vehicle_Rig",
+    "Wheel_Right_06": "Vehicle_Rig",
+    "Wheel_Right_07": "Vehicle_Rig",
+    "Wheel_Right_08": "Vehicle_Rig",
+    "Track_Left": "Vehicle_Rig",
+    "Track_Left_Rig": "Track_Left",
+    "Track_Left_Shoes": "Track_Left_Rig",
+    "Track_Right": "Vehicle_Rig",
+    "Track_Right_Rig": "Track_Right",
+    "Track_Right_Shoes": "Track_Right_Rig"
+  },
+  "tracks": [
+    {
+      "motion_sign": -1,
+      "side": "Left",
+      "parent": "Track_Left",
+      "assembly": "Track_Left",
+      "armature": "Track_Left_Rig",
+      "mesh": "Track_Left_Shoes",
+      "length": 13.596656627996778,
+      "samples": [
+        {
+          "distance": 0.0,
+          "position": [
+            -1.8879998922348022,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            0.9998457431793213,
+            0.0,
+            0.017563989385962486,
+            0.0
+          ]
+        },
+        {
+          "distance": 0.05666065256610821,
+          "position": [
+            -1.8313392400741577,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 0.11332130513221642,
+          "position": [
+            -1.7746785879135132,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 0.16998195769832464,
+          "position": [
+            -1.7180179357528687,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 0.22664261026443283,
+          "position": [
+            -1.6613572835922241,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 0.283303262830541,
+          "position": [
+            -1.6046966314315796,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 0.3399639153966492,
+          "position": [
+            -1.548035979270935,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 0.3966245679627574,
+          "position": [
+            -1.4913753271102905,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 0.45328522052886566,
+          "position": [
+            -1.434714674949646,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 0.5099458730949739,
+          "position": [
+            -1.3780540227890015,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 0.566606525661082,
+          "position": [
+            -1.321393370628357,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 0.6232672729033598,
+          "position": [
+            -1.2647325992584229,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 0.679927925469468,
+          "position": [
+            -1.2080719470977783,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 0.7365885780355762,
+          "position": [
+            -1.1514112949371338,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 0.7932492306016844,
+          "position": [
+            -1.0947506427764893,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 0.8499098831677927,
+          "position": [
+            -1.0380899906158447,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 0.906570535733901,
+          "position": [
+            -0.981429398059845,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 0.9632311883000093,
+          "position": [
+            -0.9247687458992004,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 1.019891935542287,
+          "position": [
+            -0.8681079745292664,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 1.0765525881083953,
+          "position": [
+            -0.8114473223686218,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 1.1332132406745037,
+          "position": [
+            -0.7547866702079773,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 1.1898738932406119,
+          "position": [
+            -0.6981260180473328,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 1.2465345458067203,
+          "position": [
+            -0.6414653658866882,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 1.3031951983728285,
+          "position": [
+            -0.5848047137260437,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 1.3598558982770412,
+          "position": [
+            -0.5281440019607544,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 1.4165165508431494,
+          "position": [
+            -0.47148337960243225,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 1.4731772034092578,
+          "position": [
+            -0.4148227274417877,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 1.5298378796444232,
+          "position": [
+            -0.3581620454788208,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 1.5864985322105314,
+          "position": [
+            -0.30150139331817627,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 1.643159208445697,
+          "position": [
+            -0.24484071135520935,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 1.6998198715313872,
+          "position": [
+            -0.18818005919456482,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 1.7564805346170775,
+          "position": [
+            -0.1315193921327591,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 1.8131411977027678,
+          "position": [
+            -0.07485872507095337,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 1.8698018607884581,
+          "position": [
+            -0.018198061734437943,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 1.9264625238741484,
+          "position": [
+            0.038462601602077484,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 1.9831231869598387,
+          "position": [
+            0.09512326866388321,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 2.039783850045529,
+          "position": [
+            0.15178392827510834,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 2.0964445131312193,
+          "position": [
+            0.20844459533691406,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 2.153105189366385,
+          "position": [
+            0.265105277299881,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 2.209765841932493,
+          "position": [
+            0.3217659294605255,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 2.2664265181676586,
+          "position": [
+            0.37842661142349243,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 2.323087170733767,
+          "position": [
+            0.43508726358413696,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 2.379747823299875,
+          "position": [
+            0.4917479157447815,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 2.436408523204088,
+          "position": [
+            0.5484086275100708,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 2.4930691757701964,
+          "position": [
+            0.6050692796707153,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 2.5497298283363046,
+          "position": [
+            0.6617299318313599,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 2.6063904809024128,
+          "position": [
+            0.7183905839920044,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 2.6630511808066255,
+          "position": [
+            0.7750512361526489,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 2.7197117860345896,
+          "position": [
+            0.8317118883132935,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 2.7763725332768674,
+          "position": [
+            0.8883726000785828,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 2.8330331858429756,
+          "position": [
+            0.9450332522392273,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 2.889693838409084,
+          "position": [
+            1.0016939640045166,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 2.9463544909751924,
+          "position": [
+            1.0583546161651611,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 3.0030151435413006,
+          "position": [
+            1.1150152683258057,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 3.059675796107409,
+          "position": [
+            1.1716759204864502,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 3.116336448673517,
+          "position": [
+            1.2283365726470947,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 3.1729971959157948,
+          "position": [
+            1.2849972248077393,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 3.229657848481903,
+          "position": [
+            1.3416578769683838,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 3.286318501048011,
+          "position": [
+            1.3983185291290283,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 3.342979153614119,
+          "position": [
+            1.4549791812896729,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 3.399639806180227,
+          "position": [
+            1.5116398334503174,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 3.456300458746335,
+          "position": [
+            1.568300485610962,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 3.512961205988612,
+          "position": [
+            1.624961256980896,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 3.5696218585547204,
+          "position": [
+            1.6816219091415405,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 3.626282511120828,
+          "position": [
+            1.738282561302185,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 3.682943163686936,
+          "position": [
+            1.7949432134628296,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 3.739603816253044,
+          "position": [
+            1.8516038656234741,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            0.9999974370002747,
+            0.0,
+            -0.0022588949650526047,
+            0.0
+          ]
+        },
+        {
+          "distance": 3.7962581971619294,
+          "position": [
+            1.908255934715271,
+            1.1647999286651611,
+            0.04829540103673935
+          ],
+          "rotation_quaternion": [
+            0.9994759559631348,
+            0.0,
+            -0.03236991539597511,
+            0.0
+          ]
+        },
+        {
+          "distance": 3.8528720328289268,
+          "position": [
+            1.9644591808319092,
+            1.1647999286651611,
+            0.05510120466351509
+          ],
+          "rotation_quaternion": [
+            0.9954544901847839,
+            0.0,
+            -0.09523920714855194,
+            0.0
+          ]
+        },
+        {
+          "distance": 3.909486112661071,
+          "position": [
+            2.019155502319336,
+            1.1647999286651611,
+            0.06971187889575958
+          ],
+          "rotation_quaternion": [
+            0.9863107800483704,
+            0.0,
+            -0.1648971289396286,
+            0.0
+          ]
+        },
+        {
+          "distance": 3.966100299256018,
+          "position": [
+            2.071265697479248,
+            1.1647999286651611,
+            0.09184112399816513
+          ],
+          "rotation_quaternion": [
+            0.9725812077522278,
+            0.0,
+            -0.23256359994411469,
+            0.0
+          ]
+        },
+        {
+          "distance": 4.022727585714555,
+          "position": [
+            2.119915246963501,
+            1.1647999286651611,
+            0.12082157284021378
+          ],
+          "rotation_quaternion": [
+            0.9615559577941895,
+            0.0,
+            -0.2746090590953827,
+            0.0
+          ]
+        },
+        {
+          "distance": 4.07938834413387,
+          "position": [
+            2.167449951171875,
+            1.1647999286651611,
+            0.1516580581665039
+          ],
+          "rotation_quaternion": [
+            0.9588890075683594,
+            0.0,
+            -0.2837812900543213,
+            0.0
+          ]
+        },
+        {
+          "distance": 4.136048838248534,
+          "position": [
+            2.21498441696167,
+            1.1647999286651611,
+            0.1824943572282791
+          ],
+          "rotation_quaternion": [
+            0.9588890075683594,
+            0.0,
+            -0.2837812900543213,
+            0.0
+          ]
+        },
+        {
+          "distance": 4.192709596667849,
+          "position": [
+            2.262519359588623,
+            1.1647999286651611,
+            0.21333083510398865
+          ],
+          "rotation_quaternion": [
+            0.9588887691497803,
+            0.0,
+            -0.28378209471702576,
+            0.0
+          ]
+        },
+        {
+          "distance": 4.249370194663594,
+          "position": [
+            2.310053825378418,
+            1.1647999286651611,
+            0.24416732788085938
+          ],
+          "rotation_quaternion": [
+            0.9588887691497803,
+            0.0,
+            -0.28378209471702576,
+            0.0
+          ]
+        },
+        {
+          "distance": 4.306030953082909,
+          "position": [
+            2.357588529586792,
+            1.1647999286651611,
+            0.2750038206577301
+          ],
+          "rotation_quaternion": [
+            0.9588887691497803,
+            0.0,
+            -0.28378209471702576,
+            0.0
+          ]
+        },
+        {
+          "distance": 4.362691551078654,
+          "position": [
+            2.405123233795166,
+            1.1647999286651611,
+            0.30584031343460083
+          ],
+          "rotation_quaternion": [
+            0.9588887691497803,
+            0.0,
+            -0.28378209471702576,
+            0.0
+          ]
+        },
+        {
+          "distance": 4.4193523094979685,
+          "position": [
+            2.45265793800354,
+            1.1647999286651611,
+            0.33667677640914917
+          ],
+          "rotation_quaternion": [
+            0.9588890075683594,
+            0.0,
+            -0.2837812900543213,
+            0.0
+          ]
+        },
+        {
+          "distance": 4.476012803612633,
+          "position": [
+            2.500192403793335,
+            1.1647999286651611,
+            0.36751309037208557
+          ],
+          "rotation_quaternion": [
+            0.9588890075683594,
+            0.0,
+            -0.2837812900543213,
+            0.0
+          ]
+        },
+        {
+          "distance": 4.532673562031948,
+          "position": [
+            2.547727108001709,
+            1.1647999286651611,
+            0.3983495831489563
+          ],
+          "rotation_quaternion": [
+            0.9588887691497803,
+            0.0,
+            -0.28378209471702576,
+            0.0
+          ]
+        },
+        {
+          "distance": 4.5893341600276925,
+          "position": [
+            2.595261812210083,
+            1.1647999286651611,
+            0.42918604612350464
+          ],
+          "rotation_quaternion": [
+            0.9588887691497803,
+            0.0,
+            -0.28378209471702576,
+            0.0
+          ]
+        },
+        {
+          "distance": 4.645994918447008,
+          "position": [
+            2.642796516418457,
+            1.1647999286651611,
+            0.46002253890037537
+          ],
+          "rotation_quaternion": [
+            0.9588887691497803,
+            0.0,
+            -0.28378209471702576,
+            0.0
+          ]
+        },
+        {
+          "distance": 4.702655516442753,
+          "position": [
+            2.690330982208252,
+            1.1647999286651611,
+            0.4908590316772461
+          ],
+          "rotation_quaternion": [
+            0.9588887691497803,
+            0.0,
+            -0.28378209471702576,
+            0.0
+          ]
+        },
+        {
+          "distance": 4.759316274862067,
+          "position": [
+            2.737865924835205,
+            1.1647999286651611,
+            0.5216954946517944
+          ],
+          "rotation_quaternion": [
+            0.9588888883590698,
+            0.0,
+            -0.28378164768218994,
+            0.0
+          ]
+        },
+        {
+          "distance": 4.815976820917296,
+          "position": [
+            2.785400390625,
+            1.1647999286651611,
+            0.552531898021698
+          ],
+          "rotation_quaternion": [
+            0.9588890075683594,
+            0.0,
+            -0.2837812900543213,
+            0.0
+          ]
+        },
+        {
+          "distance": 4.872637527396242,
+          "position": [
+            2.832935094833374,
+            1.1647999286651611,
+            0.5833683013916016
+          ],
+          "rotation_quaternion": [
+            0.956845760345459,
+            0.0,
+            -0.2905963361263275,
+            0.0
+          ]
+        },
+        {
+          "distance": 4.929275422848809,
+          "position": [
+            2.879554271697998,
+            1.1647999286651611,
+            0.6155322194099426
+          ],
+          "rotation_quaternion": [
+            0.9454448819160461,
+            0.0,
+            -0.32578203082084656,
+            0.0
+          ]
+        },
+        {
+          "distance": 4.985898156723816,
+          "position": [
+            2.921994924545288,
+            1.1647999286651611,
+            0.6530143618583679
+          ],
+          "rotation_quaternion": [
+            0.923629879951477,
+            0.0,
+            -0.38328564167022705,
+            0.0
+          ]
+        },
+        {
+          "distance": 5.042520986654221,
+          "position": [
+            2.9593663215637207,
+            1.1647999286651611,
+            0.6955528259277344
+          ],
+          "rotation_quaternion": [
+            0.8975623250007629,
+            0.0,
+            -0.44088757038116455,
+            0.0
+          ]
+        },
+        {
+          "distance": 5.099143598814962,
+          "position": [
+            2.9910764694213867,
+            1.1647999286651611,
+            0.7424632906913757
+          ],
+          "rotation_quaternion": [
+            0.8679053783416748,
+            0.0,
+            -0.4967295527458191,
+            0.0
+          ]
+        },
+        {
+          "distance": 5.155766324794998,
+          "position": [
+            3.0166125297546387,
+            1.1647999286651611,
+            0.7930008172988892
+          ],
+          "rotation_quaternion": [
+            0.8347800374031067,
+            0.0,
+            -0.55058354139328,
+            0.0
+          ]
+        },
+        {
+          "distance": 5.212389096500061,
+          "position": [
+            3.035573959350586,
+            1.1647999286651611,
+            0.8463543653488159
+          ],
+          "rotation_quaternion": [
+            0.7983167171478271,
+            0.0,
+            -0.6022378206253052,
+            0.0
+          ]
+        },
+        {
+          "distance": 5.269011749533798,
+          "position": [
+            3.04764986038208,
+            1.1647999286651611,
+            0.9016743898391724
+          ],
+          "rotation_quaternion": [
+            0.7586629986763,
+            0.0,
+            -0.6514832973480225,
+            0.0
+          ]
+        },
+        {
+          "distance": 5.325634521650057,
+          "position": [
+            3.0526556968688965,
+            1.1647999286651611,
+            0.9580754041671753
+          ],
+          "rotation_quaternion": [
+            0.7159749865531921,
+            0.0,
+            -0.6981258988380432,
+            0.0
+          ]
+        },
+        {
+          "distance": 5.382257259015094,
+          "position": [
+            3.050502300262451,
+            1.1647999286651611,
+            1.0146572589874268
+          ],
+          "rotation_quaternion": [
+            0.6704263687133789,
+            -0.0,
+            -0.7419760823249817,
+            -0.0
+          ]
+        },
+        {
+          "distance": 5.438880021262645,
+          "position": [
+            3.041234254837036,
+            1.1647999286651611,
+            1.0705163478851318
+          ],
+          "rotation_quaternion": [
+            0.6221961975097656,
+            -0.0,
+            -0.7828613519668579,
+            -0.0
+          ]
+        },
+        {
+          "distance": 5.495502649048881,
+          "position": [
+            3.024989128112793,
+            1.1647999286651611,
+            1.1247584819793701
+          ],
+          "rotation_quaternion": [
+            0.5714799761772156,
+            -0.0,
+            -0.8206160068511963,
+            -0.0
+          ]
+        },
+        {
+          "distance": 5.55212544312301,
+          "position": [
+            3.0020365715026855,
+            1.1647999286651611,
+            1.1765207052230835
+          ],
+          "rotation_quaternion": [
+            0.5184773802757263,
+            -0.0,
+            -0.8550913333892822,
+            -0.0
+          ]
+        },
+        {
+          "distance": 5.608748168445131,
+          "position": [
+            2.972733497619629,
+            1.1647999286651611,
+            1.2249712944030762
+          ],
+          "rotation_quaternion": [
+            0.4634045362472534,
+            -0.0,
+            -0.8861468434333801,
+            -0.0
+          ]
+        },
+        {
+          "distance": 5.665370960874475,
+          "position": [
+            2.9375576972961426,
+            1.1647999286651611,
+            1.2693424224853516
+          ],
+          "rotation_quaternion": [
+            0.40647733211517334,
+            -0.0,
+            -0.9136608839035034,
+            -0.0
+          ]
+        },
+        {
+          "distance": 5.72199363553717,
+          "position": [
+            2.897061586380005,
+            1.1647999286651611,
+            1.3089176416397095
+          ],
+          "rotation_quaternion": [
+            0.3479263186454773,
+            -0.0,
+            -0.9375218749046326,
+            -0.0
+          ]
+        },
+        {
+          "distance": 5.778616496389483,
+          "position": [
+            2.851900577545166,
+            1.1647999286651611,
+            1.343073844909668
+          ],
+          "rotation_quaternion": [
+            0.28798243403434753,
+            -0.0,
+            -0.9576357007026672,
+            -0.0
+          ]
+        },
+        {
+          "distance": 5.835239207895402,
+          "position": [
+            2.8027889728546143,
+            1.1647999286651611,
+            1.371254801750183
+          ],
+          "rotation_quaternion": [
+            0.22688980400562286,
+            -0.0,
+            -0.9739205241203308,
+            -0.0
+          ]
+        },
+        {
+          "distance": 5.891862087169269,
+          "position": [
+            2.7505173683166504,
+            1.1647999286651611,
+            1.3930222988128662
+          ],
+          "rotation_quaternion": [
+            0.16488802433013916,
+            -0.0,
+            -0.9863122701644897,
+            -0.0
+          ]
+        },
+        {
+          "distance": 5.948484870387823,
+          "position": [
+            2.695915699005127,
+            1.1647999286651611,
+            1.408015489578247
+          ],
+          "rotation_quaternion": [
+            0.10222921520471573,
+            -0.0,
+            -0.9947608709335327,
+            -0.0
+          ]
+        },
+        {
+          "distance": 6.005107579097604,
+          "position": [
+            2.639859914779663,
+            1.1647999286651611,
+            1.4160090684890747
+          ],
+          "rotation_quaternion": [
+            0.04146110266447067,
+            -0.0,
+            -0.9991401433944702,
+            -0.0
+          ]
+        },
+        {
+          "distance": 6.061749049208088,
+          "position": [
+            2.583235263824463,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            0.006065646186470985,
+            -0.0,
+            -0.9999816417694092,
+            -0.0
+          ]
+        },
+        {
+          "distance": 6.118409701774196,
+          "position": [
+            2.5265746116638184,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 6.175070543692485,
+          "position": [
+            2.4699137210845947,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 6.231731196258593,
+          "position": [
+            2.41325306892395,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 6.288391848824701,
+          "position": [
+            2.3565924167633057,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 6.345052501390809,
+          "position": [
+            2.299931764602661,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 6.4017131539569165,
+          "position": [
+            2.2432711124420166,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 6.458373806523025,
+          "position": [
+            2.186610460281372,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 6.515034459089134,
+          "position": [
+            2.1299498081207275,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 6.5716951116552424,
+          "position": [
+            2.073289155960083,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 6.628355764221351,
+          "position": [
+            2.0166285037994385,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 6.68501641678746,
+          "position": [
+            1.959967851638794,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 6.741677069353568,
+          "position": [
+            1.9033071994781494,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 6.798337721919677,
+          "position": [
+            1.8466465473175049,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 6.854998374485786,
+          "position": [
+            1.7899858951568604,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 6.911659027051894,
+          "position": [
+            1.7333252429962158,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 6.968319679618003,
+          "position": [
+            1.6766645908355713,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 7.024980521536292,
+          "position": [
+            1.6200037002563477,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 7.081641079426072,
+          "position": [
+            1.5633431673049927,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 7.138301731992181,
+          "position": [
+            1.5066825151443481,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 7.1949623845582895,
+          "position": [
+            1.4500218629837036,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 7.251623131800567,
+          "position": [
+            1.3933610916137695,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 7.308283784366676,
+          "position": [
+            1.336700439453125,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 7.3649444369327846,
+          "position": [
+            1.2800397872924805,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 7.421605089498893,
+          "position": [
+            1.223379135131836,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 7.478265742065002,
+          "position": [
+            1.1667184829711914,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 7.5349263946311105,
+          "position": [
+            1.1100578308105469,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 7.591587047197219,
+          "position": [
+            1.0533971786499023,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 7.648247794439496,
+          "position": [
+            0.9967364072799683,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 7.704908447005605,
+          "position": [
+            0.9400757551193237,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 7.761569099571713,
+          "position": [
+            0.8834151029586792,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 7.818229752137822,
+          "position": [
+            0.8267544507980347,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 7.8748904047039305,
+          "position": [
+            0.7700937986373901,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 7.931551057270039,
+          "position": [
+            0.7134331464767456,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 7.988211757174252,
+          "position": [
+            0.6567724943161011,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 8.04487240974036,
+          "position": [
+            0.6001118421554565,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 8.10153306230647,
+          "position": [
+            0.543451189994812,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 8.158193714872578,
+          "position": [
+            0.4867905080318451,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 8.21485441477679,
+          "position": [
+            0.4301298260688782,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 8.271515067342898,
+          "position": [
+            0.37346917390823364,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 8.328175719909007,
+          "position": [
+            0.3168085217475891,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 8.384836396144172,
+          "position": [
+            0.2601478397846222,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 8.441497072379338,
+          "position": [
+            0.20348715782165527,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 8.498157724945447,
+          "position": [
+            0.14682650566101074,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 8.554818388031137,
+          "position": [
+            0.09016583859920502,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 8.611479051116829,
+          "position": [
+            0.03350517526268959,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 8.66813971420252,
+          "position": [
+            -0.023155491799116135,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 8.72480037728821,
+          "position": [
+            -0.07981615513563156,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 8.781461035114111,
+          "position": [
+            -0.1364768147468567,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 8.838121711349276,
+          "position": [
+            -0.1931374967098236,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 8.894782374434966,
+          "position": [
+            -0.24979814887046814,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 8.951443027001075,
+          "position": [
+            -0.30645880103111267,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 9.008103703236241,
+          "position": [
+            -0.3631194829940796,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 9.064764379471406,
+          "position": [
+            -0.4197801649570465,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 9.121425032037514,
+          "position": [
+            -0.47644081711769104,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 9.178085684603623,
+          "position": [
+            -0.5331014394760132,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 9.234746337169732,
+          "position": [
+            -0.5897620916366577,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 9.291407037073943,
+          "position": [
+            -0.646422803401947,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 9.348067689640052,
+          "position": [
+            -0.7030834555625916,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 9.40472834220616,
+          "position": [
+            -0.7597441077232361,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 9.461389042110374,
+          "position": [
+            -0.8164048194885254,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 9.518049694676483,
+          "position": [
+            -0.8730654716491699,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 9.574710347242592,
+          "position": [
+            -0.9297261238098145,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 9.6313709998087,
+          "position": [
+            -0.986386775970459,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 9.688031652374809,
+          "position": [
+            -1.0430474281311035,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 9.744692304940918,
+          "position": [
+            -1.099708080291748,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 9.801353052183195,
+          "position": [
+            -1.1563688516616821,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 9.858013704749304,
+          "position": [
+            -1.2130295038223267,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 9.914674357315413,
+          "position": [
+            -1.2696901559829712,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 9.971335009881521,
+          "position": [
+            -1.3263508081436157,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 10.02799566244763,
+          "position": [
+            -1.3830114603042603,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 10.084656315013738,
+          "position": [
+            -1.4396721124649048,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 10.141316967579847,
+          "position": [
+            -1.4963327646255493,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 10.197977620145956,
+          "position": [
+            -1.5529934167861938,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 10.254638272712064,
+          "position": [
+            -1.6096540689468384,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 10.311298925278173,
+          "position": [
+            -1.666314721107483,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 10.367959577844282,
+          "position": [
+            -1.7229753732681274,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 10.424620419762569,
+          "position": [
+            -1.7796361446380615,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 10.481281072328677,
+          "position": [
+            -1.836296796798706,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 10.537941724894786,
+          "position": [
+            -1.8929574489593506,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 10.594602377460895,
+          "position": [
+            -1.9496181011199951,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 10.651263030027003,
+          "position": [
+            -2.0062787532806396,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 10.707923682593112,
+          "position": [
+            -2.062939405441284,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 10.76458433515922,
+          "position": [
+            -2.1196000576019287,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 10.82124498772533,
+          "position": [
+            -2.1762607097625732,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 10.877905640291438,
+          "position": [
+            -2.2329213619232178,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 10.934566292857546,
+          "position": [
+            -2.2895820140838623,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 10.991226945423655,
+          "position": [
+            -2.346242666244507,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 11.047887597989764,
+          "position": [
+            -2.4029033184051514,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 11.104548250555872,
+          "position": [
+            -2.459563970565796,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 11.161208903121981,
+          "position": [
+            -2.5162246227264404,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 11.21786955568809,
+          "position": [
+            -2.572885274887085,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 11.274530397606378,
+          "position": [
+            -2.6295461654663086,
+            1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            0.006614593788981438,
+            0.0,
+            0.9999781250953674,
+            0.0
+          ]
+        },
+        {
+          "distance": 11.331169872025939,
+          "position": [
+            -2.6861658096313477,
+            1.1647999286651611,
+            1.4158847332000732
+          ],
+          "rotation_quaternion": [
+            0.042827580124139786,
+            0.0,
+            0.9990825057029724,
+            0.0
+          ]
+        },
+        {
+          "distance": 11.387792527115659,
+          "position": [
+            -2.742194890975952,
+            1.1647999286651611,
+            1.4077078104019165
+          ],
+          "rotation_quaternion": [
+            0.10390540212392807,
+            0.0,
+            0.9945871829986572,
+            0.0
+          ]
+        },
+        {
+          "distance": 11.444415367572674,
+          "position": [
+            -2.7967443466186523,
+            1.1647999286651611,
+            1.392525315284729
+          ],
+          "rotation_quaternion": [
+            0.166551873087883,
+            0.0,
+            0.9860327243804932,
+            0.0
+          ]
+        },
+        {
+          "distance": 11.501038035985175,
+          "position": [
+            -2.8489441871643066,
+            1.1647999286651611,
+            1.3705865144729614
+          ],
+          "rotation_quaternion": [
+            0.2285306602716446,
+            0.0,
+            0.9735366702079773,
+            0.0
+          ]
+        },
+        {
+          "distance": 11.557660681699605,
+          "position": [
+            -2.8979580402374268,
+            1.1647999286651611,
+            1.342235803604126
+          ],
+          "rotation_quaternion": [
+            0.2895979583263397,
+            0.0,
+            0.9571483731269836,
+            0.0
+          ]
+        },
+        {
+          "distance": 11.614283399126755,
+          "position": [
+            -2.9430060386657715,
+            1.1647999286651611,
+            1.3079313039779663
+          ],
+          "rotation_quaternion": [
+            0.3495057225227356,
+            0.0,
+            0.936934232711792,
+            0.0
+          ]
+        },
+        {
+          "distance": 11.670906119843474,
+          "position": [
+            -2.983365535736084,
+            1.1647999286651611,
+            1.268216609954834
+          ],
+          "rotation_quaternion": [
+            0.4080177843570709,
+            0.0,
+            0.9129739999771118,
+            0.0
+          ]
+        },
+        {
+          "distance": 11.72752886950842,
+          "position": [
+            -3.018394947052002,
+            1.1647999286651611,
+            1.2237298488616943
+          ],
+          "rotation_quaternion": [
+            0.46489715576171875,
+            0.0,
+            0.8853647112846375,
+            0.0
+          ]
+        },
+        {
+          "distance": 11.784151472458342,
+          "position": [
+            -3.0475308895111084,
+            1.1647999286651611,
+            1.1751787662506104
+          ],
+          "rotation_quaternion": [
+            0.519919753074646,
+            0.0,
+            0.854215145111084,
+            0.0
+          ]
+        },
+        {
+          "distance": 11.840774192846105,
+          "position": [
+            -3.070312023162842,
+            1.1647999286651611,
+            1.1233409643173218
+          ],
+          "rotation_quaternion": [
+            0.5728618502616882,
+            0.0,
+            0.8196519017219543,
+            0.0
+          ]
+        },
+        {
+          "distance": 11.897396862903395,
+          "position": [
+            -3.0863709449768066,
+            1.1647999286651611,
+            1.0690432786941528
+          ],
+          "rotation_quaternion": [
+            0.6235160231590271,
+            0.0,
+            0.7818105816841125,
+            0.0
+          ]
+        },
+        {
+          "distance": 11.954019537895048,
+          "position": [
+            -3.0954537391662598,
+            1.1647999286651611,
+            1.0131537914276123
+          ],
+          "rotation_quaternion": [
+            0.6716761589050293,
+            0.0,
+            0.7408449053764343,
+            0.0
+          ]
+        },
+        {
+          "distance": 12.010642283941467,
+          "position": [
+            -3.0974130630493164,
+            1.1647999286651611,
+            0.9565650224685669
+          ],
+          "rotation_quaternion": [
+            0.7171519994735718,
+            0.0,
+            0.6969167590141296,
+            0.0
+          ]
+        },
+        {
+          "distance": 12.067264921452516,
+          "position": [
+            -3.092219829559326,
+            1.1647999286651611,
+            0.900180995464325
+          ],
+          "rotation_quaternion": [
+            0.7597596645355225,
+            0.0,
+            0.650204062461853,
+            0.0
+          ]
+        },
+        {
+          "distance": 12.1238875950461,
+          "position": [
+            -3.0799551010131836,
+            1.1647999286651611,
+            0.8449026346206665
+          ],
+          "rotation_quaternion": [
+            0.7993316650390625,
+            0.0,
+            0.600890040397644,
+            0.0
+          ]
+        },
+        {
+          "distance": 12.180510297341215,
+          "position": [
+            -3.0608162879943848,
+            1.1647999286651611,
+            0.7916125059127808
+          ],
+          "rotation_quaternion": [
+            0.835706889629364,
+            0.0,
+            0.5491757392883301,
+            0.0
+          ]
+        },
+        {
+          "distance": 12.237132976609313,
+          "position": [
+            -3.0351078510284424,
+            1.1647999286651611,
+            0.7411624789237976
+          ],
+          "rotation_quaternion": [
+            0.8687422275543213,
+            0.0,
+            0.49526447057724,
+            0.0
+          ]
+        },
+        {
+          "distance": 12.293755634166217,
+          "position": [
+            -3.0032413005828857,
+            1.1647999286651611,
+            0.6943580508232117
+          ],
+          "rotation_quaternion": [
+            0.898303747177124,
+            0.0,
+            0.43937498331069946,
+            0.0
+          ]
+        },
+        {
+          "distance": 12.350378368041223,
+          "position": [
+            -2.9657254219055176,
+            1.1647999286651611,
+            0.651947021484375
+          ],
+          "rotation_quaternion": [
+            0.9242752194404602,
+            0.0,
+            0.38172686100006104,
+            0.0
+          ]
+        },
+        {
+          "distance": 12.40700094927992,
+          "position": [
+            -2.923159599304199,
+            1.1647999286651611,
+            0.6146072149276733
+          ],
+          "rotation_quaternion": [
+            0.9464367032051086,
+            0.0,
+            0.3228893578052521,
+            0.0
+          ]
+        },
+        {
+          "distance": 12.463627925227051,
+          "position": [
+            -2.876265287399292,
+            1.1647999286651611,
+            0.5828654170036316
+          ],
+          "rotation_quaternion": [
+            0.9593788385391235,
+            0.0,
+            0.28212112188339233,
+            0.0
+          ]
+        },
+        {
+          "distance": 12.520288623158843,
+          "position": [
+            -2.8279309272766113,
+            1.1647999286651611,
+            0.5532983541488647
+          ],
+          "rotation_quaternion": [
+            0.9625622630119324,
+            0.0,
+            0.27106085419654846,
+            0.0
+          ]
+        },
+        {
+          "distance": 12.576949271122633,
+          "position": [
+            -2.7795963287353516,
+            1.1647999286651611,
+            0.5237314105033875
+          ],
+          "rotation_quaternion": [
+            0.9625623226165771,
+            0.0,
+            0.2710605561733246,
+            0.0
+          ]
+        },
+        {
+          "distance": 12.633609919086423,
+          "position": [
+            -2.731261730194092,
+            1.1647999286651611,
+            0.49416446685791016
+          ],
+          "rotation_quaternion": [
+            0.9625623226165771,
+            0.0,
+            0.2710605561733246,
+            0.0
+          ]
+        },
+        {
+          "distance": 12.690270567050213,
+          "position": [
+            -2.682927370071411,
+            1.1647999286651611,
+            0.46459752321243286
+          ],
+          "rotation_quaternion": [
+            0.9625623226165771,
+            0.0,
+            0.2710605561733246,
+            0.0
+          ]
+        },
+        {
+          "distance": 12.746931215014001,
+          "position": [
+            -2.6345927715301514,
+            1.1647999286651611,
+            0.4350305497646332
+          ],
+          "rotation_quaternion": [
+            0.9625623226165771,
+            0.0,
+            0.2710605561733246,
+            0.0
+          ]
+        },
+        {
+          "distance": 12.803591862977791,
+          "position": [
+            -2.5862584114074707,
+            1.1647999286651611,
+            0.4054636061191559
+          ],
+          "rotation_quaternion": [
+            0.9625621438026428,
+            0.0,
+            0.27106109261512756,
+            0.0
+          ]
+        },
+        {
+          "distance": 12.860252610220071,
+          "position": [
+            -2.537923812866211,
+            1.1647999286651611,
+            0.3758964538574219
+          ],
+          "rotation_quaternion": [
+            0.9625621438026428,
+            0.0,
+            0.27106109261512756,
+            0.0
+          ]
+        },
+        {
+          "distance": 12.916913258183861,
+          "position": [
+            -2.489589214324951,
+            1.1647999286651611,
+            0.3463295102119446
+          ],
+          "rotation_quaternion": [
+            0.9625623226165771,
+            0.0,
+            0.2710605561733246,
+            0.0
+          ]
+        },
+        {
+          "distance": 12.97357390614765,
+          "position": [
+            -2.4412548542022705,
+            1.1647999286651611,
+            0.3167625367641449
+          ],
+          "rotation_quaternion": [
+            0.9625623226165771,
+            0.0,
+            0.2710605561733246,
+            0.0
+          ]
+        },
+        {
+          "distance": 13.03023455411144,
+          "position": [
+            -2.3929202556610107,
+            1.1647999286651611,
+            0.2871955931186676
+          ],
+          "rotation_quaternion": [
+            0.9625623226165771,
+            0.0,
+            0.2710605561733246,
+            0.0
+          ]
+        },
+        {
+          "distance": 13.08689520207523,
+          "position": [
+            -2.34458589553833,
+            1.1647999286651611,
+            0.2576286196708679
+          ],
+          "rotation_quaternion": [
+            0.9625623226165771,
+            0.0,
+            0.2710605561733246,
+            0.0
+          ]
+        },
+        {
+          "distance": 13.14355585003902,
+          "position": [
+            -2.2962512969970703,
+            1.1647999286651611,
+            0.22806167602539062
+          ],
+          "rotation_quaternion": [
+            0.9625623226165771,
+            0.0,
+            0.2710605561733246,
+            0.0
+          ]
+        },
+        {
+          "distance": 13.20021649800281,
+          "position": [
+            -2.2479166984558105,
+            1.1647999286651611,
+            0.19849471747875214
+          ],
+          "rotation_quaternion": [
+            0.9625623226165771,
+            0.0,
+            0.2710605561733246,
+            0.0
+          ]
+        },
+        {
+          "distance": 13.256877145966598,
+          "position": [
+            -2.19958233833313,
+            1.1647999286651611,
+            0.16892775893211365
+          ],
+          "rotation_quaternion": [
+            0.9625621438026428,
+            0.0,
+            0.27106109261512756,
+            0.0
+          ]
+        },
+        {
+          "distance": 13.313537893208878,
+          "position": [
+            -2.15124773979187,
+            1.1647999286651611,
+            0.13936062157154083
+          ],
+          "rotation_quaternion": [
+            0.9625621438026428,
+            0.0,
+            0.27106109261512756,
+            0.0
+          ]
+        },
+        {
+          "distance": 13.370198541172668,
+          "position": [
+            -2.1029133796691895,
+            1.1647999286651611,
+            0.10979366302490234
+          ],
+          "rotation_quaternion": [
+            0.9663777351379395,
+            0.0,
+            0.2571266293525696,
+            0.0
+          ]
+        },
+        {
+          "distance": 13.426814581032497,
+          "position": [
+            -2.052990436553955,
+            1.1647999286651611,
+            0.08308982849121094
+          ],
+          "rotation_quaternion": [
+            0.9778995513916016,
+            0.0,
+            0.20907525718212128,
+            0.0
+          ]
+        },
+        {
+          "distance": 13.483428411640984,
+          "position": [
+            -1.9998350143432617,
+            1.1647999286651611,
+            0.06360606849193573
+          ],
+          "rotation_quaternion": [
+            0.9901410937309265,
+            0.0,
+            0.14007404446601868,
+            0.0
+          ]
+        },
+        {
+          "distance": 13.54004234012952,
+          "position": [
+            -1.944474458694458,
+            1.1647999286651611,
+            0.05175952985882759
+          ],
+          "rotation_quaternion": [
+            0.9975317716598511,
+            0.0,
+            0.07021652162075043,
+            0.0
+          ]
+        },
+        {
+          "distance": 13.596656627996778,
+          "position": [
+            -1.8879998922348022,
+            1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            0.9998457431793213,
+            0.0,
+            0.017563989385962486,
+            0.0
+          ]
+        }
+      ],
+      "links": [
+        {
+          "bone_name": "Tread_L_000",
+          "distance": 0.0,
+          "rest_rotation_y": 0.03512987230898735
+        },
+        {
+          "bone_name": "Tread_L_001",
+          "distance": 0.1888424531666219,
+          "rest_rotation_y": -0.0
+        },
+        {
+          "bone_name": "Tread_L_002",
+          "distance": 0.3776849063332438,
+          "rest_rotation_y": -0.0
+        },
+        {
+          "bone_name": "Tread_L_003",
+          "distance": 0.5665273594998657,
+          "rest_rotation_y": -0.0
+        },
+        {
+          "bone_name": "Tread_L_004",
+          "distance": 0.7553698126664876,
+          "rest_rotation_y": -0.0
+        },
+        {
+          "bone_name": "Tread_L_005",
+          "distance": 0.9442122658331095,
+          "rest_rotation_y": -0.0
+        },
+        {
+          "bone_name": "Tread_L_006",
+          "distance": 1.1330547189997313,
+          "rest_rotation_y": -0.0
+        },
+        {
+          "bone_name": "Tread_L_007",
+          "distance": 1.3218971721663533,
+          "rest_rotation_y": -0.0
+        },
+        {
+          "bone_name": "Tread_L_008",
+          "distance": 1.5107396253329752,
+          "rest_rotation_y": -0.0
+        },
+        {
+          "bone_name": "Tread_L_009",
+          "distance": 1.6995820784995972,
+          "rest_rotation_y": -0.0
+        },
+        {
+          "bone_name": "Tread_L_010",
+          "distance": 1.888424531666219,
+          "rest_rotation_y": -0.0
+        },
+        {
+          "bone_name": "Tread_L_011",
+          "distance": 2.077266984832841,
+          "rest_rotation_y": -0.0
+        },
+        {
+          "bone_name": "Tread_L_012",
+          "distance": 2.2661094379994626,
+          "rest_rotation_y": -0.0
+        },
+        {
+          "bone_name": "Tread_L_013",
+          "distance": 2.454951891166085,
+          "rest_rotation_y": -0.0
+        },
+        {
+          "bone_name": "Tread_L_014",
+          "distance": 2.6437943443327065,
+          "rest_rotation_y": -0.0
+        },
+        {
+          "bone_name": "Tread_L_015",
+          "distance": 2.8326367974993287,
+          "rest_rotation_y": -0.0
+        },
+        {
+          "bone_name": "Tread_L_016",
+          "distance": 3.0214792506659505,
+          "rest_rotation_y": -0.0
+        },
+        {
+          "bone_name": "Tread_L_017",
+          "distance": 3.2103217038325726,
+          "rest_rotation_y": -0.0
+        },
+        {
+          "bone_name": "Tread_L_018",
+          "distance": 3.3991641569991944,
+          "rest_rotation_y": -0.0
+        },
+        {
+          "bone_name": "Tread_L_019",
+          "distance": 3.588006610165816,
+          "rest_rotation_y": -0.0
+        },
+        {
+          "bone_name": "Tread_L_020",
+          "distance": 3.776849063332438,
+          "rest_rotation_y": -0.04411843932704121
+        },
+        {
+          "bone_name": "Tread_L_021",
+          "distance": 3.96569151649906,
+          "rest_rotation_y": -0.46843136768912486
+        },
+        {
+          "bone_name": "Tread_L_022",
+          "distance": 4.154533969665682,
+          "rest_rotation_y": -0.575470997973742
+        },
+        {
+          "bone_name": "Tread_L_023",
+          "distance": 4.3433764228323035,
+          "rest_rotation_y": -0.5754719724183892
+        },
+        {
+          "bone_name": "Tread_L_024",
+          "distance": 4.532218875998925,
+          "rest_rotation_y": -0.5754719724183892
+        },
+        {
+          "bone_name": "Tread_L_025",
+          "distance": 4.721061329165548,
+          "rest_rotation_y": -0.575471707523202
+        },
+        {
+          "bone_name": "Tread_L_026",
+          "distance": 4.90990378233217,
+          "rest_rotation_y": -0.6383801298751164
+        },
+        {
+          "bone_name": "Tread_L_027",
+          "distance": 5.098746235498791,
+          "rest_rotation_y": -1.0387675617967178
+        },
+        {
+          "bone_name": "Tread_L_028",
+          "distance": 5.287588688665413,
+          "rest_rotation_y": -1.4605452844475884
+        },
+        {
+          "bone_name": "Tread_L_029",
+          "distance": 5.476431141832036,
+          "rest_rotation_y": -1.8824023863215948
+        },
+        {
+          "bone_name": "Tread_L_030",
+          "distance": 5.6652735949986575,
+          "rest_rotation_y": -2.3041855214767337
+        },
+        {
+          "bone_name": "Tread_L_031",
+          "distance": 5.854116048165278,
+          "rest_rotation_y": -2.72596635588775
+        },
+        {
+          "bone_name": "Tread_L_032",
+          "distance": 6.042958501331901,
+          "rest_rotation_y": -3.105973170372554
+        },
+        {
+          "bone_name": "Tread_L_033",
+          "distance": 6.231800954498524,
+          "rest_rotation_y": -3.141592653589793
+        },
+        {
+          "bone_name": "Tread_L_034",
+          "distance": 6.420643407665145,
+          "rest_rotation_y": -3.141592653589793
+        },
+        {
+          "bone_name": "Tread_L_035",
+          "distance": 6.609485860831767,
+          "rest_rotation_y": -3.141592653589793
+        },
+        {
+          "bone_name": "Tread_L_036",
+          "distance": 6.798328313998389,
+          "rest_rotation_y": -3.141592653589793
+        },
+        {
+          "bone_name": "Tread_L_037",
+          "distance": 6.9871707671650105,
+          "rest_rotation_y": -3.141592653589793
+        },
+        {
+          "bone_name": "Tread_L_038",
+          "distance": 7.176013220331632,
+          "rest_rotation_y": -3.141592653589793
+        },
+        {
+          "bone_name": "Tread_L_039",
+          "distance": 7.364855673498254,
+          "rest_rotation_y": -3.141592653589793
+        },
+        {
+          "bone_name": "Tread_L_040",
+          "distance": 7.553698126664876,
+          "rest_rotation_y": -3.141592653589793
+        },
+        {
+          "bone_name": "Tread_L_041",
+          "distance": 7.742540579831498,
+          "rest_rotation_y": -3.141592653589793
+        },
+        {
+          "bone_name": "Tread_L_042",
+          "distance": 7.93138303299812,
+          "rest_rotation_y": -3.141592653589793
+        },
+        {
+          "bone_name": "Tread_L_043",
+          "distance": 8.120225486164742,
+          "rest_rotation_y": -3.141592653589793
+        },
+        {
+          "bone_name": "Tread_L_044",
+          "distance": 8.309067939331364,
+          "rest_rotation_y": -3.141592653589793
+        },
+        {
+          "bone_name": "Tread_L_045",
+          "distance": 8.497910392497985,
+          "rest_rotation_y": -3.141592653589793
+        },
+        {
+          "bone_name": "Tread_L_046",
+          "distance": 8.686752845664607,
+          "rest_rotation_y": -3.141592653589793
+        },
+        {
+          "bone_name": "Tread_L_047",
+          "distance": 8.875595298831229,
+          "rest_rotation_y": -3.141592653589793
+        },
+        {
+          "bone_name": "Tread_L_048",
+          "distance": 9.06443775199785,
+          "rest_rotation_y": -3.141592653589793
+        },
+        {
+          "bone_name": "Tread_L_049",
+          "distance": 9.253280205164474,
+          "rest_rotation_y": -3.141592653589793
+        },
+        {
+          "bone_name": "Tread_L_050",
+          "distance": 9.442122658331096,
+          "rest_rotation_y": -3.141592653589793
+        },
+        {
+          "bone_name": "Tread_L_051",
+          "distance": 9.630965111497716,
+          "rest_rotation_y": -3.141592653589793
+        },
+        {
+          "bone_name": "Tread_L_052",
+          "distance": 9.81980756466434,
+          "rest_rotation_y": -3.141592653589793
+        },
+        {
+          "bone_name": "Tread_L_053",
+          "distance": 10.008650017830961,
+          "rest_rotation_y": -3.141592653589793
+        },
+        {
+          "bone_name": "Tread_L_054",
+          "distance": 10.197492470997583,
+          "rest_rotation_y": -3.141592653589793
+        },
+        {
+          "bone_name": "Tread_L_055",
+          "distance": 10.386334924164204,
+          "rest_rotation_y": -3.141592653589793
+        },
+        {
+          "bone_name": "Tread_L_056",
+          "distance": 10.575177377330826,
+          "rest_rotation_y": -3.141592653589793
+        },
+        {
+          "bone_name": "Tread_L_057",
+          "distance": 10.76401983049745,
+          "rest_rotation_y": -3.141592653589793
+        },
+        {
+          "bone_name": "Tread_L_058",
+          "distance": 10.952862283664071,
+          "rest_rotation_y": -3.141592653589793
+        },
+        {
+          "bone_name": "Tread_L_059",
+          "distance": 11.141704736830691,
+          "rest_rotation_y": -3.141592653589793
+        },
+        {
+          "bone_name": "Tread_L_060",
+          "distance": 11.330547189997315,
+          "rest_rotation_y": 3.0567070574857316
+        },
+        {
+          "bone_name": "Tread_L_061",
+          "distance": 11.519389643163937,
+          "rest_rotation_y": 2.639490516377616
+        },
+        {
+          "bone_name": "Tread_L_062",
+          "distance": 11.708232096330557,
+          "rest_rotation_y": 2.217633358940119
+        },
+        {
+          "bone_name": "Tread_L_063",
+          "distance": 11.897074549497182,
+          "rest_rotation_y": 1.7958467443012442
+        },
+        {
+          "bone_name": "Tread_L_064",
+          "distance": 12.085917002663802,
+          "rest_rotation_y": 1.3740683768207358
+        },
+        {
+          "bone_name": "Tread_L_065",
+          "distance": 12.274759455830424,
+          "rest_rotation_y": 0.952210927557189
+        },
+        {
+          "bone_name": "Tread_L_066",
+          "distance": 12.463601908997047,
+          "rest_rotation_y": 0.5720478478478156
+        },
+        {
+          "bone_name": "Tread_L_067",
+          "distance": 12.652444362163667,
+          "rest_rotation_y": 0.5489891907597962
+        },
+        {
+          "bone_name": "Tread_L_068",
+          "distance": 12.84128681533029,
+          "rest_rotation_y": 0.5489906317619161
+        },
+        {
+          "bone_name": "Tread_L_069",
+          "distance": 13.03012926849691,
+          "rest_rotation_y": 0.5489892105024753
+        },
+        {
+          "bone_name": "Tread_L_070",
+          "distance": 13.218971721663534,
+          "rest_rotation_y": 0.5489896908364894
+        },
+        {
+          "bone_name": "Tread_L_071",
+          "distance": 13.407814174830158,
+          "rest_rotation_y": 0.4544163157776257
+        }
+      ],
+      "positive_travel_phase_sign": -1
+    },
+    {
+      "motion_sign": -1,
+      "side": "Right",
+      "parent": "Track_Right",
+      "assembly": "Track_Right",
+      "armature": "Track_Right_Rig",
+      "mesh": "Track_Right_Shoes",
+      "length": 13.596656627996778,
+      "samples": [
+        {
+          "distance": 0.0,
+          "position": [
+            -1.8879998922348022,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            0.9998457431793213,
+            0.0,
+            0.017563989385962486,
+            0.0
+          ]
+        },
+        {
+          "distance": 0.05666065256610821,
+          "position": [
+            -1.8313392400741577,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 0.11332130513221642,
+          "position": [
+            -1.7746785879135132,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 0.16998195769832464,
+          "position": [
+            -1.7180179357528687,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 0.22664261026443283,
+          "position": [
+            -1.6613572835922241,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 0.283303262830541,
+          "position": [
+            -1.6046966314315796,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 0.3399639153966492,
+          "position": [
+            -1.548035979270935,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 0.3966245679627574,
+          "position": [
+            -1.4913753271102905,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 0.45328522052886566,
+          "position": [
+            -1.434714674949646,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 0.5099458730949739,
+          "position": [
+            -1.3780540227890015,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 0.566606525661082,
+          "position": [
+            -1.321393370628357,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 0.6232672729033598,
+          "position": [
+            -1.2647325992584229,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 0.679927925469468,
+          "position": [
+            -1.2080719470977783,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 0.7365885780355762,
+          "position": [
+            -1.1514112949371338,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 0.7932492306016844,
+          "position": [
+            -1.0947506427764893,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 0.8499098831677927,
+          "position": [
+            -1.0380899906158447,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 0.906570535733901,
+          "position": [
+            -0.981429398059845,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 0.9632311883000093,
+          "position": [
+            -0.9247687458992004,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 1.019891935542287,
+          "position": [
+            -0.8681079745292664,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 1.0765525881083953,
+          "position": [
+            -0.8114473223686218,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 1.1332132406745037,
+          "position": [
+            -0.7547866702079773,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 1.1898738932406119,
+          "position": [
+            -0.6981260180473328,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 1.2465345458067203,
+          "position": [
+            -0.6414653658866882,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 1.3031951983728285,
+          "position": [
+            -0.5848047137260437,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 1.3598558982770412,
+          "position": [
+            -0.5281440019607544,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 1.4165165508431494,
+          "position": [
+            -0.47148337960243225,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 1.4731772034092578,
+          "position": [
+            -0.4148227274417877,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 1.5298378796444232,
+          "position": [
+            -0.3581620454788208,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 1.5864985322105314,
+          "position": [
+            -0.30150139331817627,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 1.643159208445697,
+          "position": [
+            -0.24484071135520935,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 1.6998198715313872,
+          "position": [
+            -0.18818005919456482,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 1.7564805346170775,
+          "position": [
+            -0.1315193921327591,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 1.8131411977027678,
+          "position": [
+            -0.07485872507095337,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 1.8698018607884581,
+          "position": [
+            -0.018198061734437943,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 1.9264625238741484,
+          "position": [
+            0.038462601602077484,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 1.9831231869598387,
+          "position": [
+            0.09512326866388321,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 2.039783850045529,
+          "position": [
+            0.15178392827510834,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 2.0964445131312193,
+          "position": [
+            0.20844459533691406,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 2.153105189366385,
+          "position": [
+            0.265105277299881,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 2.209765841932493,
+          "position": [
+            0.3217659294605255,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 2.2664265181676586,
+          "position": [
+            0.37842661142349243,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 2.323087170733767,
+          "position": [
+            0.43508726358413696,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 2.379747823299875,
+          "position": [
+            0.4917479157447815,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 2.436408523204088,
+          "position": [
+            0.5484086275100708,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 2.4930691757701964,
+          "position": [
+            0.6050692796707153,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 2.5497298283363046,
+          "position": [
+            0.6617299318313599,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 2.6063904809024128,
+          "position": [
+            0.7183905839920044,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 2.6630511808066255,
+          "position": [
+            0.7750512361526489,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 2.7197117860345896,
+          "position": [
+            0.8317118883132935,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 2.7763725332768674,
+          "position": [
+            0.8883726000785828,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 2.8330331858429756,
+          "position": [
+            0.9450332522392273,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 2.889693838409084,
+          "position": [
+            1.0016939640045166,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 2.9463544909751924,
+          "position": [
+            1.0583546161651611,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 3.0030151435413006,
+          "position": [
+            1.1150152683258057,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 3.059675796107409,
+          "position": [
+            1.1716759204864502,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 3.116336448673517,
+          "position": [
+            1.2283365726470947,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 3.1729971959157948,
+          "position": [
+            1.2849972248077393,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 3.229657848481903,
+          "position": [
+            1.3416578769683838,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 3.286318501048011,
+          "position": [
+            1.3983185291290283,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 3.342979153614119,
+          "position": [
+            1.4549791812896729,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 3.399639806180227,
+          "position": [
+            1.5116398334503174,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 3.456300458746335,
+          "position": [
+            1.568300485610962,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 3.512961205988612,
+          "position": [
+            1.624961256980896,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 3.5696218585547204,
+          "position": [
+            1.6816219091415405,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 3.626282511120828,
+          "position": [
+            1.738282561302185,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 3.682943163686936,
+          "position": [
+            1.7949432134628296,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            1.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 3.739603816253044,
+          "position": [
+            1.8516038656234741,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            0.9999974370002747,
+            0.0,
+            -0.0022588949650526047,
+            0.0
+          ]
+        },
+        {
+          "distance": 3.7962581971619294,
+          "position": [
+            1.908255934715271,
+            -1.1647999286651611,
+            0.04829540103673935
+          ],
+          "rotation_quaternion": [
+            0.9994759559631348,
+            0.0,
+            -0.03236991539597511,
+            0.0
+          ]
+        },
+        {
+          "distance": 3.8528720328289268,
+          "position": [
+            1.9644591808319092,
+            -1.1647999286651611,
+            0.05510120466351509
+          ],
+          "rotation_quaternion": [
+            0.9954544901847839,
+            0.0,
+            -0.09523920714855194,
+            0.0
+          ]
+        },
+        {
+          "distance": 3.909486112661071,
+          "position": [
+            2.019155502319336,
+            -1.1647999286651611,
+            0.06971187889575958
+          ],
+          "rotation_quaternion": [
+            0.9863107800483704,
+            0.0,
+            -0.1648971289396286,
+            0.0
+          ]
+        },
+        {
+          "distance": 3.966100299256018,
+          "position": [
+            2.071265697479248,
+            -1.1647999286651611,
+            0.09184112399816513
+          ],
+          "rotation_quaternion": [
+            0.9725812077522278,
+            0.0,
+            -0.23256359994411469,
+            0.0
+          ]
+        },
+        {
+          "distance": 4.022727585714555,
+          "position": [
+            2.119915246963501,
+            -1.1647999286651611,
+            0.12082157284021378
+          ],
+          "rotation_quaternion": [
+            0.9615559577941895,
+            0.0,
+            -0.2746090590953827,
+            0.0
+          ]
+        },
+        {
+          "distance": 4.07938834413387,
+          "position": [
+            2.167449951171875,
+            -1.1647999286651611,
+            0.1516580581665039
+          ],
+          "rotation_quaternion": [
+            0.9588890075683594,
+            0.0,
+            -0.2837812900543213,
+            0.0
+          ]
+        },
+        {
+          "distance": 4.136048838248534,
+          "position": [
+            2.21498441696167,
+            -1.1647999286651611,
+            0.1824943572282791
+          ],
+          "rotation_quaternion": [
+            0.9588890075683594,
+            0.0,
+            -0.2837812900543213,
+            0.0
+          ]
+        },
+        {
+          "distance": 4.192709596667849,
+          "position": [
+            2.262519359588623,
+            -1.1647999286651611,
+            0.21333083510398865
+          ],
+          "rotation_quaternion": [
+            0.9588887691497803,
+            0.0,
+            -0.28378209471702576,
+            0.0
+          ]
+        },
+        {
+          "distance": 4.249370194663594,
+          "position": [
+            2.310053825378418,
+            -1.1647999286651611,
+            0.24416732788085938
+          ],
+          "rotation_quaternion": [
+            0.9588887691497803,
+            0.0,
+            -0.28378209471702576,
+            0.0
+          ]
+        },
+        {
+          "distance": 4.306030953082909,
+          "position": [
+            2.357588529586792,
+            -1.1647999286651611,
+            0.2750038206577301
+          ],
+          "rotation_quaternion": [
+            0.9588887691497803,
+            0.0,
+            -0.28378209471702576,
+            0.0
+          ]
+        },
+        {
+          "distance": 4.362691551078654,
+          "position": [
+            2.405123233795166,
+            -1.1647999286651611,
+            0.30584031343460083
+          ],
+          "rotation_quaternion": [
+            0.9588887691497803,
+            0.0,
+            -0.28378209471702576,
+            0.0
+          ]
+        },
+        {
+          "distance": 4.4193523094979685,
+          "position": [
+            2.45265793800354,
+            -1.1647999286651611,
+            0.33667677640914917
+          ],
+          "rotation_quaternion": [
+            0.9588890075683594,
+            0.0,
+            -0.2837812900543213,
+            0.0
+          ]
+        },
+        {
+          "distance": 4.476012803612633,
+          "position": [
+            2.500192403793335,
+            -1.1647999286651611,
+            0.36751309037208557
+          ],
+          "rotation_quaternion": [
+            0.9588890075683594,
+            0.0,
+            -0.2837812900543213,
+            0.0
+          ]
+        },
+        {
+          "distance": 4.532673562031948,
+          "position": [
+            2.547727108001709,
+            -1.1647999286651611,
+            0.3983495831489563
+          ],
+          "rotation_quaternion": [
+            0.9588887691497803,
+            0.0,
+            -0.28378209471702576,
+            0.0
+          ]
+        },
+        {
+          "distance": 4.5893341600276925,
+          "position": [
+            2.595261812210083,
+            -1.1647999286651611,
+            0.42918604612350464
+          ],
+          "rotation_quaternion": [
+            0.9588887691497803,
+            0.0,
+            -0.28378209471702576,
+            0.0
+          ]
+        },
+        {
+          "distance": 4.645994918447008,
+          "position": [
+            2.642796516418457,
+            -1.1647999286651611,
+            0.46002253890037537
+          ],
+          "rotation_quaternion": [
+            0.9588887691497803,
+            0.0,
+            -0.28378209471702576,
+            0.0
+          ]
+        },
+        {
+          "distance": 4.702655516442753,
+          "position": [
+            2.690330982208252,
+            -1.1647999286651611,
+            0.4908590316772461
+          ],
+          "rotation_quaternion": [
+            0.9588887691497803,
+            0.0,
+            -0.28378209471702576,
+            0.0
+          ]
+        },
+        {
+          "distance": 4.759316274862067,
+          "position": [
+            2.737865924835205,
+            -1.1647999286651611,
+            0.5216954946517944
+          ],
+          "rotation_quaternion": [
+            0.9588888883590698,
+            0.0,
+            -0.28378164768218994,
+            0.0
+          ]
+        },
+        {
+          "distance": 4.815976820917296,
+          "position": [
+            2.785400390625,
+            -1.1647999286651611,
+            0.552531898021698
+          ],
+          "rotation_quaternion": [
+            0.9588890075683594,
+            0.0,
+            -0.2837812900543213,
+            0.0
+          ]
+        },
+        {
+          "distance": 4.872637527396242,
+          "position": [
+            2.832935094833374,
+            -1.1647999286651611,
+            0.5833683013916016
+          ],
+          "rotation_quaternion": [
+            0.956845760345459,
+            0.0,
+            -0.2905963361263275,
+            0.0
+          ]
+        },
+        {
+          "distance": 4.929275422848809,
+          "position": [
+            2.879554271697998,
+            -1.1647999286651611,
+            0.6155322194099426
+          ],
+          "rotation_quaternion": [
+            0.9454448819160461,
+            0.0,
+            -0.32578203082084656,
+            0.0
+          ]
+        },
+        {
+          "distance": 4.985898156723816,
+          "position": [
+            2.921994924545288,
+            -1.1647999286651611,
+            0.6530143618583679
+          ],
+          "rotation_quaternion": [
+            0.923629879951477,
+            0.0,
+            -0.38328564167022705,
+            0.0
+          ]
+        },
+        {
+          "distance": 5.042520986654221,
+          "position": [
+            2.9593663215637207,
+            -1.1647999286651611,
+            0.6955528259277344
+          ],
+          "rotation_quaternion": [
+            0.8975623250007629,
+            0.0,
+            -0.44088757038116455,
+            0.0
+          ]
+        },
+        {
+          "distance": 5.099143598814962,
+          "position": [
+            2.9910764694213867,
+            -1.1647999286651611,
+            0.7424632906913757
+          ],
+          "rotation_quaternion": [
+            0.8679053783416748,
+            0.0,
+            -0.4967295527458191,
+            0.0
+          ]
+        },
+        {
+          "distance": 5.155766324794998,
+          "position": [
+            3.0166125297546387,
+            -1.1647999286651611,
+            0.7930008172988892
+          ],
+          "rotation_quaternion": [
+            0.8347800374031067,
+            0.0,
+            -0.55058354139328,
+            0.0
+          ]
+        },
+        {
+          "distance": 5.212389096500061,
+          "position": [
+            3.035573959350586,
+            -1.1647999286651611,
+            0.8463543653488159
+          ],
+          "rotation_quaternion": [
+            0.7983167171478271,
+            0.0,
+            -0.6022378206253052,
+            0.0
+          ]
+        },
+        {
+          "distance": 5.269011749533798,
+          "position": [
+            3.04764986038208,
+            -1.1647999286651611,
+            0.9016743898391724
+          ],
+          "rotation_quaternion": [
+            0.7586629986763,
+            0.0,
+            -0.6514832973480225,
+            0.0
+          ]
+        },
+        {
+          "distance": 5.325634521650057,
+          "position": [
+            3.0526556968688965,
+            -1.1647999286651611,
+            0.9580754041671753
+          ],
+          "rotation_quaternion": [
+            0.7159749865531921,
+            0.0,
+            -0.6981258988380432,
+            0.0
+          ]
+        },
+        {
+          "distance": 5.382257259015094,
+          "position": [
+            3.050502300262451,
+            -1.1647999286651611,
+            1.0146572589874268
+          ],
+          "rotation_quaternion": [
+            0.6704263687133789,
+            -0.0,
+            -0.7419760823249817,
+            -0.0
+          ]
+        },
+        {
+          "distance": 5.438880021262645,
+          "position": [
+            3.041234254837036,
+            -1.1647999286651611,
+            1.0705163478851318
+          ],
+          "rotation_quaternion": [
+            0.6221961975097656,
+            -0.0,
+            -0.7828613519668579,
+            -0.0
+          ]
+        },
+        {
+          "distance": 5.495502649048881,
+          "position": [
+            3.024989128112793,
+            -1.1647999286651611,
+            1.1247584819793701
+          ],
+          "rotation_quaternion": [
+            0.5714799761772156,
+            -0.0,
+            -0.8206160068511963,
+            -0.0
+          ]
+        },
+        {
+          "distance": 5.55212544312301,
+          "position": [
+            3.0020365715026855,
+            -1.1647999286651611,
+            1.1765207052230835
+          ],
+          "rotation_quaternion": [
+            0.5184773802757263,
+            -0.0,
+            -0.8550913333892822,
+            -0.0
+          ]
+        },
+        {
+          "distance": 5.608748168445131,
+          "position": [
+            2.972733497619629,
+            -1.1647999286651611,
+            1.2249712944030762
+          ],
+          "rotation_quaternion": [
+            0.4634045362472534,
+            -0.0,
+            -0.8861468434333801,
+            -0.0
+          ]
+        },
+        {
+          "distance": 5.665370960874475,
+          "position": [
+            2.9375576972961426,
+            -1.1647999286651611,
+            1.2693424224853516
+          ],
+          "rotation_quaternion": [
+            0.40647733211517334,
+            -0.0,
+            -0.9136608839035034,
+            -0.0
+          ]
+        },
+        {
+          "distance": 5.72199363553717,
+          "position": [
+            2.897061586380005,
+            -1.1647999286651611,
+            1.3089176416397095
+          ],
+          "rotation_quaternion": [
+            0.3479263186454773,
+            -0.0,
+            -0.9375218749046326,
+            -0.0
+          ]
+        },
+        {
+          "distance": 5.778616496389483,
+          "position": [
+            2.851900577545166,
+            -1.1647999286651611,
+            1.343073844909668
+          ],
+          "rotation_quaternion": [
+            0.28798243403434753,
+            -0.0,
+            -0.9576357007026672,
+            -0.0
+          ]
+        },
+        {
+          "distance": 5.835239207895402,
+          "position": [
+            2.8027889728546143,
+            -1.1647999286651611,
+            1.371254801750183
+          ],
+          "rotation_quaternion": [
+            0.22688980400562286,
+            -0.0,
+            -0.9739205241203308,
+            -0.0
+          ]
+        },
+        {
+          "distance": 5.891862087169269,
+          "position": [
+            2.7505173683166504,
+            -1.1647999286651611,
+            1.3930222988128662
+          ],
+          "rotation_quaternion": [
+            0.16488802433013916,
+            -0.0,
+            -0.9863122701644897,
+            -0.0
+          ]
+        },
+        {
+          "distance": 5.948484870387823,
+          "position": [
+            2.695915699005127,
+            -1.1647999286651611,
+            1.408015489578247
+          ],
+          "rotation_quaternion": [
+            0.10222921520471573,
+            -0.0,
+            -0.9947608709335327,
+            -0.0
+          ]
+        },
+        {
+          "distance": 6.005107579097604,
+          "position": [
+            2.639859914779663,
+            -1.1647999286651611,
+            1.4160090684890747
+          ],
+          "rotation_quaternion": [
+            0.04146110266447067,
+            -0.0,
+            -0.9991401433944702,
+            -0.0
+          ]
+        },
+        {
+          "distance": 6.061749049208088,
+          "position": [
+            2.583235263824463,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            0.006065646186470985,
+            -0.0,
+            -0.9999816417694092,
+            -0.0
+          ]
+        },
+        {
+          "distance": 6.118409701774196,
+          "position": [
+            2.5265746116638184,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 6.175070543692485,
+          "position": [
+            2.4699137210845947,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 6.231731196258593,
+          "position": [
+            2.41325306892395,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 6.288391848824701,
+          "position": [
+            2.3565924167633057,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 6.345052501390809,
+          "position": [
+            2.299931764602661,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 6.4017131539569165,
+          "position": [
+            2.2432711124420166,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 6.458373806523025,
+          "position": [
+            2.186610460281372,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 6.515034459089134,
+          "position": [
+            2.1299498081207275,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 6.5716951116552424,
+          "position": [
+            2.073289155960083,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 6.628355764221351,
+          "position": [
+            2.0166285037994385,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 6.68501641678746,
+          "position": [
+            1.959967851638794,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 6.741677069353568,
+          "position": [
+            1.9033071994781494,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 6.798337721919677,
+          "position": [
+            1.8466465473175049,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 6.854998374485786,
+          "position": [
+            1.7899858951568604,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 6.911659027051894,
+          "position": [
+            1.7333252429962158,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 6.968319679618003,
+          "position": [
+            1.6766645908355713,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 7.024980521536292,
+          "position": [
+            1.6200037002563477,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 7.081641079426072,
+          "position": [
+            1.5633431673049927,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 7.138301731992181,
+          "position": [
+            1.5066825151443481,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 7.1949623845582895,
+          "position": [
+            1.4500218629837036,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 7.251623131800567,
+          "position": [
+            1.3933610916137695,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 7.308283784366676,
+          "position": [
+            1.336700439453125,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 7.3649444369327846,
+          "position": [
+            1.2800397872924805,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 7.421605089498893,
+          "position": [
+            1.223379135131836,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 7.478265742065002,
+          "position": [
+            1.1667184829711914,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 7.5349263946311105,
+          "position": [
+            1.1100578308105469,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 7.591587047197219,
+          "position": [
+            1.0533971786499023,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 7.648247794439496,
+          "position": [
+            0.9967364072799683,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 7.704908447005605,
+          "position": [
+            0.9400757551193237,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 7.761569099571713,
+          "position": [
+            0.8834151029586792,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 7.818229752137822,
+          "position": [
+            0.8267544507980347,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 7.8748904047039305,
+          "position": [
+            0.7700937986373901,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 7.931551057270039,
+          "position": [
+            0.7134331464767456,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 7.988211757174252,
+          "position": [
+            0.6567724943161011,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 8.04487240974036,
+          "position": [
+            0.6001118421554565,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 8.10153306230647,
+          "position": [
+            0.543451189994812,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 8.158193714872578,
+          "position": [
+            0.4867905080318451,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 8.21485441477679,
+          "position": [
+            0.4301298260688782,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 8.271515067342898,
+          "position": [
+            0.37346917390823364,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 8.328175719909007,
+          "position": [
+            0.3168085217475891,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 8.384836396144172,
+          "position": [
+            0.2601478397846222,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 8.441497072379338,
+          "position": [
+            0.20348715782165527,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 8.498157724945447,
+          "position": [
+            0.14682650566101074,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 8.554818388031137,
+          "position": [
+            0.09016583859920502,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 8.611479051116829,
+          "position": [
+            0.03350517526268959,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 8.66813971420252,
+          "position": [
+            -0.023155491799116135,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 8.72480037728821,
+          "position": [
+            -0.07981615513563156,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 8.781461035114111,
+          "position": [
+            -0.1364768147468567,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 8.838121711349276,
+          "position": [
+            -0.1931374967098236,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 8.894782374434966,
+          "position": [
+            -0.24979814887046814,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 8.951443027001075,
+          "position": [
+            -0.30645880103111267,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 9.008103703236241,
+          "position": [
+            -0.3631194829940796,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 9.064764379471406,
+          "position": [
+            -0.4197801649570465,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 9.121425032037514,
+          "position": [
+            -0.47644081711769104,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 9.178085684603623,
+          "position": [
+            -0.5331014394760132,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 9.234746337169732,
+          "position": [
+            -0.5897620916366577,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 9.291407037073943,
+          "position": [
+            -0.646422803401947,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 9.348067689640052,
+          "position": [
+            -0.7030834555625916,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 9.40472834220616,
+          "position": [
+            -0.7597441077232361,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 9.461389042110374,
+          "position": [
+            -0.8164048194885254,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 9.518049694676483,
+          "position": [
+            -0.8730654716491699,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 9.574710347242592,
+          "position": [
+            -0.9297261238098145,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 9.6313709998087,
+          "position": [
+            -0.986386775970459,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 9.688031652374809,
+          "position": [
+            -1.0430474281311035,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 9.744692304940918,
+          "position": [
+            -1.099708080291748,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 9.801353052183195,
+          "position": [
+            -1.1563688516616821,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 9.858013704749304,
+          "position": [
+            -1.2130295038223267,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 9.914674357315413,
+          "position": [
+            -1.2696901559829712,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 9.971335009881521,
+          "position": [
+            -1.3263508081436157,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 10.02799566244763,
+          "position": [
+            -1.3830114603042603,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 10.084656315013738,
+          "position": [
+            -1.4396721124649048,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 10.141316967579847,
+          "position": [
+            -1.4963327646255493,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 10.197977620145956,
+          "position": [
+            -1.5529934167861938,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 10.254638272712064,
+          "position": [
+            -1.6096540689468384,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 10.311298925278173,
+          "position": [
+            -1.666314721107483,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 10.367959577844282,
+          "position": [
+            -1.7229753732681274,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 10.424620419762569,
+          "position": [
+            -1.7796361446380615,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 10.481281072328677,
+          "position": [
+            -1.836296796798706,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 10.537941724894786,
+          "position": [
+            -1.8929574489593506,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 10.594602377460895,
+          "position": [
+            -1.9496181011199951,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 10.651263030027003,
+          "position": [
+            -2.0062787532806396,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 10.707923682593112,
+          "position": [
+            -2.062939405441284,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 10.76458433515922,
+          "position": [
+            -2.1196000576019287,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 10.82124498772533,
+          "position": [
+            -2.1762607097625732,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 10.877905640291438,
+          "position": [
+            -2.2329213619232178,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 10.934566292857546,
+          "position": [
+            -2.2895820140838623,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 10.991226945423655,
+          "position": [
+            -2.346242666244507,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 11.047887597989764,
+          "position": [
+            -2.4029033184051514,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 11.104548250555872,
+          "position": [
+            -2.459563970565796,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 11.161208903121981,
+          "position": [
+            -2.5162246227264404,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 11.21786955568809,
+          "position": [
+            -2.572885274887085,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            4.371138828673793e-08,
+            0.0,
+            1.0,
+            0.0
+          ]
+        },
+        {
+          "distance": 11.274530397606378,
+          "position": [
+            -2.6295461654663086,
+            -1.1647999286651611,
+            1.4173834323883057
+          ],
+          "rotation_quaternion": [
+            0.006614593788981438,
+            0.0,
+            0.9999781250953674,
+            0.0
+          ]
+        },
+        {
+          "distance": 11.331169872025939,
+          "position": [
+            -2.6861658096313477,
+            -1.1647999286651611,
+            1.4158847332000732
+          ],
+          "rotation_quaternion": [
+            0.042827580124139786,
+            0.0,
+            0.9990825057029724,
+            0.0
+          ]
+        },
+        {
+          "distance": 11.387792527115659,
+          "position": [
+            -2.742194890975952,
+            -1.1647999286651611,
+            1.4077078104019165
+          ],
+          "rotation_quaternion": [
+            0.10390540212392807,
+            0.0,
+            0.9945871829986572,
+            0.0
+          ]
+        },
+        {
+          "distance": 11.444415367572674,
+          "position": [
+            -2.7967443466186523,
+            -1.1647999286651611,
+            1.392525315284729
+          ],
+          "rotation_quaternion": [
+            0.166551873087883,
+            0.0,
+            0.9860327243804932,
+            0.0
+          ]
+        },
+        {
+          "distance": 11.501038035985175,
+          "position": [
+            -2.8489441871643066,
+            -1.1647999286651611,
+            1.3705865144729614
+          ],
+          "rotation_quaternion": [
+            0.2285306602716446,
+            0.0,
+            0.9735366702079773,
+            0.0
+          ]
+        },
+        {
+          "distance": 11.557660681699605,
+          "position": [
+            -2.8979580402374268,
+            -1.1647999286651611,
+            1.342235803604126
+          ],
+          "rotation_quaternion": [
+            0.2895979583263397,
+            0.0,
+            0.9571483731269836,
+            0.0
+          ]
+        },
+        {
+          "distance": 11.614283399126755,
+          "position": [
+            -2.9430060386657715,
+            -1.1647999286651611,
+            1.3079313039779663
+          ],
+          "rotation_quaternion": [
+            0.3495057225227356,
+            0.0,
+            0.936934232711792,
+            0.0
+          ]
+        },
+        {
+          "distance": 11.670906119843474,
+          "position": [
+            -2.983365535736084,
+            -1.1647999286651611,
+            1.268216609954834
+          ],
+          "rotation_quaternion": [
+            0.4080177843570709,
+            0.0,
+            0.9129739999771118,
+            0.0
+          ]
+        },
+        {
+          "distance": 11.72752886950842,
+          "position": [
+            -3.018394947052002,
+            -1.1647999286651611,
+            1.2237298488616943
+          ],
+          "rotation_quaternion": [
+            0.46489715576171875,
+            0.0,
+            0.8853647112846375,
+            0.0
+          ]
+        },
+        {
+          "distance": 11.784151472458342,
+          "position": [
+            -3.0475308895111084,
+            -1.1647999286651611,
+            1.1751787662506104
+          ],
+          "rotation_quaternion": [
+            0.519919753074646,
+            0.0,
+            0.854215145111084,
+            0.0
+          ]
+        },
+        {
+          "distance": 11.840774192846105,
+          "position": [
+            -3.070312023162842,
+            -1.1647999286651611,
+            1.1233409643173218
+          ],
+          "rotation_quaternion": [
+            0.5728618502616882,
+            0.0,
+            0.8196519017219543,
+            0.0
+          ]
+        },
+        {
+          "distance": 11.897396862903395,
+          "position": [
+            -3.0863709449768066,
+            -1.1647999286651611,
+            1.0690432786941528
+          ],
+          "rotation_quaternion": [
+            0.6235160231590271,
+            0.0,
+            0.7818105816841125,
+            0.0
+          ]
+        },
+        {
+          "distance": 11.954019537895048,
+          "position": [
+            -3.0954537391662598,
+            -1.1647999286651611,
+            1.0131537914276123
+          ],
+          "rotation_quaternion": [
+            0.6716761589050293,
+            0.0,
+            0.7408449053764343,
+            0.0
+          ]
+        },
+        {
+          "distance": 12.010642283941467,
+          "position": [
+            -3.0974130630493164,
+            -1.1647999286651611,
+            0.9565650224685669
+          ],
+          "rotation_quaternion": [
+            0.7171519994735718,
+            0.0,
+            0.6969167590141296,
+            0.0
+          ]
+        },
+        {
+          "distance": 12.067264921452516,
+          "position": [
+            -3.092219829559326,
+            -1.1647999286651611,
+            0.900180995464325
+          ],
+          "rotation_quaternion": [
+            0.7597596645355225,
+            0.0,
+            0.650204062461853,
+            0.0
+          ]
+        },
+        {
+          "distance": 12.1238875950461,
+          "position": [
+            -3.0799551010131836,
+            -1.1647999286651611,
+            0.8449026346206665
+          ],
+          "rotation_quaternion": [
+            0.7993316650390625,
+            0.0,
+            0.600890040397644,
+            0.0
+          ]
+        },
+        {
+          "distance": 12.180510297341215,
+          "position": [
+            -3.0608162879943848,
+            -1.1647999286651611,
+            0.7916125059127808
+          ],
+          "rotation_quaternion": [
+            0.835706889629364,
+            0.0,
+            0.5491757392883301,
+            0.0
+          ]
+        },
+        {
+          "distance": 12.237132976609313,
+          "position": [
+            -3.0351078510284424,
+            -1.1647999286651611,
+            0.7411624789237976
+          ],
+          "rotation_quaternion": [
+            0.8687422275543213,
+            0.0,
+            0.49526447057724,
+            0.0
+          ]
+        },
+        {
+          "distance": 12.293755634166217,
+          "position": [
+            -3.0032413005828857,
+            -1.1647999286651611,
+            0.6943580508232117
+          ],
+          "rotation_quaternion": [
+            0.898303747177124,
+            0.0,
+            0.43937498331069946,
+            0.0
+          ]
+        },
+        {
+          "distance": 12.350378368041223,
+          "position": [
+            -2.9657254219055176,
+            -1.1647999286651611,
+            0.651947021484375
+          ],
+          "rotation_quaternion": [
+            0.9242752194404602,
+            0.0,
+            0.38172686100006104,
+            0.0
+          ]
+        },
+        {
+          "distance": 12.40700094927992,
+          "position": [
+            -2.923159599304199,
+            -1.1647999286651611,
+            0.6146072149276733
+          ],
+          "rotation_quaternion": [
+            0.9464367032051086,
+            0.0,
+            0.3228893578052521,
+            0.0
+          ]
+        },
+        {
+          "distance": 12.463627925227051,
+          "position": [
+            -2.876265287399292,
+            -1.1647999286651611,
+            0.5828654170036316
+          ],
+          "rotation_quaternion": [
+            0.9593788385391235,
+            0.0,
+            0.28212112188339233,
+            0.0
+          ]
+        },
+        {
+          "distance": 12.520288623158843,
+          "position": [
+            -2.8279309272766113,
+            -1.1647999286651611,
+            0.5532983541488647
+          ],
+          "rotation_quaternion": [
+            0.9625622630119324,
+            0.0,
+            0.27106085419654846,
+            0.0
+          ]
+        },
+        {
+          "distance": 12.576949271122633,
+          "position": [
+            -2.7795963287353516,
+            -1.1647999286651611,
+            0.5237314105033875
+          ],
+          "rotation_quaternion": [
+            0.9625623226165771,
+            0.0,
+            0.2710605561733246,
+            0.0
+          ]
+        },
+        {
+          "distance": 12.633609919086423,
+          "position": [
+            -2.731261730194092,
+            -1.1647999286651611,
+            0.49416446685791016
+          ],
+          "rotation_quaternion": [
+            0.9625623226165771,
+            0.0,
+            0.2710605561733246,
+            0.0
+          ]
+        },
+        {
+          "distance": 12.690270567050213,
+          "position": [
+            -2.682927370071411,
+            -1.1647999286651611,
+            0.46459752321243286
+          ],
+          "rotation_quaternion": [
+            0.9625623226165771,
+            0.0,
+            0.2710605561733246,
+            0.0
+          ]
+        },
+        {
+          "distance": 12.746931215014001,
+          "position": [
+            -2.6345927715301514,
+            -1.1647999286651611,
+            0.4350305497646332
+          ],
+          "rotation_quaternion": [
+            0.9625623226165771,
+            0.0,
+            0.2710605561733246,
+            0.0
+          ]
+        },
+        {
+          "distance": 12.803591862977791,
+          "position": [
+            -2.5862584114074707,
+            -1.1647999286651611,
+            0.4054636061191559
+          ],
+          "rotation_quaternion": [
+            0.9625621438026428,
+            0.0,
+            0.27106109261512756,
+            0.0
+          ]
+        },
+        {
+          "distance": 12.860252610220071,
+          "position": [
+            -2.537923812866211,
+            -1.1647999286651611,
+            0.3758964538574219
+          ],
+          "rotation_quaternion": [
+            0.9625621438026428,
+            0.0,
+            0.27106109261512756,
+            0.0
+          ]
+        },
+        {
+          "distance": 12.916913258183861,
+          "position": [
+            -2.489589214324951,
+            -1.1647999286651611,
+            0.3463295102119446
+          ],
+          "rotation_quaternion": [
+            0.9625623226165771,
+            0.0,
+            0.2710605561733246,
+            0.0
+          ]
+        },
+        {
+          "distance": 12.97357390614765,
+          "position": [
+            -2.4412548542022705,
+            -1.1647999286651611,
+            0.3167625367641449
+          ],
+          "rotation_quaternion": [
+            0.9625623226165771,
+            0.0,
+            0.2710605561733246,
+            0.0
+          ]
+        },
+        {
+          "distance": 13.03023455411144,
+          "position": [
+            -2.3929202556610107,
+            -1.1647999286651611,
+            0.2871955931186676
+          ],
+          "rotation_quaternion": [
+            0.9625623226165771,
+            0.0,
+            0.2710605561733246,
+            0.0
+          ]
+        },
+        {
+          "distance": 13.08689520207523,
+          "position": [
+            -2.34458589553833,
+            -1.1647999286651611,
+            0.2576286196708679
+          ],
+          "rotation_quaternion": [
+            0.9625623226165771,
+            0.0,
+            0.2710605561733246,
+            0.0
+          ]
+        },
+        {
+          "distance": 13.14355585003902,
+          "position": [
+            -2.2962512969970703,
+            -1.1647999286651611,
+            0.22806167602539062
+          ],
+          "rotation_quaternion": [
+            0.9625623226165771,
+            0.0,
+            0.2710605561733246,
+            0.0
+          ]
+        },
+        {
+          "distance": 13.20021649800281,
+          "position": [
+            -2.2479166984558105,
+            -1.1647999286651611,
+            0.19849471747875214
+          ],
+          "rotation_quaternion": [
+            0.9625623226165771,
+            0.0,
+            0.2710605561733246,
+            0.0
+          ]
+        },
+        {
+          "distance": 13.256877145966598,
+          "position": [
+            -2.19958233833313,
+            -1.1647999286651611,
+            0.16892775893211365
+          ],
+          "rotation_quaternion": [
+            0.9625621438026428,
+            0.0,
+            0.27106109261512756,
+            0.0
+          ]
+        },
+        {
+          "distance": 13.313537893208878,
+          "position": [
+            -2.15124773979187,
+            -1.1647999286651611,
+            0.13936062157154083
+          ],
+          "rotation_quaternion": [
+            0.9625621438026428,
+            0.0,
+            0.27106109261512756,
+            0.0
+          ]
+        },
+        {
+          "distance": 13.370198541172668,
+          "position": [
+            -2.1029133796691895,
+            -1.1647999286651611,
+            0.10979366302490234
+          ],
+          "rotation_quaternion": [
+            0.9663777351379395,
+            0.0,
+            0.2571266293525696,
+            0.0
+          ]
+        },
+        {
+          "distance": 13.426814581032497,
+          "position": [
+            -2.052990436553955,
+            -1.1647999286651611,
+            0.08308982849121094
+          ],
+          "rotation_quaternion": [
+            0.9778995513916016,
+            0.0,
+            0.20907525718212128,
+            0.0
+          ]
+        },
+        {
+          "distance": 13.483428411640984,
+          "position": [
+            -1.9998350143432617,
+            -1.1647999286651611,
+            0.06360606849193573
+          ],
+          "rotation_quaternion": [
+            0.9901410937309265,
+            0.0,
+            0.14007404446601868,
+            0.0
+          ]
+        },
+        {
+          "distance": 13.54004234012952,
+          "position": [
+            -1.944474458694458,
+            -1.1647999286651611,
+            0.05175952985882759
+          ],
+          "rotation_quaternion": [
+            0.9975317716598511,
+            0.0,
+            0.07021652162075043,
+            0.0
+          ]
+        },
+        {
+          "distance": 13.596656627996778,
+          "position": [
+            -1.8879998922348022,
+            -1.1647999286651611,
+            0.04778347164392471
+          ],
+          "rotation_quaternion": [
+            0.9998457431793213,
+            0.0,
+            0.017563989385962486,
+            0.0
+          ]
+        }
+      ],
+      "links": [
+        {
+          "bone_name": "Tread_R_000",
+          "distance": 0.0,
+          "rest_rotation_y": 0.03512987230898735
+        },
+        {
+          "bone_name": "Tread_R_001",
+          "distance": 0.1888424531666219,
+          "rest_rotation_y": -0.0
+        },
+        {
+          "bone_name": "Tread_R_002",
+          "distance": 0.3776849063332438,
+          "rest_rotation_y": -0.0
+        },
+        {
+          "bone_name": "Tread_R_003",
+          "distance": 0.5665273594998657,
+          "rest_rotation_y": -0.0
+        },
+        {
+          "bone_name": "Tread_R_004",
+          "distance": 0.7553698126664876,
+          "rest_rotation_y": -0.0
+        },
+        {
+          "bone_name": "Tread_R_005",
+          "distance": 0.9442122658331095,
+          "rest_rotation_y": -0.0
+        },
+        {
+          "bone_name": "Tread_R_006",
+          "distance": 1.1330547189997313,
+          "rest_rotation_y": -0.0
+        },
+        {
+          "bone_name": "Tread_R_007",
+          "distance": 1.3218971721663533,
+          "rest_rotation_y": -0.0
+        },
+        {
+          "bone_name": "Tread_R_008",
+          "distance": 1.5107396253329752,
+          "rest_rotation_y": -0.0
+        },
+        {
+          "bone_name": "Tread_R_009",
+          "distance": 1.6995820784995972,
+          "rest_rotation_y": -0.0
+        },
+        {
+          "bone_name": "Tread_R_010",
+          "distance": 1.888424531666219,
+          "rest_rotation_y": -0.0
+        },
+        {
+          "bone_name": "Tread_R_011",
+          "distance": 2.077266984832841,
+          "rest_rotation_y": -0.0
+        },
+        {
+          "bone_name": "Tread_R_012",
+          "distance": 2.2661094379994626,
+          "rest_rotation_y": -0.0
+        },
+        {
+          "bone_name": "Tread_R_013",
+          "distance": 2.454951891166085,
+          "rest_rotation_y": -0.0
+        },
+        {
+          "bone_name": "Tread_R_014",
+          "distance": 2.6437943443327065,
+          "rest_rotation_y": -0.0
+        },
+        {
+          "bone_name": "Tread_R_015",
+          "distance": 2.8326367974993287,
+          "rest_rotation_y": -0.0
+        },
+        {
+          "bone_name": "Tread_R_016",
+          "distance": 3.0214792506659505,
+          "rest_rotation_y": -0.0
+        },
+        {
+          "bone_name": "Tread_R_017",
+          "distance": 3.2103217038325726,
+          "rest_rotation_y": -0.0
+        },
+        {
+          "bone_name": "Tread_R_018",
+          "distance": 3.3991641569991944,
+          "rest_rotation_y": -0.0
+        },
+        {
+          "bone_name": "Tread_R_019",
+          "distance": 3.588006610165816,
+          "rest_rotation_y": -0.0
+        },
+        {
+          "bone_name": "Tread_R_020",
+          "distance": 3.776849063332438,
+          "rest_rotation_y": -0.04411843932704121
+        },
+        {
+          "bone_name": "Tread_R_021",
+          "distance": 3.96569151649906,
+          "rest_rotation_y": -0.46843136768912486
+        },
+        {
+          "bone_name": "Tread_R_022",
+          "distance": 4.154533969665682,
+          "rest_rotation_y": -0.575470997973742
+        },
+        {
+          "bone_name": "Tread_R_023",
+          "distance": 4.3433764228323035,
+          "rest_rotation_y": -0.5754719724183892
+        },
+        {
+          "bone_name": "Tread_R_024",
+          "distance": 4.532218875998925,
+          "rest_rotation_y": -0.5754719724183892
+        },
+        {
+          "bone_name": "Tread_R_025",
+          "distance": 4.721061329165548,
+          "rest_rotation_y": -0.575471707523202
+        },
+        {
+          "bone_name": "Tread_R_026",
+          "distance": 4.90990378233217,
+          "rest_rotation_y": -0.6383801298751164
+        },
+        {
+          "bone_name": "Tread_R_027",
+          "distance": 5.098746235498791,
+          "rest_rotation_y": -1.0387675617967178
+        },
+        {
+          "bone_name": "Tread_R_028",
+          "distance": 5.287588688665413,
+          "rest_rotation_y": -1.4605452844475884
+        },
+        {
+          "bone_name": "Tread_R_029",
+          "distance": 5.476431141832036,
+          "rest_rotation_y": -1.8824023863215948
+        },
+        {
+          "bone_name": "Tread_R_030",
+          "distance": 5.6652735949986575,
+          "rest_rotation_y": -2.3041855214767337
+        },
+        {
+          "bone_name": "Tread_R_031",
+          "distance": 5.854116048165278,
+          "rest_rotation_y": -2.72596635588775
+        },
+        {
+          "bone_name": "Tread_R_032",
+          "distance": 6.042958501331901,
+          "rest_rotation_y": -3.105973170372554
+        },
+        {
+          "bone_name": "Tread_R_033",
+          "distance": 6.231800954498524,
+          "rest_rotation_y": -3.141592653589793
+        },
+        {
+          "bone_name": "Tread_R_034",
+          "distance": 6.420643407665145,
+          "rest_rotation_y": -3.141592653589793
+        },
+        {
+          "bone_name": "Tread_R_035",
+          "distance": 6.609485860831767,
+          "rest_rotation_y": -3.141592653589793
+        },
+        {
+          "bone_name": "Tread_R_036",
+          "distance": 6.798328313998389,
+          "rest_rotation_y": -3.141592653589793
+        },
+        {
+          "bone_name": "Tread_R_037",
+          "distance": 6.9871707671650105,
+          "rest_rotation_y": -3.141592653589793
+        },
+        {
+          "bone_name": "Tread_R_038",
+          "distance": 7.176013220331632,
+          "rest_rotation_y": -3.141592653589793
+        },
+        {
+          "bone_name": "Tread_R_039",
+          "distance": 7.364855673498254,
+          "rest_rotation_y": -3.141592653589793
+        },
+        {
+          "bone_name": "Tread_R_040",
+          "distance": 7.553698126664876,
+          "rest_rotation_y": -3.141592653589793
+        },
+        {
+          "bone_name": "Tread_R_041",
+          "distance": 7.742540579831498,
+          "rest_rotation_y": -3.141592653589793
+        },
+        {
+          "bone_name": "Tread_R_042",
+          "distance": 7.93138303299812,
+          "rest_rotation_y": -3.141592653589793
+        },
+        {
+          "bone_name": "Tread_R_043",
+          "distance": 8.120225486164742,
+          "rest_rotation_y": -3.141592653589793
+        },
+        {
+          "bone_name": "Tread_R_044",
+          "distance": 8.309067939331364,
+          "rest_rotation_y": -3.141592653589793
+        },
+        {
+          "bone_name": "Tread_R_045",
+          "distance": 8.497910392497985,
+          "rest_rotation_y": -3.141592653589793
+        },
+        {
+          "bone_name": "Tread_R_046",
+          "distance": 8.686752845664607,
+          "rest_rotation_y": -3.141592653589793
+        },
+        {
+          "bone_name": "Tread_R_047",
+          "distance": 8.875595298831229,
+          "rest_rotation_y": -3.141592653589793
+        },
+        {
+          "bone_name": "Tread_R_048",
+          "distance": 9.06443775199785,
+          "rest_rotation_y": -3.141592653589793
+        },
+        {
+          "bone_name": "Tread_R_049",
+          "distance": 9.253280205164474,
+          "rest_rotation_y": -3.141592653589793
+        },
+        {
+          "bone_name": "Tread_R_050",
+          "distance": 9.442122658331096,
+          "rest_rotation_y": -3.141592653589793
+        },
+        {
+          "bone_name": "Tread_R_051",
+          "distance": 9.630965111497716,
+          "rest_rotation_y": -3.141592653589793
+        },
+        {
+          "bone_name": "Tread_R_052",
+          "distance": 9.81980756466434,
+          "rest_rotation_y": -3.141592653589793
+        },
+        {
+          "bone_name": "Tread_R_053",
+          "distance": 10.008650017830961,
+          "rest_rotation_y": -3.141592653589793
+        },
+        {
+          "bone_name": "Tread_R_054",
+          "distance": 10.197492470997583,
+          "rest_rotation_y": -3.141592653589793
+        },
+        {
+          "bone_name": "Tread_R_055",
+          "distance": 10.386334924164204,
+          "rest_rotation_y": -3.141592653589793
+        },
+        {
+          "bone_name": "Tread_R_056",
+          "distance": 10.575177377330826,
+          "rest_rotation_y": -3.141592653589793
+        },
+        {
+          "bone_name": "Tread_R_057",
+          "distance": 10.76401983049745,
+          "rest_rotation_y": -3.141592653589793
+        },
+        {
+          "bone_name": "Tread_R_058",
+          "distance": 10.952862283664071,
+          "rest_rotation_y": -3.141592653589793
+        },
+        {
+          "bone_name": "Tread_R_059",
+          "distance": 11.141704736830691,
+          "rest_rotation_y": -3.141592653589793
+        },
+        {
+          "bone_name": "Tread_R_060",
+          "distance": 11.330547189997315,
+          "rest_rotation_y": 3.0567070574857316
+        },
+        {
+          "bone_name": "Tread_R_061",
+          "distance": 11.519389643163937,
+          "rest_rotation_y": 2.639490516377616
+        },
+        {
+          "bone_name": "Tread_R_062",
+          "distance": 11.708232096330557,
+          "rest_rotation_y": 2.217633358940119
+        },
+        {
+          "bone_name": "Tread_R_063",
+          "distance": 11.897074549497182,
+          "rest_rotation_y": 1.7958467443012442
+        },
+        {
+          "bone_name": "Tread_R_064",
+          "distance": 12.085917002663802,
+          "rest_rotation_y": 1.3740683768207358
+        },
+        {
+          "bone_name": "Tread_R_065",
+          "distance": 12.274759455830424,
+          "rest_rotation_y": 0.952210927557189
+        },
+        {
+          "bone_name": "Tread_R_066",
+          "distance": 12.463601908997047,
+          "rest_rotation_y": 0.5720478478478156
+        },
+        {
+          "bone_name": "Tread_R_067",
+          "distance": 12.652444362163667,
+          "rest_rotation_y": 0.5489891907597962
+        },
+        {
+          "bone_name": "Tread_R_068",
+          "distance": 12.84128681533029,
+          "rest_rotation_y": 0.5489906317619161
+        },
+        {
+          "bone_name": "Tread_R_069",
+          "distance": 13.03012926849691,
+          "rest_rotation_y": 0.5489892105024753
+        },
+        {
+          "bone_name": "Tread_R_070",
+          "distance": 13.218971721663534,
+          "rest_rotation_y": 0.5489896908364894
+        },
+        {
+          "bone_name": "Tread_R_071",
+          "distance": 13.407814174830158,
+          "rest_rotation_y": 0.4544163157776257
+        }
+      ],
+      "positive_travel_phase_sign": -1
+    }
+  ],
+  "wheels": [
+    {
+      "name": "Wheel_Left_01",
+      "side": "Left",
+      "radius": 0.35840000000000005,
+      "axis": [
+        0,
+        1,
+        0
+      ],
+      "rotation_sign": 1
+    },
+    {
+      "name": "Wheel_Left_02",
+      "side": "Left",
+      "radius": 0.35840000000000005,
+      "axis": [
+        0,
+        1,
+        0
+      ],
+      "rotation_sign": 1
+    },
+    {
+      "name": "Wheel_Left_03",
+      "side": "Left",
+      "radius": 0.35840000000000005,
+      "axis": [
+        0,
+        1,
+        0
+      ],
+      "rotation_sign": 1
+    },
+    {
+      "name": "Wheel_Left_04",
+      "side": "Left",
+      "radius": 0.35840000000000005,
+      "axis": [
+        0,
+        1,
+        0
+      ],
+      "rotation_sign": 1
+    },
+    {
+      "name": "Wheel_Left_05",
+      "side": "Left",
+      "radius": 0.35840000000000005,
+      "axis": [
+        0,
+        1,
+        0
+      ],
+      "rotation_sign": 1
+    },
+    {
+      "name": "Wheel_Left_06",
+      "side": "Left",
+      "radius": 0.35840000000000005,
+      "axis": [
+        0,
+        1,
+        0
+      ],
+      "rotation_sign": 1
+    },
+    {
+      "name": "Wheel_Left_07",
+      "side": "Left",
+      "radius": 0.4032,
+      "axis": [
+        0,
+        1,
+        0
+      ],
+      "rotation_sign": 1
+    },
+    {
+      "name": "Wheel_Left_08",
+      "side": "Left",
+      "radius": 0.4032,
+      "axis": [
+        0,
+        1,
+        0
+      ],
+      "rotation_sign": 1
+    },
+    {
+      "name": "Wheel_Right_01",
+      "side": "Right",
+      "radius": 0.35840000000000005,
+      "axis": [
+        0,
+        1,
+        0
+      ],
+      "rotation_sign": 1
+    },
+    {
+      "name": "Wheel_Right_02",
+      "side": "Right",
+      "radius": 0.35840000000000005,
+      "axis": [
+        0,
+        1,
+        0
+      ],
+      "rotation_sign": 1
+    },
+    {
+      "name": "Wheel_Right_03",
+      "side": "Right",
+      "radius": 0.35840000000000005,
+      "axis": [
+        0,
+        1,
+        0
+      ],
+      "rotation_sign": 1
+    },
+    {
+      "name": "Wheel_Right_04",
+      "side": "Right",
+      "radius": 0.35840000000000005,
+      "axis": [
+        0,
+        1,
+        0
+      ],
+      "rotation_sign": 1
+    },
+    {
+      "name": "Wheel_Right_05",
+      "side": "Right",
+      "radius": 0.35840000000000005,
+      "axis": [
+        0,
+        1,
+        0
+      ],
+      "rotation_sign": 1
+    },
+    {
+      "name": "Wheel_Right_06",
+      "side": "Right",
+      "radius": 0.35840000000000005,
+      "axis": [
+        0,
+        1,
+        0
+      ],
+      "rotation_sign": 1
+    },
+    {
+      "name": "Wheel_Right_07",
+      "side": "Right",
+      "radius": 0.4032,
+      "axis": [
+        0,
+        1,
+        0
+      ],
+      "rotation_sign": 1
+    },
+    {
+      "name": "Wheel_Right_08",
+      "side": "Right",
+      "radius": 0.4032,
+      "axis": [
+        0,
+        1,
+        0
+      ],
+      "rotation_sign": 1
+    }
+  ],
+  "headlight_nodes": [
+    "Headlight_Left_Lens",
+    "Headlight_Right_Lens"
+  ],
+  "elevation_limits_degrees": [
+    -6,
+    18
+  ],
+  "yaw_limits_degrees": [
+    -180,
+    180
+  ],
+  "flash_windows": {
+    "Fire_Single": [
+      [
+        0,
+        0.09
+      ]
+    ],
+    "Fire_Burst_3": [
+      [
+        0,
+        0.09
+      ],
+      [
+        0.5,
+        0.59
+      ],
+      [
+        1.0,
+        1.09
+      ]
+    ]
+  },
+  "detachable_components": [
+    "Turret_Pivot",
+    "Side_Armor_Left",
+    "Side_Armor_Right",
+    "Track_Left",
+    "Track_Right",
+    "Commander_Hatch_Pivot"
+  ],
+  "collision_meshes": [
+    "Hull_Upper_Armor",
+    "Hull_Underbody",
+    "Turret_Armor"
+  ],
+  "runtime_vertex_budget": 7000,
+  "effect_reserved_vertices": 8,
+  "scale_note": "Native source uniformly scaled by 6.4 and grounded; nominal game metres, no calibrated real-world dimensions were supplied.",
+  "track_animation_note": "Drive clips are finite in-place motion. Continuous Godot controller accumulates real traveled distance; it does not reset wheel rotations at arbitrary track loops."
+}
