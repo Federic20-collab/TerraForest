@@ -11,6 +11,13 @@
     },
     {
       "capability": "vehicle",
+      "id": "terraforest.bmx42.v1",
+      "name": "BMX-42",
+      "scene": "res://addons/vehicle_runtime/bmx42_7k/bmx42_world.tscn",
+      "adapter": "res://addons/vehicle_runtime/bmx42_7k/bmx42_adapter.gd"
+    },
+    {
+      "capability": "vehicle",
       "id": "terraforest.boat.v1",
       "name": "Boat",
       "scene": "res://boat_demo/scenes/boat_world.tscn",

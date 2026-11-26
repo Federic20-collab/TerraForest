@@ -1,0 +1,30 @@
+[gd_scene load_steps=5 format=3]
+
+[ext_resource type="Script" path="res://addons/vehicle_runtime/bmx42_7k/bmx42_body.gd" id="1_body"]
+[ext_resource type="PackedScene" path="res://addons/vehicle_runtime/bmx42_7k/bmx42_7k.tscn" id="2_model"]
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_tracks"]
+friction = 0.9
+bounce = 0.0
+
+[sub_resource type="BoxShape3D" id="BoxShape_hull"]
+size = Vector3(6.0, 4.2, 3.0)
+
+[node name="BMX42" type="RigidBody3D"]
+collision_layer = 4
+collision_mask = 15
+mass = 42000.0
+physics_material_override = SubResource("PhysicsMaterial_tracks")
+continuous_cd = true
+axis_lock_angular_x = true
+axis_lock_angular_z = true
+can_sleep = false
+script = ExtResource("1_body")
+
+[node name="ChassisCollision" type="CollisionShape3D" parent="."]
+position = Vector3(0, 1.25, 0)
+shape = SubResource("BoxShape_hull")
+
+[node name="Model" parent="." instance=ExtResource("2_model")]
+position = Vector3(0, -0.85, 0)
+create_collisions = false
